@@ -3,6 +3,7 @@ import store from '@/store.js'
 import Router from 'vue-router'
 import Login from '@/pages/Login.vue'
 import AdminMain from '@/pages/AdminMain.vue'
+import PendingComic from '@/pages/PendingComic.vue'
 
 Vue.use(Router)
 
@@ -56,6 +57,15 @@ export default new Router({
       meta: {
         redirectOnLogin: true,
       },
+    },
+    {
+      path: '/pending-comic/:comicName',
+      name: 'pendingComic',
+      component: PendingComic,
+      beforeEnter: rerouteIfNotLoggedIn,
+      meta: {
+        redirectOnLogout: true,
+      }
     },
     {
       path: '*',

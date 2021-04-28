@@ -43,9 +43,9 @@
             <tbody>
               <tr v-for="pendingComic in pendingComics" :key="pendingComic.id">
                 <td>
-                  <a :href="`https://yiffer.xyz/${comic.name}`" target="_blank" class="underline-link">
+                  <router-link :to="`/pending-comic/${pendingComic.name}`" target="_blank" class="underline-link">
                     {{pendingComic.name}} <RightArrow/>
-                  </a>
+                  </router-link>
                 </td>
                 <td>
                   <a :href="`https://yiffer.xyz/artist/${pendingComic.artist}`" target="_blank" class="underline-link">

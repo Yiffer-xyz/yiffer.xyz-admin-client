@@ -108,6 +108,14 @@ export default {
     box-shadow: 0 3px 10px rgba(0,0,0,0.15);
   }
   .newFeedback {
-    background-color: $theme10;
+    border: 3px solid $themeGreen1;
+  }
+  .dark {
+    .newFeedback {
+      border: 2px solid $themeGreen1;
+    }
+    .oneFeedback {
+      background-color: $themeDark1;
+    }
   }
 </style>

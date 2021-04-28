@@ -79,7 +79,8 @@
 					</div>
 					
 					<button @click="submitNewUserData()" 
-									:class="{'y-button': true, 'y-button-disabled': !isSelectedUserModified, 'margin-top-8': true}">
+									:class="{'y-button-disabled': !isSelectedUserModified}"
+									class="fitContent marginAuto mt-8 y-button">
 						Submit changes
 					</button>
 
@@ -88,10 +89,14 @@
 						User has not rated any comics.
 					</p>
 					<div v-else class="margin-top-16 width100">
-						<button class="y-button y-button-neutral button-with-icon" @click="showComicRatings = true" v-if="!showComicRatings">
+						<button class="y-button y-button-neutral button-with-icon fitContent marginAuto"
+										@click="showComicRatings = true"
+										v-if="!showComicRatings">
 							<DownArrow/> Show {{selectedUserComicVotes.length}} comic votes
 						</button>
-						<button class="y-button y-button-neutral button-with-icon" @click="showComicRatings = false" v-if="showComicRatings">
+						<button class="y-button y-button-neutral button-with-icon fitContent marginAuto"
+										@click="showComicRatings = false"
+										v-if="showComicRatings">
 							<UpArrow/> Hide comic votes
 						</button>
 
