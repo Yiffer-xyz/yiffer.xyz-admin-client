@@ -4,6 +4,7 @@ import Vuex from 'vuex'
 import auth from './store-auth'
 import { registerFetchNames, doFetch, doFetchSilent } from './utils/statefulFetch'
 import miscApi from '@/api/miscApi'
+import keywordApi from '@/api/keywordApi'
 
 Vue.use(Vuex)
 
@@ -16,6 +17,7 @@ const store = {
   state: {
     darkTheme: false,
     orderedKeywordList: [],
+    alphabeticKeywordList: [],
     comicKeywords: {},
   },
 
@@ -24,6 +26,7 @@ const store = {
       let keywords = await doFetch(commit, 'allKeywords', keywordApi.getKeywordList())
       if (keywords) {
         commit('setOrderedKeywordList', keywords)
+        commit('setAlphabeticKeywordList', keywords)
       }
     },
 
@@ -52,11 +55,16 @@ const store = {
       keywordList.sort((a, b) => a.count > b.count ? -1 : 1)
       state.orderedKeywordList = keywordList
     },
+    setAlphabeticKeywordList (state, keywordList) {
+      keywordList.sort((a, b) => a.name > b.name ? 1 : -1)
+      state.alphabeticKeywordList = keywordList
+    }
   },
 
   getters: {
     orderedKeywordListF: state => () => state.orderedKeywordList,
     orderedKeywordList: state => state.orderedKeywordList,
+    alphabeticKeywordList: state => state.orderedKeywordList,
     isDarkTheme: state => state.darkTheme,
   }
 }

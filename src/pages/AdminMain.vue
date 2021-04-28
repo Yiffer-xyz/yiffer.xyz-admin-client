@@ -134,6 +134,9 @@ export default {
     if (!this.allComics.fetched && !this.allComics.fetching) {
       doFetch(this.$store.commit, 'allComics', comicApi.getAllComics())
     }
+    if (!this.allKeywords.fetched && !this.allKeywords.fetching) {
+      this.$store.dispatch('fetchKeywordList')
+    }
     this.artistList = await ArtistApi.getArtistList()
     this.refreshPendingComics()
   },

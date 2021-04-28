@@ -30,7 +30,7 @@
           <div class="verticalFlex mr-40" style="flex-wrap: wrap;">
             <p class="admin-mini-header">Tag list</p>
             <select size="13" style="margin-bottom: 0" v-model="selectedKeyword" @keyup.13="addSelectedKeyword()"> 
-              <option v-for="keyword in allKeywords.payload" 
+              <option v-for="keyword in alphabeticKeywordList" 
                       :key="keyword.name" 
                       :value="keyword">
                 {{keyword.name}}
@@ -132,7 +132,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['allKeywords']),
+    ...mapGetters(['alphabeticKeywordList']),
   },
 
   methods: {
@@ -165,6 +165,7 @@ export default {
     },
     
     async confirmAddKeywords () {
+      this.responseMessage = ''
       let response = await keywordApi.addKeywordsToComic(this.comic, this.selectedKeywords)
 
       if (response.success) {

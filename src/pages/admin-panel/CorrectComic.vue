@@ -23,7 +23,12 @@
       </div>
 
       <span v-if="comic && !isSubmitting" class="margin-top-8" style="width: 100%;">
-				<button @click="toggleRename(true)" v-if="!renameActive" class="y-button y-button-neutral margin-bottom-16">Rename comic</button>
+				<button @click="toggleRename(true)"
+                v-if="!renameActive"
+                class="y-button y-button-neutral marginAuto mb-16 fitContent">
+          Rename comic
+        </button>
+
 				<span v-if="renameActive" class="horizontalFlex margin-bottom-16" style="align-items: center;">
           <div class="verticalFlex">
             <p style="text-align: left;">New name</p>
@@ -237,11 +242,12 @@ export default {
     
     async findComicLinks () {
       let comicData = await comicApi.getComic(this.comic.name)
-      this.previousComic = comicData.result.previousComic ? 
-        this.comicList.find(c => c.name === comicData.result.previousComic)
+      console.log(comicData)
+      this.previousComic = comicData.previousComic ? 
+        this.comicList.find(c => c.name === comicData.previousComic)
         : undefined
-      this.nextComic = comicData.result.nextComic ? 
-        this.comicList.find(c => c.name === comicData.result.nextComic)
+      this.nextComic = comicData.nextComic ? 
+        this.comicList.find(c => c.name === comicData.nextComic)
         : undefined
       this.originalPreviousComic = this.previousComic + ''
       this.originalNextComic = this.nextComic + ''

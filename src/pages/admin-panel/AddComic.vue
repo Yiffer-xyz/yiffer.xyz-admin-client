@@ -190,7 +190,6 @@ import RightArrow from 'vue-material-design-icons/ArrowRight.vue'
 import CrossIcon from 'vue-material-design-icons/Close.vue'
 
 import comicApi from '@/api/comicApi'
-import keywordApi from '@/api/keywordApi'
 import ResponseMessage from '@/components/ResponseMessage.vue'
 import { mapGetters } from 'vuex'
 
