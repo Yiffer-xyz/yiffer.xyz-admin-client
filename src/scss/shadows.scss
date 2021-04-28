@@ -1,0 +1,43 @@
+@mixin simpleshadow {
+  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+  &:hover, &:focus {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+  }
+}
+
+@mixin simpleshadowNoHover {
+  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+}
+
+@mixin simpleshadowSmall {
+  box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  position: relative;
+  &::before {
+    content: ' ';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    box-shadow: 0 3px 7px rgba(0,0,0,0.18);
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 80ms;
+  }
+  &:hover, &:focus {
+    &::before {
+      opacity: 1;
+    }
+  }
+}
+
+@mixin simpleShadowSmallBtn {
+  box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  &:hover, &:focus {
+    box-shadow: 0 3px 7px rgba(0,0,0,0.18);
+  }
+}
+
+@mixin simpleshadow-active {
+  box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+}

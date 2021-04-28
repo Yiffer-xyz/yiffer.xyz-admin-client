@@ -1,0 +1,95 @@
+@import "shadows.scss";
+
+.yForm2Input {
+  outline: none;
+  border: 0.5px solid #555;
+  border-color: transparent transparent #555 transparent;
+  color: #333;
+  background: transparent;
+  padding: 8px 4px;
+  &:focus {
+    border-bottom-color: $themeBlueDark;
+  }
+}
+
+.yForm2Label {
+  font-size: 14px;
+  font-weight: 300;
+  text-align: left;
+}
+
+.yForm2Field {
+  display: flex;
+  flex-direction: column;
+  label {
+    @extend .yForm2Label;
+  }
+  input {
+    @extend .yForm2Input;
+  }
+  select {
+    border: 0.5px solid transparent;
+    border-bottom-color: #555;
+    background: transparent;
+    padding: 6px 0;
+    border-radius: 3px;
+  }
+  textarea {
+    background: transparent !important;
+    border: 0.5px solid #555;
+    padding: 6px;
+    &:focus {
+      border-color: $themeBlueDark;
+      outline: none;
+    }
+  }
+  margin-bottom: 2rem;
+}
+
+.dark {
+  .yForm2Input {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 0.5px solid #ccc !important;
+    &:focus {
+      border-bottom-color: $themeBlueDark !important;
+    }
+  }
+  .yForm2Field {
+    textarea {
+      border-color: #ccc;
+      &:focus {
+        border-color: $themeBlueDark;
+      }
+    }
+  }
+}
+
+.yForm2 {
+  @extend .simpleShadowNoHover;
+  box-sizing: border-box;
+  border-style: hidden;
+  border-width: 0;
+  border-top-width: 10px;
+  border-top-style: solid;
+  border-image: linear-gradient(to left, $themeGreen1, $themeGreen2) 1;
+  padding: 2rem 2rem 1rem 2rem;
+  background-color: white;
+  width: fit-content;
+  display: flex;
+  flex-direction: column;
+
+  h3 {
+    margin-bottom: 1rem;
+  }
+
+  .error-message, .success-message, .info-message {
+    margin: 1rem auto;
+  }
+}
+
+.dark {
+  .yForm2 {
+    background-color: $themeDark2;
+  }
+}

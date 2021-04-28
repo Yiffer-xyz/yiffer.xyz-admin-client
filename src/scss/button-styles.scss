@@ -1,0 +1,381 @@
+@import "shadows.scss";
+
+.blueButton {
+  border: none;
+  background: #00aaff;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 2px;
+  a, p, span, svg {
+    color: white;
+  }
+  @include simpleshadowSmall;
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+$buttonPaddingSides: 12px;
+$buttonPaddingTopBot: 6px;
+$buttonBorderWidth: 2px;
+
+.y-button {
+  @include simpleShadowSmallBtn;
+  outline: none;
+  border-radius: 4px;
+  padding: $buttonPaddingTopBot $buttonPaddingSides;
+  font-family: 'Mulish', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  background-color: $themeBlueDark;
+  color: white;
+  border: 2px solid $themeBlueDark;
+  width: fit-content;
+  word-break: keep-all;
+  transition: background-color 100ms, border-color 100ms, box-shadow 100ms;
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+
+  &:hover, &:focus {
+    cursor: pointer;
+    background-color: $themeBlueDarker;
+    border-color: $themeBlueDarker;
+  }
+
+  span {
+    color: white;
+  }
+}
+
+.y-button-small {
+  padding: 3px 8px;
+  background-color: $themeBlueDark;
+  color: white;
+  font-weight: 400;
+  &:hover {
+    background-color: $themeBlueDarker;
+  }
+}
+
+.y-button-neutral {
+  box-shadow: none;
+  background-color: transparent;
+  border: 2px solid $themeBlueDark;
+  color: $themeBlueDark;
+  box-sizing: border-box;
+  span {
+    color: $themeBlueDark;
+  }
+
+  &:hover, &:focus {
+  box-shadow: none;
+  background-color: transparent;
+    color: white;
+    background-color: $themeBlueDark;
+    border-color: $themeBlueDark;
+    span {
+      color: white;
+    }
+  }
+}
+
+.yButtonRound {
+  border-radius: 50px;
+  padding: 0.4rem 0.5rem;
+}
+
+.y-button-red {
+  background-color: $themeRed;
+  border-color: $themeRed;
+  color: white;
+  &:hover, &:focus {
+    border-color: $themeRed2;
+    background-color: $themeRed2;
+  }
+}
+
+.y-button-red-outline {
+  background: transparent;
+  background-color: transparent;
+  box-shadow: none;
+  border: 1px solid $themeRed2;
+  color: $themeRed2;
+  svg {
+    color: $themeRed2;
+  }
+  box-sizing: border-box;
+  &:hover, &:focus {
+    background-color: $themeRed2;
+    color: white;
+    svg {
+      color: white;
+    }
+  }
+}
+
+.y-button-disabled {
+  border-color: $themeGray4;
+  background-color: transparent;
+  color: $themeGray4;
+  box-shadow: none;
+  &:hover, &:focus {
+    cursor: not-allowed;
+    border-color: $themeGray4;
+    background-color: transparent;
+    color: $themeGray4;
+    box-shadow: none !important;
+    &::before {
+      box-shadow: none !important;
+    }
+  }
+}
+
+.y-button-transparent {
+  background-color: transparent !important;
+  color: $themeGray8;
+  border: 1px solid $themeGray8;
+  path {
+    color: $themeGray8;  
+  }
+  &:hover, &:focus {
+    background-color: $themeGray8 !important;
+    border-color: $themeGray8;
+    color: white;
+    path {
+      color: white;  
+    }
+  }
+}
+
+.y-button-close {
+  font-weight: 400;
+  border-radius: 40px;
+  border: none;
+  color: $themeGray7;
+  background: white;
+  height: 26px;
+  width: 26px;
+  padding: 0;
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.text-button {
+  font-size: 1rem;
+  text-align: center;
+  font-weight: 400;
+  font-family: 'Mulish', sans-serif;
+  background: transparent;
+  border: none;
+  color: $themeBlueVeryLight;
+  padding: 0px;
+  margin: 0px;
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.button-with-icon {
+  padding-right: 15px;
+  svg {
+    margin-bottom: 1px;
+  }
+}
+
+.pretty-input-upload {
+  @include simpleShadowSmallBtn;
+  outline: none;
+  border-radius: 4px;
+  font-family: 'Mulish', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  background-color: $themeBlueDark;
+  color: white;
+  border: 2px solid $themeBlueDark;
+  width: 12rem;
+  word-break: keep-all;
+  transition: background-color 100ms, border-color 100ms, box-shadow 100ms;
+  padding: 4px 0;
+  position: relative;
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+
+  &:hover, &:focus {
+    background-color: $themeBlueDarker;
+    border-color: $themeBlueDarker;
+  }
+
+  p:hover {
+    cursor: default;
+  }
+
+  span {
+    color: white;
+  }
+
+  input {
+    width: 12rem;
+  }
+
+  p {
+    font-size: 14px;
+    color: white;
+    font-weight: 400;
+  }
+
+  &:hover, &:focus {
+    background-color: $themeDark1;
+  }
+}
+
+.input-file {
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  left: 0;
+}
+
+.comic-card {
+  .y-button {
+    background: linear-gradient(left, $themeGreen1Darker, $themeGreen2Darker);
+    color: white;
+    span {
+      color: white;
+    }
+    &:hover, &:focus {
+      background: linear-gradient(left, $themeGreen1Darker, $themeGreen2Darker);
+    }
+  }
+}
+
+
+.y-button-big {
+  @include simpleshadow;
+  border-radius: 4px;
+  color: white !important;
+  border: none;
+  outline: none;
+  height: 3rem;
+  font-size: 1rem;
+  margin-top: 1.5rem;
+  padding: 0 1rem;
+  background: linear-gradient(to right, $themeGreen1Dark, $themeGreen2Dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  transition: all 200ms;
+  
+  &:hover {
+    cursor: pointer;
+  }
+
+  span {
+    margin-bottom: 2px;
+    margin-left: 0.25rem;
+  }
+}
+
+.dark {
+  .y-button-big {
+    background: linear-gradient(to right, $themeGreen1Darker, $themeGreen2Darker);
+    &:hover {
+      background: linear-gradient(to right, $themeGreen1Dark, $themeGreen2Dark);
+    }
+  }
+}
+
+.dark {
+  .y-button {
+    background-color: $themeBlueDT;
+    border-color: $themeBlueDT;
+    &:hover, &:focus {
+      background-color: $themeBlueDTDarker;
+      border-color: $themeBlueDTDarker;
+    }
+  }
+
+  .y-button-neutral {
+    background-color: transparent !important;
+    border-color: $themeBlueDTDarker;
+    color: #eee;
+    svg, span {
+      color: #eee;
+    }
+    &:hover, &:focus {
+      background-color: $themeBlueDT !important;
+      border-color: $themeBlueDT !important;
+    }
+  }
+
+  .y-button-red {
+    background-color: $themeRed2;
+    border-color: $themeRed2;
+    &:hover, &:focus {
+      background-color: $themeRed3;
+      border-color: $themeRed3;
+    }
+  }
+
+
+  .y-button-disabled {
+    border-color: $themeGray6;
+    background-color: transparent;
+    color: $themeGray6;
+    box-shadow: none;
+    &:hover, &:focus {
+      cursor: not-allowed;
+      border-color: $themeGray6;
+      background-color: transparent;
+      color: $themeGray6;
+    }
+  }
+
+  .y-button-transparent {
+    background-color: transparent !important;
+    color: $themeGray3;
+    border: 1px solid $themeGray3;
+    &:hover, &:focus {
+      background-color: $themeGray3 !important;
+      border-color: $themeGray3;
+      color: black;
+    }
+  }
+
+  .pretty-input-upload {
+    background: transparent !important;
+    border-color: $themeBlueDTDarker;
+
+    svg, span, p {
+      color: #eee;
+    }
+
+    &:hover, &:focus {
+      background-color: $themeDark2;
+      background: $themeBlueDT !important;
+      border-color: $themeBlueDT !important;
+
+    }
+  }
+
+  .y-button-close {
+    color: #ddd;
+    background: transparent;
+  }
+
+  .comic-card {
+    background-color: $themeDark3;
+    p, div, .fas {
+      color: #ddd;
+    }
+  }
+}
