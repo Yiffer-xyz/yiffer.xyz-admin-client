@@ -130,7 +130,7 @@ export default {
     logout () {
       this.$store.dispatch('logout')
       if (this.$route.meta.redirectOnLogout) {
-        this.$router.replace('/')
+        this.$router.replace('/login')
       }
     }
   },
