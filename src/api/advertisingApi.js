@@ -31,24 +31,14 @@ export default {
     return response.data
   },
 
-  async updateAd (id, adName, link, mainText, secondaryText, file1, file2) {
-    let formData = new FormData()
-    formData.append('link', link)
-    formData.append('adName', adName)
-    if (mainText) { formData.append('mainText', mainText) }
-    if (secondaryText) { formData.append('secondaryText', secondaryText) }
-    if (file1) { formData.append('file1', file1) }
-    if (file2) { formData.append('file2', file2) }
+  async updateAd (id, status, adminNotes, correctionNote, link, expiryDateExtendMonths, customExpiryDate) {
+    let body = {
+      status, customExpiryDate, adminNotes, correctionNote, link,
+      expiryDateExtendMonths: expiryDateExtendMonths ? Number(expiryDateExtendMonths) : expiryDateExtendMonths,
+    }
 
     try {
-      let response = await axios.post(
-        `${baseUrl}/paid-images/${id}/update-user`,
-        formData,
-        {
-          headers: {'Content-Type': 'multipart/form-data'},
-        }
-      )
-
+      let response = await axios.post(`${baseUrl}/paid-images/${id}/update-admin`, body)
       return response.data
     }
     catch (err) {

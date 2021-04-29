@@ -11,12 +11,12 @@
 
     <Loading text="Saving..." v-if="isSaving" class="mb-16"/>
 
-    <MultiToggleButton :items="['Non-ended', 'Pending', 'Soon active', 'Active', 'All']"
-                        :initialValue="'Non-ended'"
-                        :allowMultiple="false"
-                        :allowNone="false"
-                        @on-change="onAdSelectionChange"
-                        class="mb-16"/>
+    <MultiToggleButton :items="['All', 'Pending', 'Active', 'Needs correction']"
+                       :initialValue="'All'"
+                       :allowMultiple="false"
+                       :allowNone="false"
+                       @on-change="onAdSelectionChange"
+                       class="mb-16"/>
 
       <div class="scrolling-table-container" v-show="displayedAds.length>0">
         <table v-if="displayedAds" class="yTable yTableLeft">
@@ -25,17 +25,15 @@
               <th></th>
               <th>Id</th>
               <th>Clicks</th>
-              <th>Type</th>
-              <th>Price</th>
               <th>User</th>
+              <th>Expires</th>
+              <th>Type</th>
               <th>Status</th>
               <th>Link</th>
               <th>Media</th>
               <th>Main txt</th>
               <th>2nd txt</th>
-              <th>Appl. date</th>
-              <th>Act. date</th>
-              <th>Deac. date</th>
+              <th>Created</th>
               <th>Notes</th>
               <th>Adm. notes</th>
             </tr>
@@ -66,18 +64,46 @@
               </td>
 
               <td>
-                {{ad.adType}}
+                {{ad.username}}
               </td>
 
               <td>
                 <p v-if="!isThisAdBeingEdited(ad.id)">
-                  {{ad.price}}$
+                  {{formatTimestamp(ad.expiryDate)}}
                 </p>
-                <input v-else type="number" v-model="editedAd.price" style="width: 3rem;"/>
+                <div v-else class="verticalFlex">
+                  <div class="verticalFlex">
+                    <div>
+                      <input type="radio" v-model="editedAd.expiryDateChoice" value="manual" id="expiryManual"/>
+                      <label for="expiryManual">Manual</label>
+                    </div>
+                    <div>
+                      <input type="radio" v-model="editedAd.expiryDateChoice" value="extend" id="expiryExtend"/>
+                      <label for="expiryExtend">Extend months</label>
+                    </div>
+                    <div>
+                      <input type="radio" v-model="editedAd.expiryDateChoice" value="null" id="expiryClear"/>
+                      <label for="expiryClear">Null</label>
+                    </div>
+                  </div>
+
+                  <input type="date"
+                         v-if="editedAd.expiryDateChoice === 'manual'"
+                         v-model="editedAd.expiryDate"
+                         class="mt-8"/>
+
+                  <div v-else-if="editedAd.expiryDateChoice === 'extend'"
+                       class="horizontalFlex justifyContentStart mt-8">
+                    <label for="customExtend" class="mr-4">
+                      +Months{{(!editedAd.expiryDate || editedAd.expiryDate.includes('1970')) ? ' (from now)' : ''}}:
+                    </label>
+                    <input type="number" v-model="editedAd.extendMonths" id="customExtend" style="width: 2.5rem;"/>
+                  </div>
+                </div>
               </td>
 
               <td>
-                {{ad.username}}
+                {{ad.adType}}
               </td>
 
               <td>
@@ -91,14 +117,11 @@
                 </div>
                 <div v-else class="verticalFlex">
                   <select v-model="editedAd.status" style="width: 10rem;">
-                    <option value="PENDING">PENDING</option>
-                    <option value="NEEDS CORRECTION">NEEDS CORRECTION</option>
-                    <option value="AWAITING PAYMENT">AWAITING PAYMENT</option>
-                    <option value="ACTIVE SOON">ACTIVE SOON</option>
-                    <option value="ACTIVE">ACTIVE</option>
-                    <option value="ACTIVE, AWAITING RENEWAL PAYMENT">ACTIVE, AWAITING RENEWAL PAYMENT</option>
-                    <option value="ACTIVE, RENEWAL PAID">ACTIVE, RENEWAL PAID</option>
-                    <option value="ENDED">ENDED</option>
+                    <option v-for="adStatus in Object.values(adStatuses)"
+                            :key="adStatus"
+                            :value="adStatus">
+                      {{adStatus}}
+                    </option>
                   </select>
                   <textarea v-if="editedAd.status === 'NEEDS CORRECTION'"
                             v-model="editedAd.correctionNote"
@@ -110,12 +133,30 @@
               </td>
 
               <td style="white-space: pre-wrap;">
-                <a :href="ad.link" target="_blank" style="min-width: 6rem; word-break: normal;" class="underline-link">{{ad.link}}</a>
+                <a :href="ad.link" v-if="!isThisAdBeingEdited(ad.id)" target="_blank" style="min-width: 6rem; word-break: normal;" class="underline-link">
+                  {{ad.link}}
+                </a>
+                <input type="text" v-else v-model="editedAd.link"/>
               </td>
 
               <td>
-                <a :href="`${config.paidImagesDirectory}/${ad.id}.${ad.filetype}`" target="_blank">
+                <a v-if="ad.adType === 'banner'"
+                   :href="`${config.paidImagesDirectory}/${ad.id}.${ad.filetype}`"
+                   class="underline-link"
+                   target="_blank">
                   View
+                </a>
+                <a v-if="ad.adType === 'card'"
+                   :href="`${config.paidImagesDirectory}/${ad.id}-big.${ad.filetype}`"
+                   class="underline-link mr-8"
+                   target="_blank">
+                  Big
+                </a>
+                <a v-if="ad.adType === 'card'"
+                   :href="`${config.paidImagesDirectory}/${ad.id}-small.${ad.filetype}`"
+                   class="underline-link"
+                   target="_blank">
+                  Small
                 </a>
               </td>
 
@@ -128,21 +169,7 @@
               </td>
 
               <td>
-                {{formatTimestamp(ad.applicationDate)}}
-              </td>
-
-              <td>
-                <p v-if="!isThisAdBeingEdited(ad.id)">
-                  {{formatTimestamp(ad.activationDate)}}
-                </p>
-                <input type="date" v-else v-model="editedAd.activationDate"/>
-              </td>
-              
-              <td>
-                <p v-if="!isThisAdBeingEdited(ad.id)">
-                  {{formatTimestamp(ad.deactivationDate)}}
-                </p>
-                <input type="date" v-else v-model="editedAd.deactivationDate"/>
+                {{formatTimestamp(ad.createdDate)}}
               </td>
 
               <td style="white-space: pre-wrap;">
@@ -202,6 +229,7 @@ export default {
       numberOfPendingAds: 0,
       isOpen: false,
       config,
+      adStatuses: adStatuses,
     }
   },
 
@@ -209,12 +237,13 @@ export default {
     editAd (ad) {
       this.editedAd = {
         id: ad.id,
-        price: ad.price,
+        link: ad.link,
         status: ad.status,
         correctionNote: '',
-        activationDate: ad.activationDate ? ad.activationDate.substring(0,10) : null,
-        deactivationDate: ad.deactivationDate ? ad.deactivationDate.substring(0,10) : null,
+        expiryDate: format(new Date(ad.expiryDate), 'yyyy-MM-dd'),
         adminNotes: ad.adminNotes,
+        extendMonths: 0,
+        expiryDateChoice: ad.expiryDate ? 'manual' : 'null',
       }
     },
 
@@ -224,7 +253,25 @@ export default {
 
     async saveEditedAd () {
       this.isSaving = true
-      let response = await adApi.updateAd(this.editedAd)
+      let extendMonths = null
+      let customExpiryDate = null
+
+      if (this.editedAd.expiryDateChoice === 'extend') {
+        extendMonths = this.editedAd.extendMonths
+      }
+      else if (this.editedAd.expiryDateChoice === 'manual') {
+        customExpiryDate = this.editedAd.expiryDate
+      }
+
+      let response = await adApi.updateAd(
+        this.editedAd.id,
+        this.editedAd.status,
+        this.editedAd.adminNotes, 
+        this.editedAd.correctionNote,
+        this.editedAd.link,
+        extendMonths,
+        customExpiryDate,
+      )
       this.isSaving = false
 
       if (response.success) {
@@ -254,22 +301,20 @@ export default {
         recalculatePending = false
       }
       else if (newAdSelection === 'Pending') {
-        this.displayedAds = await adApi.getAdsByStatuses([adStatuses.pending])
+        this.displayedAds = await adApi.getAdsByStatuses([adStatuses.pending, adStatuses.activeButPending])
       }
-      else if (newAdSelection === 'Soon active') {
-        this.displayedAds = await adApi.getAdsByStatuses([adStatuses.activeSoon, adStatuses.activeRenewalPaid])
+      else if (newAdSelection === 'Needs correction') {
+        this.displayedAds = await adApi.getAdsByStatuses([adStatuses.needsCorrection, adStatuses.activeNeedsCorrection])
         recalculatePending = false
-      }
-      else if (newAdSelection === 'Non-ended') {
-        this.displayedAds = await adApi.getAdsByStatuses(
-          Object.values(adStatuses).filter(s => s!==adStatuses.ended && s!==adStatuses.cancelled))
       }
       else {
         this.displayedAds = await adApi.getAllAds()
       }
 
       if (recalculatePending) {
-        this.numberOfPendingAds = this.displayedAds.filter(ad => ad.status === adStatuses.pending).length
+        this.numberOfPendingAds = this.displayedAds.filter(
+          ad => [adStatuses.pending, adStatuses.activeButPending].includes(ad.status)
+        ).length
       }
     },
 
@@ -279,13 +324,13 @@ export default {
     },
 
     getAdStatusClass (status) {
-      if (['PENDING', 'ACTIVE SOON'].includes(status)) {
+      if ([adStatuses.pending, adStatuses.activeButPending].includes(status)) {
         return 'monoInfo'
       }
-      else if (['NEEDS CORRECTION', 'AWAITING PAYMENT', 'ACTIVE, AWAITING RENEWAL PAYMENT '].includes(status)) {
+      else if ([adStatuses.needsCorrection, adStatuses.awaitingPayment, adStatuses.activeNeedsCorrection].includes(status)) {
         return 'monoWarning'
       }
-      else if (status === 'ENDED') {
+      else if ([adStatuses.ended, adStatuses.cancelled].includes(status)) {
         return 'monoError'
       }
       else {
@@ -309,10 +354,9 @@ const adStatuses = {
   pending: 'PENDING',
   needsCorrection: 'NEEDS CORRECTION',
   awaitingPayment: 'AWAITING PAYMENT',
-  activeSoon: 'ACTIVE SOON',
   active: 'ACTIVE',
-  activeAwaitingRenewal: 'ACTIVE, AWAITING RENEWAL PAYMENT',
-  activeRenewalPaid: 'ACTIVE, RENEWAL PAID',
+  activeButPending: 'ACTIVE BUT PENDING',
+  activeNeedsCorrection: 'ACTIVE BUT NEEDS CORR.',
   ended: 'ENDED',
   cancelled: 'CANCELLED',
 }
