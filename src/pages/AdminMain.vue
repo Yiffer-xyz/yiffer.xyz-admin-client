@@ -61,7 +61,7 @@
 
       <AdAdmin v-if="userData.userType==='admin'"/>
 
-      <VisitorStats v-if="userData.userType==='admin'"/>
+      <VisitorStats/>
 
       <AddBlog v-if="userData.userType==='admin'"/>
 

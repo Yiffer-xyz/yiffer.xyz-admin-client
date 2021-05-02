@@ -13,12 +13,13 @@ export default {
       authApi.logout()
     },
 
-    async checkAndSetLoginStatus ({commit, dispatch}) {
+    async getAndSetLoginStatus ({commit, dispatch}) {
       if ($cookies.isKey('user-data')) {
-        commit('setUserData', $cookies.get('user-data'))
+        let userData = $cookies.get('user-data')
+        commit('setUserData', userData)
         commit('setIsAuthenticated', true)
         dispatch('refreshUserData')
-        return true
+        return userData
       }
       else {
         commit('setIsAuthenticated', false)

@@ -4,28 +4,38 @@ import Router from 'vue-router'
 import Login from '@/pages/Login.vue'
 import AdminMain from '@/pages/AdminMain.vue'
 import PendingComic from '@/pages/PendingComic.vue'
+import NoAccess from '@/pages/NoAccess.vue'
 
 Vue.use(Router)
 
-async function rerouteIfNotLoggedIn(to, from, next) {
+async function rerouteIfNotModOrAdmin(to, from, next) {
   try {
-    let isLoggedIn = await store.dispatch('checkAndSetLoginStatus')
-    if (isLoggedIn) {
-      next()
+    let userData = await store.dispatch('getAndSetLoginStatus')
+    
+    if (userData) {
+      if (userData.userType === 'moderator' || userData.userType === 'admin') {
+        next()
+      }
+      else {
+        next({ name: 'noAccess' })
+        return
+      }
     }
     else {
       next({ name: 'login' })
+      return
     }
   }
   catch (err) {
     next({ name: 'login' })
+    return
   }
 }
 
 async function rerouteIfLoggedIn(to, from, next) {
   try {
-    let isLoggedIn = await store.dispatch('checkAndSetLoginStatus')
-    if (!isLoggedIn) {
+    let userData = await store.dispatch('getAndSetLoginStatus')
+    if (!userData) {
       next()
     }
     else {
@@ -44,7 +54,7 @@ export default new Router({
       path: '/',
       name: 'landingPage',
       component: AdminMain,
-      beforeEnter: rerouteIfNotLoggedIn,
+      beforeEnter: rerouteIfNotModOrAdmin,
       meta: {
         redirectOnLogout: true,
       },
@@ -59,10 +69,18 @@ export default new Router({
       },
     },
     {
+      path: '/no-access',
+      name: 'noAccess',
+      component: NoAccess,
+      meta: {
+        redirectOnLogout: true,
+      },
+    },
+    {
       path: '/pending-comic/:comicName',
       name: 'pendingComic',
       component: PendingComic,
-      beforeEnter: rerouteIfNotLoggedIn,
+      beforeEnter: rerouteIfNotModOrAdmin,
       meta: {
         redirectOnLogout: true,
       }

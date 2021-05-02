@@ -147,7 +147,7 @@ export default {
 
   created: function () {
     this.$cookies.config('60d')
-    this.$store.dispatch('checkAndSetLoginStatus')
+    this.$store.dispatch('getAndSetLoginStatus')
     if (this.$cookies.get('theme') && this.$cookies.get('theme')==='dark') {
       this.setTheme('dark')
     }
