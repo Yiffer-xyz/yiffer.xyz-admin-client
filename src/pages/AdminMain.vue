@@ -34,8 +34,8 @@
       <add-page :comicList="allComics.payload"
                 @refresh-comic-list="refreshComicList" />
 
-      <add-keywords :comicList="allComics.payload"
-                    @refresh-comic-list="refreshComicList" />
+      <KeywordManager :comicList="allComics.payload"
+                      @refresh-comic-list="refreshComicList" />
 
       <correct-comic :comicList="allComics.payload" 
                      :artistList="artistList"
@@ -76,7 +76,7 @@
 
 <script>
 import AddPage from '@/pages/admin-panel/AddPage.vue'
-import AddKeywords from '@/pages/admin-panel/AddKeywords.vue'
+import KeywordManager from '@/pages/admin-panel/KeywordManager.vue'
 import CorrectComic from '@/pages/admin-panel/CorrectComic.vue'
 import AddComic from '@/pages/admin-panel/AddComic.vue'
 import ArtistManager from '@/pages/admin-panel/ArtistManager.vue'
@@ -103,7 +103,7 @@ export default {
 
   components: {
     'add-page': AddPage,
-    'add-keywords': AddKeywords,
+    KeywordManager,
     'correct-comic': CorrectComic,
     'add-comic': AddComic,
     'artist-manager': ArtistManager,
