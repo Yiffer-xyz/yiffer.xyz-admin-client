@@ -119,8 +119,8 @@ $buttonBorderWidth: 2px;
 
 .y-button-disabled {
   border-color: $themeGray4;
-  background-color: transparent;
-  color: $themeGray4;
+  background-color: $themeGray4;
+  color: white;
   box-shadow: none;
   &:hover, &:focus {
     cursor: not-allowed;
@@ -182,8 +182,11 @@ $buttonBorderWidth: 2px;
 
 .button-with-icon {
   padding-right: 15px;
+  span {
+    margin-right: 4px;
+  }
   svg {
-    margin-bottom: 1px;
+    margin-bottom: 2px;
   }
 }
 
@@ -328,9 +331,9 @@ $buttonBorderWidth: 2px;
 
 
   .y-button-disabled {
-    border-color: $themeGray6;
-    background-color: transparent;
-    color: $themeGray6;
+    border-color: $themeGray8;
+    background-color: $themeGray8;
+    color: #aaa;
     box-shadow: none;
     &:hover, &:focus {
       cursor: not-allowed;

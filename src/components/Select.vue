@@ -1,8 +1,13 @@
 <template>
-  <div :class="`customSelect ${classes}`" :tabindex="tabindex" @blur="isOpen = false" :style="wrapperStyle">
-    <p v-if="title && selected" class="titleText">
+  <div :class="`customSelect ${classes} ${isSearchable ? '' : 'cursorPointer'}`"
+       id="customSelect"
+       :tabindex="tabindex"
+       @blur="isOpen = false"
+       :style="wrapperStyle">
+    <p v-if="title && (selected || isSearchable)" class="titleText">
       {{ title }}
     </p>
+
     <div class="selected"
          :style="{'border-color': overrideBorderColor}"
          :class="{
@@ -12,12 +17,49 @@
            borderTheme2: borderTheme2,
            placeholderStyle: !selected,
          }"
+         v-if="!isSearchable"
          @click="isOpen = !isOpen">
       {{ selected ? selected.text : title }}
     </div>
+    
+    <input type="text" v-else-if="!searchSelected"
+           class="selected"
+           :style="{'border-color': overrideBorderColor}"
+           :placeholder="searchPlaceholder || ''"
+           :class="{
+             open: isOpen,
+             overrideBorderColor: (overrideBorderColor || borderTheme1 || borderTheme2),
+             borderTheme1: borderTheme1,
+             borderTheme2: borderTheme2,
+           }"
+           @click="isOpen = !isOpen || searchText"
+           v-model="searchText"/>    
+
+    <input type="text" v-else
+           class="selected cursorPointer"
+           :style="{'border-color': overrideBorderColor}"
+           :placeholder="searchPlaceholder || ''"
+           :class="{
+             open: isOpen,
+             overrideBorderColor: (overrideBorderColor || borderTheme1 || borderTheme2),
+             borderTheme1: borderTheme1,
+             borderTheme2: borderTheme2,
+           }"
+           @click="() => {
+             $emit('searchSelectedClicked')
+             isOpen = true
+           }"
+           v-model="searchSelected"/>
+
+    <span class="clearContainer cursorPointer"
+          v-if="isSearchable && searchSelected"
+          @click="$emit('searchSelectedClicked')">
+      <CrossIcon/>
+    </span>
+
     <div class="items" :class="{ selectHide: !isOpen }">
       <div
-        v-for="option of options"
+        v-for="option of filteredOptions"
         :key="option.text"
         @click="
           selected = option
@@ -32,6 +74,8 @@
 </template>
 
 <script>
+import CrossIcon from 'vue-material-design-icons/Close.vue'
+
 export default {
   props: {
     title: {
@@ -45,6 +89,26 @@ export default {
     defaultValue: {
       type: Object,
       required: false,
+    },
+    isSearchable: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    searchKeepSelected: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    searchSelected: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    searchPlaceholder: {
+      type: String,
+      required: false,
+      default: null,
     },
     overrideBorderColor: {
       type: String,
@@ -68,6 +132,11 @@ export default {
       required: false,
       default: '',
     },
+    reducePadding: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     resetValue: {
       type: [String, Object],
       required: false,
@@ -79,6 +148,10 @@ export default {
     },
   },
 
+  components: {
+    CrossIcon,
+  },
+
   mounted() {
     this.$emit("input", this.selected)
   },
@@ -88,14 +161,55 @@ export default {
     resetValue () {
       if (this.resetValue) {
         this.selected = this.defaultValue
+        this.searchText = ''
+      }
+    },
+
+    searchText (newText) {
+      if (newText && !this.isopen) {
+        this.isOpen = true
+      }
+    },
+
+    isOpen () {
+      if (this.isSearchable && this.isOpen) {
+        setTimeout(() => {
+          window.addEventListener('click', this.closeSearchableResults)
+        }, 25)
+      }
+      else {
+        window.removeEventListener('click', this.closeSearchableResults)
       }
     }
+  },
+
+  methods: {
+    closeSearchableResults () {
+      this.isOpen = false
+      this.searchText = ''
+    }
+  },
+
+  computed: {
+    filteredOptions () {
+      if (!this.isSearchable || this.searchText === '') {
+        return this.options
+      }
+      
+      return this.lowerCaseOptions.filter(opt => opt.lowerCaseText.includes(this.searchText.toLowerCase()))
+    },
+
+    lowerCaseOptions () {
+      return this.options.map(opt => ({...opt, lowerCaseText: opt.text.toLowerCase()}))
+    },
   },
 
   data() {
     return {
       selected: this.defaultValue,
+      searchText: '',
       isOpen: false,
+      clickListener: null,
     }
   },
 }
@@ -110,6 +224,19 @@ $borderRadius: 0px;
 
 $lightThemeColor: #333;
 $darkThemeColor: #eee;
+
+input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  outline: none;
+  font-size: 1rem;
+  color: #333;
+  &::placeholder {
+    filter: opacity(0.4);
+  }
+  background: transparent;
+}
 
 .titleText {
   position: absolute;
@@ -129,12 +256,17 @@ $darkThemeColor: #eee;
   height: $height;
   line-height: $height;
   padding-top: 0.75rem;
+
+  .clearContainer {
+    position: absolute;
+    right: 5px;
+    top: 12px;
+  }
 }
 
 .customSelect .selected {
   border-radius: $borderRadius;
   color: $lightThemeColor;
-  cursor: pointer;
   user-select: none;
   border-width: 0;
   border-style: hidden;
@@ -192,7 +324,7 @@ $darkThemeColor: #eee;
 }
 
 .items div:hover {
-  background: linear-gradient(to left, $themeGreen1, $themeGreen2);
+  background: linear-gradient(to right, $themeGreen1, $themeGreen2);
 }
 
 .selectHide {
@@ -218,6 +350,10 @@ $darkThemeColor: #eee;
   .items,
   .items div {
     color: $darkThemeColor;
+  }
+
+  input::placeholder {
+    filter: none;
   }
 
   .placeholderStyle {
