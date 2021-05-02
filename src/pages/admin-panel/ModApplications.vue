@@ -46,16 +46,18 @@
                 <CloseIcon v-else title=""/>
               </td>
 							<td>
-                <button v-if="!application.isProcessed"
-                        @click="processApplication(application, false)"
-                        class="y-button y-button-neutral mr-4 ml-4">
-                  Processed
-                </button>
-                <button v-if="!application.isRemoved"
-                        @click="processApplication(application, true)"
-                        class="y-button y-button-neutral mr-4 ml-4">
-                  Remove
-                </button>
+                <div class="verticalFlex alignCenter">
+                  <button v-if="!application.isProcessed"
+                          @click="processApplication(application, false)"
+                          class="y-button">
+                    Processed
+                  </button>
+                  <button v-if="!application.isRemoved"
+                          @click="processApplication(application, true)"
+                          class="y-button y-button-red mt-4">
+                    Remove
+                  </button>
+                </div>
               </td>
 						</tr>
 					</tbody>

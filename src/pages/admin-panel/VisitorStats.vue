@@ -33,9 +33,7 @@
         Fetch data
       </button>
 
-      <p v-if="isLoadingData" class="mt-16">
-        Loading data...
-      </p>
+      <Loading v-if="isLoadingData" classes="mt-32" text="Fetching data"/>
 
       <div v-else-if="data.length>0" class="scrolling-table-container mt-16">
         <table class="yTable">
@@ -67,11 +65,14 @@
 import miscApi from '@/api/miscApi'
 
 import MultiToggleButton from '@/components/MultiToggleButton'
+import Loading from '@/components/LoadingIndicator.vue'
 
 export default {
   name: 'visitorStats',
 
-  components: { MultiToggleButton, },
+  components: {
+    MultiToggleButton, Loading,
+  },
 
   data: function () {
     return {

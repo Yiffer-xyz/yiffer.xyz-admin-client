@@ -6,7 +6,8 @@
              line-fg-color="#37dda0"
              :line-bg-color="isDarkTheme ? '#727679' : '#ddd'"
              :text-fg-color="isDarkTheme ? '#ddd' : '#444'"
-             :message="text"/>
+             :message="text"
+             :font-size="fontSizePx"/>
 
     <Spinner v-else
              line-fg-color="#37dda0"
@@ -23,8 +24,17 @@ export default {
 
   props: {
     styles: String,
-    text: String,
+    text: {
+      type: String,
+      required: false,
+      default: '',
+    },
     classes: String,
+    fontSizePx: {
+      type: Number,
+      required: false,
+      default: 14,
+    },
   },
   
   components: {

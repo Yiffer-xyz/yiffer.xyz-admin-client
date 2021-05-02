@@ -24,7 +24,7 @@
             <div class="horizontalFlexLeft">
               <button @click="() => markFeedbackRead(fb)"
                       v-if="!fb.isRead"
-                      class="y-button y-button-neutral button-with-icon mr-8">
+                      class="y-button button-with-icon mr-8">
                 <CheckIcon/> Have read
               </button>
               <button @click="() => deleteFeedback(fb)"

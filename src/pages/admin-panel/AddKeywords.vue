@@ -42,7 +42,7 @@
           </div>
         
           <div class="verticalFlex mr-40">
-            <p class="admin-mini-header">Tags you're adding</p>
+            <p class="admin-mini-header">New tags</p>
             <p v-if="selectedKeywords.length > 0" style="margin-bottom: 6px;">Click tag to remove</p>
             <p v-for="keyword in selectedKeywords" 
               @click="removeKeywordFromSelection(keyword)" 

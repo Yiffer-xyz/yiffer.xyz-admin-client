@@ -47,7 +47,7 @@ export default new Router({
       beforeEnter: rerouteIfNotLoggedIn,
       meta: {
         redirectOnLogout: true,
-      }
+      },
     },
     {
       path: '/login',
