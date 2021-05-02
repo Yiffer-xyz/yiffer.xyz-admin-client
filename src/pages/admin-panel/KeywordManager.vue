@@ -29,7 +29,7 @@
         </div>
     
         <div v-if="comic && comicKeywords !== null" class="mt-16 width100">
-          <div class="tagsContainer mt-24 width100" style="justify-content: space-between;">
+          <div class="tagsContainer mt-24 width100">
             <div class="verticalFlex">
               <p class="admin-mini-header">
                 Existing tags
@@ -92,7 +92,7 @@
         </div>
 
         <button v-if="!isCreatingNewTag"
-                class="y-button button-with-icon y-button-neutral"
+                class="y-button button-with-icon"
                 style="margin-top: 40px;"
                 @click="isCreatingNewTag = true">
           <PlusIcon/> Create new tag
@@ -309,15 +309,17 @@ export default {
 .tagsContainer {
   display: grid;
   grid-template-columns: auto auto;
+  justify-content: space-between;
 
   @media (max-width: 500px) {
     grid-template-columns: auto;
+    justify-content: center;
   }
 }
 
 .newTagsHeader {
   @media (max-width: 500px) {
-    margin-top: 2rem;
+    margin-top: 3rem;
   }
 }
 
