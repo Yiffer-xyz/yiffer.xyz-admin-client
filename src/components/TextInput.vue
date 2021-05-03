@@ -24,8 +24,9 @@
              @focus="$emit('focus')"
              @blur="$emit('blur')"
              @click="$emit('click')"/>
-      <span v-if="includeClearButton" class="inputIconWrapper inputIconWrapperRight cursorPointer"
-            v-show="localValue"
+      <span v-if="includeClearButton"
+            class="inputIconWrapper inputIconWrapperRight cursorPointer"
+            v-show="alwaysShowClearButton || localValue"
             @click="clear">
         <CrossIcon title="Clear"/>
       </span>
@@ -93,6 +94,10 @@ export default {
       required: false,
     },
     includeClearButton: {
+      type: Boolean,
+      required: false,
+    },
+    alwaysShowClearButton: {
       type: Boolean,
       required: false,
     },
@@ -223,6 +228,15 @@ $paddingSmall: 0.4rem;
   @media (max-width: 900px) {
     padding: 9px $paddingSmall;
   }
+}
+
+input[type=number] {
+  appearance: textfield;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
 }
 
 .borderTheme1 {

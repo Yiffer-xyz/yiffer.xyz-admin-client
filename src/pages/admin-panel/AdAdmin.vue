@@ -7,9 +7,12 @@
     </h2>
     <span class="admin-content-box-inner" v-if="isOpen">
 
-    <ResponseMessage :message="responseMessage" :messageType="responseMessageType" @closeMessage="closeResponseMessage" class="mb-16"/>
+    <FetchResponseMessage :fetchStates="[updateAd]" 
+                          :successMessage="successMessage" 
+                          disableElevation
+                          class="mb-16"/>
 
-    <Loading text="Saving..." v-if="isSaving" class="mb-16"/>
+    <Loading text="Saving..." v-if="updateAd.fetching" class="mb-16"/>
 
     <MultiToggleButton :items="['All', 'Pending', 'Active', 'Needs correction']"
                        :initialValue="'All'"
@@ -29,6 +32,7 @@
               <th>Expires</th>
               <th>Type</th>
               <th>Status</th>
+              <th>$</th>
               <th>Link</th>
               <th>Media</th>
               <th>Main txt</th>
@@ -41,7 +45,7 @@
           <tbody>
             <tr v-for="ad in displayedAds" :key="ad.id">
               <td style="height: 2rem;">
-                <button @click="editAd(ad)" v-if="!editedAd" class="y-button y-button-neutral yButtonRound">
+                <button v-if="!editedAd" @click="editAd(ad)" class="y-button yButtonRound mr-4">
                   <EditIcon/>
                 </button>
 
@@ -132,10 +136,32 @@
                 </div>
               </td>
 
+              <td>
+                <span v-if="ad && ad.payments && ad.payments.length > 0">
+                  <p v-for="(payment, index) in ad.payments" :key="index" :title="formatTimestamp(payment.date)">
+                    ${{payment.amount}}, {{formatShortTimestamp(payment.date)}}
+                  </p>
+                </span>
+
+                <button v-if="isThisAdBeingEdited(ad.id) && editedAd.payment === null"
+                        class="y-button y-button-small mt-4"
+                        @click="editedAd.payment = 0">
+                  Add
+                </button>
+
+                <TextInput @change="newVal => editedAd.payment = newVal"
+                           @clear="editedAd.payment = null"
+                           type="number"
+                           class="mt-8"
+                           includeClearButton
+                           alwaysShowClearButton
+                           v-if="isThisAdBeingEdited(ad.id) && editedAd.payment !== null"
+                           title="Amount ($)"
+                           textAlign="left"/>
+              </td>
+
               <td style="white-space: pre-wrap;">
-                <a :href="ad.link" v-if="!isThisAdBeingEdited(ad.id)" target="_blank" style="min-width: 6rem; word-break: normal;" class="underline-link">
-                  {{ad.link}}
-                </a>
+                <a :href="ad.link" v-if="!isThisAdBeingEdited(ad.id)" target="_blank" style="min-width: 6rem; word-break: normal;" class="underline-link">{{ad.link}}</a>
                 <input type="text" v-else v-model="editedAd.link"/>
               </td>
 
@@ -201,35 +227,42 @@
 <script>
 import adApi from '@/api/advertisingApi'
 import config from '@/config.json'
+import { doFetch } from '@/utils/statefulFetch'
 
 import MultiToggleButton from '@/components/MultiToggleButton'
-import ResponseMessage from '@/components/ResponseMessage.vue'
+import FetchResponseMessage from '@/components/FetchResponseMessage.vue'
 import Loading from '@/components/LoadingIndicator.vue'
+import TextInput from '@/components/TextInput.vue'
 
 import CancelIcon from 'vue-material-design-icons/Close.vue'
 import EditIcon from 'vue-material-design-icons/Pencil.vue'
 import SaveIcon from 'vue-material-design-icons/ContentSave.vue'
 import { format } from 'date-fns'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'adAdmin',
 
   components: {
-    MultiToggleButton, ResponseMessage, Loading,
-    EditIcon, CancelIcon, SaveIcon,
+    MultiToggleButton, FetchResponseMessage, Loading,
+    EditIcon, CancelIcon, SaveIcon, TextInput,
+  },
+
+  computed: {
+    ...mapGetters(['updateAd']),
   },
 
   data: function () {
     return {
       displayedAds: [],
       editedAd: null,
-      responseMessage: '',
-      responseMessageType: 'success',
-      isSaving: false,
+      successMessage: '',
       numberOfPendingAds: 0,
       isOpen: false,
       config,
       adStatuses: adStatuses,
+      paymentAdId: null,
+      addPaymentAmount: 0,
     }
   },
 
@@ -244,6 +277,7 @@ export default {
         adminNotes: ad.adminNotes,
         extendMonths: 0,
         expiryDateChoice: ad.expiryDate ? 'manual' : 'null',
+        payment: null,
       }
     },
 
@@ -252,7 +286,8 @@ export default {
     },
 
     async saveEditedAd () {
-      this.isSaving = true
+      if (this.updateAd.fetching) { return }
+
       let extendMonths = null
       let customExpiryDate = null
 
@@ -263,7 +298,7 @@ export default {
         customExpiryDate = this.editedAd.expiryDate
       }
 
-      let response = await adApi.updateAd(
+      let result = await doFetch(this.$store.commit, 'updateAd', adApi.updateAd(
         this.editedAd.id,
         this.editedAd.status,
         this.editedAd.adminNotes, 
@@ -271,19 +306,14 @@ export default {
         this.editedAd.link,
         extendMonths,
         customExpiryDate,
-      )
-      this.isSaving = false
+        this.editedAd.payment,
+      ))
 
-      if (response.success) {
+      if (result) {
         let adIndex = this.displayedAds.findIndex(ad => ad.id === this.editedAd.id)
-        this.$set(this.displayedAds, adIndex, response.ad)
-        this.responseMessageType = 'success'
-        this.responseMessage = `Successfully edited ${this.editedAd.id}`
+        this.$set(this.displayedAds, adIndex, result)
+        this.successMessage = `Successfully edited ${this.editedAd.id}`
         this.cancelEditing()
-      }
-      else {
-        this.responseMessageType = 'error'
-        this.responseMessage = response.message
       }
     },
 
@@ -323,6 +353,11 @@ export default {
       return format(new Date(timestamp), 'MMM do yyyy')
     },
 
+    formatShortTimestamp (timestamp) {
+      if (!timestamp) { return '' }
+      return format(new Date(timestamp), `MMM do`)
+    },
+
     getAdStatusClass (status) {
       if ([adStatuses.pending, adStatuses.activeButPending].includes(status)) {
         return 'monoInfo'
@@ -338,8 +373,6 @@ export default {
       }
     },
     
-    closeResponseMessage () { this.responseMessage = '' },
-
     openComponent () { if (!this.isOpen) { setTimeout( () => this.isOpen = true, 15 ) } },
 
     closeComponent () { setTimeout( () => this.isOpen = false, 15 ) }

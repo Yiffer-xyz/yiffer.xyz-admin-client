@@ -31,19 +31,15 @@ export default {
     return response.data
   },
 
-  async updateAd (id, status, adminNotes, correctionNote, link, expiryDateExtendMonths, customExpiryDate) {
+  async updateAd (id, status, adminNotes, correctionNote, link, expiryDateExtendMonths, customExpiryDate, paymentAmount) {
     let body = {
       status, customExpiryDate, adminNotes, correctionNote, link,
+      paymentAmount: paymentAmount ? Number(paymentAmount) : null,
       expiryDateExtendMonths: expiryDateExtendMonths ? Number(expiryDateExtendMonths) : expiryDateExtendMonths,
     }
 
-    try {
-      let response = await axios.post(`${baseUrl}/paid-images/${id}/update-admin`, body)
-      return response.data
-    }
-    catch (err) {
-      return {success: false, message: err.response.data}
-    }
+    let response = await axios.post(`${baseUrl}/paid-images/${id}/update-admin`, body)
+    return response.data
   },
 
   async getAdClickStats (adId) {

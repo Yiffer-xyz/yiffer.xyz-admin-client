@@ -76,6 +76,7 @@ registerFetchNames(store,
   {name: 'blogs', defaultValue: []},
   {name: 'modApplicationSubmit', defaultValue: {}},
   {name: 'fetchLogin', defaultValue: {}},
+  {name: 'updateAd', defaultValue: null},
 )
 
 export default new Vuex.Store(store)
