@@ -26,11 +26,11 @@ export default {
   },
 
   props: {
-    'message': String,
-    'messageType': String,
-    'preventClose': Boolean,
-    'outsideStyle': String,
-    'classes': String,
+    message: String,
+    messageType: String,
+    preventClose: Boolean,
+    outsideStyle: String,
+    classes: String,
     disableElevation: Boolean,
   },
 

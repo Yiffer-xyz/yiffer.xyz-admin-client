@@ -328,6 +328,9 @@ select {
 
 .yTable {
   border-collapse: collapse;
+  p {
+    font-size: 1rem;
+  }
   td, th {
     text-align: left;
     padding: 0.5rem 0.75rem;
