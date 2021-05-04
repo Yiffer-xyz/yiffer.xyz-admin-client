@@ -1,22 +1,22 @@
 <template>
   <div class="admin-content-box" @click="openComponent" :class="{'admin-content-box-open': isOpen}">
     <h2 @click="closeComponent" class="cursorPointer">Tag manager</h2>
-    <span class="admin-content-box-inner paddedAdminBox" v-if="isOpen">
+    <span class="admin-content-box-inner paddedAdminBox" v-if="isOpen" ref="innerAdminBox">
 
       <ResponseMessage :message="responseMessage" :messageType="responseMessageType" @closeMessage="closeResponseMessage"
                        class="margin-top-8" disableElevation/>
 
       <div class="centerLeftAlignedContainer marginAuto" style="max-width: 25rem;">
         <div class="verticalFlex marginAuto no-margin-bot mt-16 flexWrap" style="align-items: flex-end;">
-
           <Select :options="comicOptions"
                   title="Comic"
                   isSearchable
                   searchKeepSelected
                   searchPlaceholder="Search for comic"
+                  initialWidth="16rem"
+                  :maxWidth="maxContentWidth"
                   :searchSelected="comic ? comic.name : null"
                   :resetValue="comicResetValue"
-                  :wrapperStyle="`min-width: ${comicInputWidth}rem; width: fit-content;`"
                   @searchSelectedClicked="comic = null"
                   @change="onComicSelect"/>
 
@@ -60,12 +60,12 @@
               </p>
 
               <Select :options="keywordOptions"
-                      title="Tags"
                       isSearchable
                       :resetValue="selectResetValue"
                       searchPlaceholder="Search for tags"
                       @change="newVal => addSelectedKeyword(newVal)"
-                      class="mb-16"/>
+                      class="mb-16"
+                      style="margin-top: -1rem;"/>
 
               <p v-for="keyword in selectedKeywords" 
                 @click="removeKeywordFromSelection(keyword)" 
@@ -136,7 +136,6 @@
 import RightArrow from 'vue-material-design-icons/ArrowRight.vue'
 import Loading from '@/components/LoadingIndicator.vue'
 import Select from '@/components/Select.vue'
-import CheckIcon from 'vue-material-design-icons/Check.vue'
 import PlusIcon from 'vue-material-design-icons/Plus.vue'
 import TextInput from '../../components/TextInput.vue'
 import LoadingButton from '@/components/LoadingButton.vue'
@@ -153,7 +152,6 @@ export default {
     RightArrow,
     Loading,
     Select,
-    CheckIcon,
     PlusIcon,
     TextInput,
     LoadingButton,
@@ -180,7 +178,13 @@ export default {
       isCreatingNewTag: false,
       isSubmittingAddKw: false,
       isSubmittingRemoveKw: false,
+      isMounted: false,
+      maxContentWidth: 9999,
     }
+  },
+
+  mounted () {
+    this.isMounted = true
   },
 
   computed: {
@@ -191,7 +195,12 @@ export default {
     },
 
     keywordOptions () {
-      return this.alphabeticKeywordList.map(kw => ({text: kw.name, value: kw}))
+      let existingKwIds = this.comicKeywords.map(kw => kw.id)
+      let selectedKwIds = this.selectedKeywords.map(kw => kw.id)
+
+      return this.alphabeticKeywordList
+        .filter(kw => !existingKwIds.includes(kw.id) && !selectedKwIds.includes(kw.id))
+        .map(kw => ({text: kw.name, value: kw}))
     },
 
     comicInputWidth () {
@@ -300,7 +309,15 @@ export default {
 	watch: {
 		comicList () {
 			this.comic = this.comicList.find(c => c.id===this.lastComicId)
-		} 
+		},
+
+    isOpen () {
+      setTimeout(() => {
+        if (this.$refs.innerAdminBox && document.body.clientWidth < 400) {
+          this.maxContentWidth = this.$refs.innerAdminBox.clientWidth - 32
+        }
+      }, 25)
+    }
 	},
 }
 </script>
@@ -310,8 +327,10 @@ export default {
   display: grid;
   grid-template-columns: auto auto;
   justify-content: space-between;
+  min-width: 26rem;
 
   @media (max-width: 500px) {
+    min-width: 0;
     grid-template-columns: auto;
     justify-content: center;
   }

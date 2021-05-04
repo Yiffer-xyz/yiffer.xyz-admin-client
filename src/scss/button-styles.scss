@@ -120,13 +120,13 @@ $buttonBorderWidth: 2px;
 .y-button-disabled {
   border-color: $themeGray4;
   background-color: $themeGray4;
-  color: white;
+  color: #f5f5f5;
   box-shadow: none;
   &:hover, &:focus {
     cursor: not-allowed;
     border-color: $themeGray4;
-    background-color: transparent;
-    color: $themeGray4;
+    background-color: $themeGray4;
+    color: #f5f5f5;
     box-shadow: none !important;
     &::before {
       box-shadow: none !important;
@@ -337,9 +337,9 @@ $buttonBorderWidth: 2px;
     box-shadow: none;
     &:hover, &:focus {
       cursor: not-allowed;
-      border-color: $themeGray6;
-      background-color: transparent;
-      color: $themeGray6;
+      border-color: $themeGray8;
+      background-color: $themeGray8;
+      color: #aaa;
     }
   }
 
@@ -355,8 +355,8 @@ $buttonBorderWidth: 2px;
   }
 
   .pretty-input-upload {
-    background: transparent !important;
-    border-color: $themeBlueDTDarker;
+    background: $themeBlueDT !important;
+    border-color: $themeBlueDT;
 
     svg, span, p {
       color: #eee;
@@ -364,8 +364,8 @@ $buttonBorderWidth: 2px;
 
     &:hover, &:focus {
       background-color: $themeDark2;
-      background: $themeBlueDT !important;
-      border-color: $themeBlueDT !important;
+      background: $themeBlueDTDarker !important;
+      border-color: $themeBlueDTDarker !important;
 
     }
   }
