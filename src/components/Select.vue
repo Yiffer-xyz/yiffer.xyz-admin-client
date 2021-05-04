@@ -239,7 +239,8 @@ export default {
     scrollToTopIfPossible () {
       if (this.isOpen
         && this.filteredOptions.length > 0
-        && this.$refs[`option0`]) {
+        && this.$refs[`option0`]
+        && this.$refs[`option0`][0]) {
         this.$refs[`option0`][0].scrollIntoView({ block: 'nearest', inline: 'start' })
       }
     },
