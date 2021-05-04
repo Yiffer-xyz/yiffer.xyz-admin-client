@@ -3,7 +3,7 @@
        id="customSelect"
        :tabindex="tabindex"
        @blur="isOpen = false"
-       :style="wrapperStyle">
+       :style="`${wrapperStyle}; ${minWidthString}`">
     <p v-if="title && (selected || isSearchable)" class="titleText">
       {{ title }}
     </p>
@@ -16,6 +16,7 @@
            borderTheme1: borderTheme1,
            borderTheme2: borderTheme2,
            placeholderStyle: !selected,
+           selectWithIconRight: !(isSearchable && !searchKeepSelected),
          }"
          v-if="!isSearchable"
          @click="isOpen = !isOpen">
@@ -24,6 +25,8 @@
     
     <input type="text" v-else-if="!searchSelected"
            class="selected"
+           ref="selectInput1"
+           autocomplete="off"
            :style="{'border-color': overrideBorderColor}"
            :placeholder="searchPlaceholder || ''"
            :class="{
@@ -36,7 +39,9 @@
            v-model="searchText"/>    
 
     <input type="text" v-else
+           ref="selectInput2"
            class="selected cursorPointer"
+           autocomplete="off"
            :style="{'border-color': overrideBorderColor}"
            :placeholder="searchPlaceholder || ''"
            :class="{
@@ -57,15 +62,13 @@
       <CrossIcon/>
     </span>
 
-    <div class="items" :class="{ selectHide: !isOpen }">
+    <div class="items" :class="{ selectHide: !isOpen }" ref="selectItemContainer">
       <div
-        v-for="option of filteredOptions"
+        v-for="(option, index) of filteredOptions"
         :key="option.text"
-        @click="
-          selected = option
-          isOpen = false
-          $emit('change', option.value)
-        "
+        :class="{highlightedOption: highlightedIndex === index}"
+        :ref="`option${index}`"
+        @click="onOptionSelected(option)"
       >
         {{ option.text }}
       </div>
@@ -146,6 +149,11 @@ export default {
       required: false,
       default: '',
     },
+    initialWidth: {
+      type: String,
+      required: false,
+      default: null,
+    }
   },
 
   components: {
@@ -154,6 +162,8 @@ export default {
 
   mounted() {
     this.$emit("input", this.selected)
+    window.addEventListener('keydown', this.onKeyPress)
+    this.tryComputeWidth()
   },
 
   watch: {
@@ -166,31 +176,161 @@ export default {
     },
 
     searchText (newText) {
+      this.highlightedIndex = null
+
       if (newText && !this.isopen) {
         this.isOpen = true
+      }
+
+      this.scrollToTopIfPossible()
+    },
+
+    highlightedIndex (newIndex) {
+      if (newIndex !== null) {
+        if (document.body.scrollIntoViewIfNeeded) {
+          this.$refs[`option${newIndex}`][0].scrollIntoViewIfNeeded()
+        }
+        else {
+          this.$refs[`option${newIndex}`][0].scrollIntoView(false)
+        }
       }
     },
 
     isOpen () {
+      this.highlightedIndex = null
+
       if (this.isSearchable && this.isOpen) {
         setTimeout(() => {
           window.addEventListener('click', this.closeSearchableResults)
-        }, 25)
+        }, 15)
+
+        this.scrollToTopIfPossible()
       }
       else {
         window.removeEventListener('click', this.closeSearchableResults)
       }
-    }
+    },
+
+    options () {
+      this.tryComputeWidth()
+    },
   },
 
   methods: {
+    async waitMillisec (millisec) {
+      return new Promise((resolve) => {
+        setTimeout(() => resolve(), millisec)
+      })
+    },
+
+    async tryComputeWidth () {
+      let isFinished = false
+      while (!isFinished) {
+        await this.waitMillisec(25)
+        isFinished = this.computeWidth()
+      }
+    },  
+
+    scrollToTopIfPossible () {
+      if (this.isOpen
+        && document.body.scrollIntoViewIfNeeded 
+        && this.filteredOptions.length > 0
+        && this.$refs[`option0`]) {
+        this.$refs[`option0`][0].scrollIntoViewIfNeeded()
+      }
+    },
+
+    computeWidth () {
+      let container = this.$refs.selectItemContainer
+      if (container.children.length > 0) {
+        let maxChildWidth = 0
+        for (let child of container.children) {
+          if (child.clientWidth > maxChildWidth) {
+            maxChildWidth = child.clientWidth
+          }
+        }
+
+        this.minWidth = maxChildWidth
+        return true
+      }
+      else {
+        return false
+      }
+    },
+
     closeSearchableResults () {
       this.isOpen = false
       this.searchText = ''
-    }
+    },
+
+    onOptionSelected (option) {
+      this.selected = option
+      this.isOpen = false
+      this.$emit('change', option.value)
+
+      if (this.isSearchable && this.searchKeepSelected) {
+        let relevantInputElement = this.$refs.selectInput1
+        if (!relevantInputElement) {
+          relevantInputElement = this.$refs.selectInput2
+        }
+        if (relevantInputElement) {
+          relevantInputElement.blur()
+        } 
+      }
+      
+    },
+
+    onKeyPress (e) {
+      if (this.isOpen) {
+        if (e.key === 'ArrowDown') {
+          if (this.highlightedIndex !== null) {
+            if (this.highlightedIndex === this.filteredOptions.length - 1) {
+              this.highlightedIndex = 0
+            }
+            else {
+              this.highlightedIndex++
+            }
+          }
+          else {
+            this.highlightedIndex = 0
+          }
+        }
+        else if (e.key === 'ArrowUp') {
+          if (this.highlightedIndex !== null) {
+            if (this.highlightedIndex === 0) {
+              this.highlightedIndex = this.filteredOptions.length-1
+            }
+            else {
+              this.highlightedIndex--
+            }
+          }
+          else {
+            this.highlightedIndex = this.filteredOptions.length-1
+          }
+        }
+        else if (e.key === 'Enter') {
+          if (this.highlightedIndex === null && this.filteredOptions.length > 0) {
+            this.onOptionSelected(this.filteredOptions[0])
+          }
+          else if (this.highlightedIndex !== null) {
+            this.onOptionSelected(this.filteredOptions[this.highlightedIndex])
+          }
+        }
+      }
+    },
   },
 
   computed: {
+    minWidthString () {
+      if (this.minWidth) {
+        return `min-width: ${this.minWidth}px`
+      }
+      else if (this.initialWidth) {
+        return `min-width: ${this.initialWidth}`
+      }
+      return ''
+    },
+
     filteredOptions () {
       if (!this.isSearchable || this.searchText === '') {
         return this.options
@@ -210,7 +350,14 @@ export default {
       searchText: '',
       isOpen: false,
       clickListener: null,
+      highlightedIndex: null,
+      minWidth: 0,
     }
+  },
+
+  beforeDestroy () {
+    window.removeEventListener('click', this.closeSearchableResults)
+    window.removeEventListener('keypress', this.onKeyPress)
   },
 }
 </script>
@@ -250,7 +397,7 @@ input {
 
 .customSelect {
   position: relative;
-  width: 100%;
+  width: fit-content;
   text-align: left;
   outline: none;
   height: $height;
@@ -276,6 +423,9 @@ input {
   padding-left: $paddingBig;
   @media (max-width: 900px) {
     padding-left: $paddingSmall
+  }
+  &.selectWithIconRight {
+    padding-right: 2rem;
   }
 }
 
@@ -303,32 +453,40 @@ input {
   overflow: hidden;
   @include simpleshadowNoHover;
 
+  width: fit-content;
+  min-width: 100%;
   position: absolute;
   background-color: white;
   left: 0;
   right: 0;
-  z-index: 1;
+  z-index: 4;
 
   max-height: 20rem;
   overflow-y: auto;
 }
 
 .items div {
+  z-index: 4;
   color: $lightThemeColor;
   cursor: pointer;
   user-select: none;
   padding-left: $paddingBig;
+  white-space: nowrap;
   @media (max-width: 900px) {
     padding-left: $paddingSmall
   }
 }
 
 .items div:hover {
-  background: linear-gradient(to right, $themeGreen1, $themeGreen2);
+  background: linear-gradient(to right, scale-color($themeGreen1, $lightness: 50%), scale-color($themeGreen2, $lightness: 50%));
+}
+
+.highlightedOption {
+  background: linear-gradient(to right, $themeGreen1, $themeGreen2) !important;
 }
 
 .selectHide {
-  display: none;
+  visibility: hidden;
 }
 
 .overrideBorderColor {
@@ -368,7 +526,14 @@ input {
     background-color: $themeDark1;
   }
 
+  
+  .highlightedOption {
+    background: linear-gradient(to right, $themeGreen1Dark, $themeGreen2Dark) !important;
+    color: #333 !important;
+  }
+
   .items div:hover {
+    background: linear-gradient(to right, scale-color($themeGreen1, $lightness: 25%), scale-color($themeGreen2, $lightness: 25%));
     color: #333;
   }
 }
