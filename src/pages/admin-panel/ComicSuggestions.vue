@@ -39,7 +39,15 @@
               <td style="white-space: pre-wrap;">{{suggestion.description}}</td>
               <td>{{suggestion.user}}</td>
               <td>
-								<div v-if="!suggestion.isRejectingAndAddingToList" class="verticalFlex alignCenter">
+                <button v-if="!suggestionIdBeingActioned"
+                        @click="onSuggestionActionClick(suggestion)"
+                        class="y-button">
+                  Choose action...
+                </button>
+
+								<div v-else-if="suggestionIdBeingActioned === suggestion.id 
+                  && !suggestion.isRejectingAndAddingToList"
+                     class="verticalFlex">
 									<button 
 										@click="processSuggestion(suggestion, true)"
 										class="y-button button-with-icon">
@@ -55,24 +63,29 @@
 										class="y-button y-button-red button-with-icon margin-top-8">
 										<DeleteIcon/> Reject as spam/dupl.
 									</button>
+									<button
+										@click="suggestionIdBeingActioned = null"
+										class="y-button y-button-neutral margin-top-8">
+										Cancel
+									</button>
 								</div>
 
                 <!-- REJECT AND ADD TO LIST -->
-                <div v-if="suggestion.isRejectingAndAddingToList" class="verticalFlex">
-                  <p>You <i>may</i> provide a reason (shown to users):</p>
-                  <input type="text" v-model="rejectReason"/>
-                  <div class="horizontalFlex margin-top-8 margin-bottom-4">
+                <div v-if="suggestion.isRejectingAndAddingToList" class="verticalFlex alignItemsStart">
+                  <TextInput @change="newVal => rejectReason = newVal"
+                             title="Optional reason (shown to users)"
+                             placeholder="May be left blank"
+                             textAlign="left"/>
                     <button 
                       @click="cancelAddingToList(suggestion)"
-                      class="y-button y-button-neutral margin-left-4 margin-right-4">
-                      Cancel
+                      class="y-button y-button-neutral button-with-icon mt-16">
+                      <LeftArrow/> Back
                     </button>
                     <button 
                       @click="processSuggestion(suggestion, false, true)"
-                      class="y-button y-button-red margin-left-4 margin-right-4">
-                      Reject, add to rejected-list
+                      class="y-button y-button-red button-with-icon mt-8">
+                      <CheckIcon/> Reject, add to rejected-list
                     </button>
-                  </div>
                 </div>
               </td>
             </tr>
@@ -129,6 +142,7 @@
 <script>
 import DownArrow from 'vue-material-design-icons/ArrowDown.vue'
 import UpArrow from 'vue-material-design-icons/ArrowUp.vue'
+import LeftArrow from 'vue-material-design-icons/ArrowLeft.vue'
 import CheckboxIcon from 'vue-material-design-icons/CheckboxMarkedCircle.vue'
 import CheckIcon from 'vue-material-design-icons/Check.vue'
 import DeleteIcon from 'vue-material-design-icons/Delete.vue'
@@ -136,13 +150,14 @@ import RemoveToListIcon from 'vue-material-design-icons/DeleteSweep.vue'
 
 import comicApi from '@/api/comicApi'
 import ResponseMessage from '@/components/ResponseMessage.vue'
+import TextInput from '@/components/TextInput.vue'
 
 export default {
   name: 'comicSuggestions',
 
 	components: {
-    ResponseMessage,
-    DownArrow, UpArrow, CheckboxIcon, CheckIcon, DeleteIcon, RemoveToListIcon
+    ResponseMessage, TextInput,
+    DownArrow, UpArrow, CheckboxIcon, CheckIcon, DeleteIcon, RemoveToListIcon, LeftArrow,
 	},
 
   data: function () {
@@ -153,10 +168,16 @@ export default {
       rejectReason: '',
       responseMessage: '',
       responseMessageType: 'info',
+      suggestionIdBeingActioned: null,
     }
   },
 
   methods: {
+    onSuggestionActionClick (suggestion) {
+      this.suggestionIdBeingActioned = suggestion.id
+      this.rejectReason = ''
+    },
+
     initRejectAndAddToList (suggestion) {
       for (let i=0; i<this.comicSuggestionList.length; i++) {
         if (this.comicSuggestionList[i].id === suggestion.id) {
@@ -189,6 +210,8 @@ export default {
       if (response.success) {
         this.responseMessage = `Successfully processed suggestion of ${suggestionData.name} (${isApproved ? 'added' : 'rejected'})`
         this.responseMessageType = 'success'
+        console.log('asdasd')
+        this.suggestionIdBeingActioned = null
         this.getComicSuggestions()
       }
       else {

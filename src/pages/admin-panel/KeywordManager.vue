@@ -108,7 +108,6 @@
                       @change="newKw => newKeyword = newKw"
                       title="New tag name"
                       textAlign="left"
-                      placeholder="New tag name"
                       class="mt-24 mb-24"/>
 
           <div class="horizontalFlex justifyContentStart">
