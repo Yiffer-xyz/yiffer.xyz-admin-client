@@ -3,7 +3,7 @@
        id="customSelect"
        :tabindex="tabindex"
        @blur="isOpen = false"
-       :style="`${wrapperStyle}; ${minWidthString}`">
+       :style="`${wrapperStyle}; ${minWidthString}; ${widthString}}`">
     <p v-if="title && (selected || isSearchable)" class="titleText">
       {{ title }}
     </p>
@@ -16,7 +16,7 @@
            borderTheme1: borderTheme1,
            borderTheme2: borderTheme2,
            placeholderStyle: !selected,
-           selectWithIconRight: !(isSearchable && !searchKeepSelected),
+           selectWithIconRight: hasIconRight,
          }"
          v-if="!isSearchable"
          @click="isOpen = !isOpen">
@@ -62,7 +62,12 @@
       <CrossIcon/>
     </span>
 
-    <div class="items" :class="{ selectHide: !isOpen }" ref="selectItemContainer">
+    <div class="items"
+         :class="{
+           selectHide: !isOpen,
+         }"
+         :style="maxOptionWidthStyle"
+         ref="selectItemContainer">
       <div
         v-for="(option, index) of filteredOptions"
         :key="option.text"
@@ -153,6 +158,11 @@ export default {
       type: String,
       required: false,
       default: null,
+    },
+    maxWidth: {
+      type: Number,
+      required: false,
+      default: 99999,
     }
   },
 
@@ -186,13 +196,8 @@ export default {
     },
 
     highlightedIndex (newIndex) {
-      if (newIndex !== null) {
-        if (document.body.scrollIntoViewIfNeeded) {
-          this.$refs[`option${newIndex}`][0].scrollIntoViewIfNeeded()
-        }
-        else {
-          this.$refs[`option${newIndex}`][0].scrollIntoView(false)
-        }
+      if (newIndex !== null && this.$refs[`option${newIndex}`]) {
+        this.$refs[`option${newIndex}`][0].scrollIntoView({ block: 'nearest', inline: 'start' })
       }
     },
 
@@ -233,16 +238,15 @@ export default {
 
     scrollToTopIfPossible () {
       if (this.isOpen
-        && document.body.scrollIntoViewIfNeeded 
         && this.filteredOptions.length > 0
         && this.$refs[`option0`]) {
-        this.$refs[`option0`][0].scrollIntoViewIfNeeded()
+        this.$refs[`option0`][0].scrollIntoView({ block: 'nearest', inline: 'start' })
       }
     },
 
     computeWidth () {
       let container = this.$refs.selectItemContainer
-      if (container.children.length > 0) {
+      if (container && container.children.length > 0) {
         let maxChildWidth = 0
         for (let child of container.children) {
           if (child.clientWidth > maxChildWidth) {
@@ -250,7 +254,13 @@ export default {
           }
         }
 
-        this.minWidth = maxChildWidth
+        if (this.minWidth > this.maxWidth) {
+          this.width = this.maxWidth
+        }
+        else {
+          this.minWidth = maxChildWidth
+        }
+
         return true
       }
       else {
@@ -321,12 +331,33 @@ export default {
   },
 
   computed: {
+    hasIconRight () {
+      return !(this.isSearchable && !this.searchKeepSelected)
+    },
+
     minWidthString () {
+      if (this.width) {
+        return ''
+      }
       if (this.minWidth) {
-        return `min-width: ${this.minWidth}px`
+        return `min-width: ${this.minWidth + (this.hasIconRight ? 16 : 0)}px`
       }
       else if (this.initialWidth) {
         return `min-width: ${this.initialWidth}`
+      }
+      return ''
+    },
+
+    widthString () {
+      if (this.width) {
+        return `width: ${this.width}px`
+      }
+      return ''
+    },
+
+    maxOptionWidthStyle () {
+      if (this.maxWidth && window.matchMedia(`(max-width: ${this.maxWidth}px)`)) {
+        return `max-width: ${this.maxWidth}px`
       }
       return ''
     },
@@ -352,6 +383,7 @@ export default {
       clickListener: null,
       highlightedIndex: null,
       minWidth: 0,
+      width: undefined,
     }
   },
 
@@ -465,12 +497,17 @@ input {
   overflow-y: auto;
 }
 
+// .itemsMaxWidth100 {
+//   max-width: 100%;
+// }
+
 .items div {
   z-index: 4;
   color: $lightThemeColor;
   cursor: pointer;
   user-select: none;
   padding-left: $paddingBig;
+  padding-right: $paddingBig;
   white-space: nowrap;
   @media (max-width: 900px) {
     padding-left: $paddingSmall
