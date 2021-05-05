@@ -10,10 +10,10 @@
     </p>
     <div v-if="isMiniStatusShown" class="full-width-text mb-32">
       <p class="mt-0">
-        This admin panel <i>works</i>, but it's very, very far from perfect. You deserve a better tool, and I'm sorry that you have to work with its shortcomings. I am aware that the "box" design is not very good. I am aware that the... everything being centered... is terrible, and I am aware that most of this panel is not well suited for phones. 
+        This admin panel <i>works</i>, but it's far from perfect. I have "modernized" the most essential features, but you'll notice that others look and feel clunky. I'm sorry that you have to work with these shortcomings. I am aware that the "box" design is not very good. I am aware that the... everything being centered... is bad, and I am aware that some of this panel is not well suited for phones. 
       </p>
       <p>
-        Reworking this admin panel is on my to-do list, but it will take time, as there's just a lot of functionality here. If you have suggestions for improvements that will help <i>a lot</i> and require seemingly little effort to implement, please let me know and I will see if I can make time for it asap. Otherwise, thank you for helping out and thank you for your patience🙏.
+        Reworking this admin panel is on my to-do list, and I have begun, but it will take some time as there's just a lot of functionality here. If you have suggestions for improvements that will help <i>a lot</i> and require seemingly little effort to implement, please let me know and I will see if I can make time for it asap. Otherwise, thank you for helping out and thank you for your patience🙏.
       </p>
     </div>
 
