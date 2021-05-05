@@ -77,6 +77,7 @@ registerFetchNames(store,
   {name: 'modApplicationSubmit', defaultValue: {}},
   {name: 'fetchLogin', defaultValue: {}},
   {name: 'updateAd', defaultValue: null},
+  {name: 'keywordSuggestionSubmit', defaultValue: null},
 )
 
 export default new Vuex.Store(store)

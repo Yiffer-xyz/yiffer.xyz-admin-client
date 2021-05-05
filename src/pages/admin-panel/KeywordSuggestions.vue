@@ -7,8 +7,10 @@
     <span class="admin-content-box-inner" v-if="isOpen">
       <p class="margin-bottom-8">Tags suggested by users pending approval will appear here.</p>
 
-      <ResponseMessage :message="responseMessage" :messageType="responseMessageType" @closeMessage="closeResponseMessage"
-                       class="margin-bottom-10"/>
+      <FetchResponseMessage :fetchStates="[keywordSuggestionSubmit]" 
+                            :successMessage="successMessage" 
+                            disableElevation
+                            class="mb-16"/>
 
       <span v-if="keywordSuggestionList.length > 0">
         <table class="yTable">
@@ -23,20 +25,21 @@
           <tbody>
             <tr v-for="(suggestion, index) in keywordSuggestionList" :key="index">
               <td><a :href="`https://yiffer.xyz/${suggestion.comicName}`" target="_blank" class="underline-link">{{suggestion.comicName}}</a></td>
-              <td>{{keywordSuggestionText(suggestion)}}</td>
+              <td>{{getKeywordSuggestionText(suggestion)}}</td>
               <td style="word-break: break-all;">{{suggestion.user}}</td>
               <td>
 								<div class="horizontal-wrapper-4">
-									<button
-										@click="processKeyword(suggestion, true)"
-										class="y-button">
+									<LoadingButton :isLoading="keywordSuggestionSubmit.fetching && isActionApprove && keywordIdBeingProcessed === suggestion.id"
+                                 text="Approve"
+										             @click="processKeyword(suggestion, true)">
 										Approve
-									</button>
-									<button
-										@click="processKeyword(suggestion, false)"
-										class="y-button y-button-red">
+									</LoadingButton>
+									<LoadingButton :isLoading="keywordSuggestionSubmit.fetching && !isActionApprove && keywordIdBeingProcessed === suggestion.id"
+                                 text="Reject"
+                                 color="error"
+										             @click="processKeyword(suggestion, false)">
 										Reject
-									</button>
+									</LoadingButton>
 								</div>
               </td>
             </tr>
@@ -59,40 +62,51 @@
 
 <script>
 import keywordApi from '@/api/keywordApi'
-import ResponseMessage from '@/components/ResponseMessage.vue'
+import FetchResponseMessage from '@/components/FetchResponseMessage.vue'
+import LoadingButton from '@/components/LoadingButton.vue'
+import { mapGetters } from 'vuex'
+import { doFetch } from '@/utils/statefulFetch'
 
 export default {
   name: 'keywordSuggestions',
 
   components: {
-    ResponseMessage,
+    FetchResponseMessage, LoadingButton,
+  },
+
+  computed: {
+    ...mapGetters(['keywordSuggestionSubmit']),
   },
 
   data () {
     return {
       keywordSuggestionList: [],
       isOpen: false,
-      responseMessage: '',
-      responseMessageType: '',
+      isActionApprove: false,
+      keywordIdBeingProcessed: null,
+      successMessage: '',
     }
   },
 
+  mounted () {
+    this.loadSuggestions()
+  },
+
   methods: {
-    keywordSuggestionText (suggestion) {
+    getKeywordSuggestionText (suggestion) {
       return (suggestion.addKeyword ? 'ADD ' : 'REMOVE ') + suggestion.keywordName
     },
 
     async processKeyword (suggestion, isApproved) {
-			let response = await keywordApi.processKeywordSuggestion(suggestion, isApproved)
+      this.isActionApprove = isApproved
+      this.keywordIdBeingProcessed = suggestion.id
 
-      if (response.success) {
-        this.responseMessage  = `Successfully ${isApproved ? 'approved' : 'rejected'} "${this.keywordSuggestionText(suggestion)}"`
-        this.responseMessageType = 'success'
+      let result = await doFetch(this.$store.commit, 'keywordSuggestionSubmit',
+        keywordApi.processKeywordSuggestion(suggestion, isApproved))
+
+      if (result) {
+        this.successMessage  = `Successfully ${isApproved ? 'approved' : 'rejected'} "${this.getKeywordSuggestionText(suggestion)}"`
         this.loadSuggestions()
-      }
-      else {
-        this.responseMessage = 'Error processing tag suggestion: ' + response.message
-        this.responseMessageType = 'error'
       }
     },
 
@@ -104,15 +118,9 @@ export default {
       }
     },
 
-    closeResponseMessage () { this.responseMessage = '' },
-
     openComponent () { if (!this.isOpen) { setTimeout( () => this.isOpen = true, 15 ) } },
 
     closeComponent () { setTimeout( () => this.isOpen = false, 15 ) }
   },
-
-  mounted () {
-    this.loadSuggestions()
-  }
 }
 </script>
