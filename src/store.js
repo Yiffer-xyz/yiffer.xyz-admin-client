@@ -78,6 +78,8 @@ registerFetchNames(store,
   {name: 'fetchLogin', defaultValue: {}},
   {name: 'updateAd', defaultValue: null},
   {name: 'keywordSuggestionSubmit', defaultValue: null},
+  {name: 'artistUpdate', defaultValue: null},
+  {name: 'createArtist', defaultValue: null},
 )
 
 export default new Vuex.Store(store)

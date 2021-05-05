@@ -29,12 +29,16 @@
               <td style="word-break: break-all;">{{suggestion.user}}</td>
               <td>
 								<div class="horizontal-wrapper-4">
-									<LoadingButton :isLoading="keywordSuggestionSubmit.fetching && isActionApprove && keywordIdBeingProcessed === suggestion.id"
+									<LoadingButton :isLoading="keywordSuggestionSubmit.fetching 
+                                    && isActionApprove 
+                                    && keywordIdBeingProcessed === suggestion.id"
                                  text="Approve"
 										             @click="processKeyword(suggestion, true)">
 										Approve
 									</LoadingButton>
-									<LoadingButton :isLoading="keywordSuggestionSubmit.fetching && !isActionApprove && keywordIdBeingProcessed === suggestion.id"
+									<LoadingButton :isLoading="keywordSuggestionSubmit.fetching 
+                                    && !isActionApprove 
+                                    && keywordIdBeingProcessed === suggestion.id"
                                  text="Reject"
                                  color="error"
 										             @click="processKeyword(suggestion, false)">
