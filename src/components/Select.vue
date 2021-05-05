@@ -1,7 +1,6 @@
 <template>
   <div :class="`customSelect ${classes} ${isSearchable ? '' : 'cursorPointer'}`"
        id="customSelect"
-       :tabindex="tabindex"
        @blur="isOpen = false"
        :style="`${wrapperStyle}; ${minWidthString}; ${widthString}}`">
     <p v-if="title && (selected || isSearchable)" class="titleText">
@@ -129,11 +128,6 @@ export default {
     borderTheme2: {
       type: Boolean,
       required: false,
-    },
-    tabindex: {
-      type: Number,
-      required: false,
-      default: 0,
     },
     wrapperStyle: {
       type: String,
@@ -447,7 +441,6 @@ input {
 .customSelect .selected {
   border-radius: $borderRadius;
   color: $lightThemeColor;
-  user-select: none;
   border-width: 0;
   border-style: hidden;
   border-image: linear-gradient(to right, $themeGreen1, $themeGreen2) 1; 
@@ -498,15 +491,10 @@ input {
   overflow-y: auto;
 }
 
-// .itemsMaxWidth100 {
-//   max-width: 100%;
-// }
-
 .items div {
   z-index: 4;
   color: $lightThemeColor;
   cursor: pointer;
-  user-select: none;
   padding-left: $paddingBig;
   padding-right: $paddingBig;
   white-space: nowrap;
