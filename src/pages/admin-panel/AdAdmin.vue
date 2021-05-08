@@ -167,19 +167,19 @@
 
               <td>
                 <a v-if="ad.adType === 'banner'"
-                   :href="`${config.paidImagesDirectory}/${ad.id}.${ad.filetype}`"
+                   :href="`${config.paidImagesBucketName}/${ad.id}.${ad.filetype}`"
                    class="underline-link"
                    target="_blank">
                   View
                 </a>
                 <a v-if="ad.adType === 'card'"
-                   :href="`${config.paidImagesDirectory}/${ad.id}-big.${ad.filetype}`"
+                   :href="`${config.paidImagesBucketName}/${ad.id}-big.${ad.filetype}`"
                    class="underline-link mr-8"
                    target="_blank">
                   Big
                 </a>
                 <a v-if="ad.adType === 'card'"
-                   :href="`${config.paidImagesDirectory}/${ad.id}-small.${ad.filetype}`"
+                   :href="`${config.paidImagesBucketName}/${ad.id}-small.${ad.filetype}`"
                    class="underline-link"
                    target="_blank">
                   Small

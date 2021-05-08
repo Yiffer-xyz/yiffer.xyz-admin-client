@@ -16,11 +16,19 @@ export default {
   },
 
   async logRoute (route, description) {
-    axios.post(baseUrl + '/log-route', {route, description})
+    try {
+      axios.post(baseUrl + '/log-route', {route, description})
+    }
+    // eslint-disable-next-line no-empty
+    catch (err) {}
   },
 
   async logEvent (event, description) {
-    axios.post(baseUrl + '/log-event', {event, description: description || null})
+    try {
+      axios.post(baseUrl + '/log-event', {event, description: description || null})
+    }
+    // eslint-disable-next-line no-empty
+    catch (err) {}
   },
 
   async getVisitorStats (interval) {

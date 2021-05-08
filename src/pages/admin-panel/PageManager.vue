@@ -34,8 +34,8 @@
       <div v-if="comic" class="horizontalFlex flex-wrap">
         <div v-for="i in pagesToShow" :key="i" class="verticalFlex" style="margin: 4px;">
           <p>Page {{i}}</p>
-          <a :href="`${config.comicDirectory}/${comic.name}/${formattedPageNumber(i)}.jpg?${generateRandomQueryString()}`" target="_blank">
-            <img :src="`${config.comicDirectory}/${comic.name}/${formattedPageNumber(i)}.jpg?${generateRandomQueryString()}`" 
+          <a :href="`${config.comicsBucketName}/${comic.name}/${formattedPageNumber(i)}.jpg?${generateRandomQueryString()}`" target="_blank">
+            <img :src="`${config.comicsBucketName}/${comic.name}/${formattedPageNumber(i)}.jpg?${generateRandomQueryString()}`" 
               class="page-manager-image"/>
           </a>
         </div>

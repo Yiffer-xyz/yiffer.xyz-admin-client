@@ -22,17 +22,15 @@ export default {
         return userData
       }
       else {
-        commit('setIsAuthenticated', false)
-        commit('setUserData', undefined)
+        dispatch('destroyUserData')
         return false
       }
     },
 
-    async refreshUserData ({commit}) {
+    async refreshUserData ({commit, dispatch}) {
       let response = await authApi.refreshAuth()
       if (response === null) {
-        commit('setIsAuthenticated', false)
-        commit('setUserData', undefined)
+        dispatch('destroyUserData')
       }
       else {
         commit('setUserData', response)

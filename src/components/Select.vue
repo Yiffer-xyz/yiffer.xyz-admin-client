@@ -1,8 +1,9 @@
 <template>
   <div :class="`customSelect ${classes} ${isSearchable ? '' : 'cursorPointer'}`"
        id="customSelect"
+       tabindex="0"
        @blur="isOpen = false"
-       :style="`${wrapperStyle}; ${minWidthString}; ${widthString}}`">
+       :style="`${wrapperStyle}; ${minWidthString}; ${widthString}`">
     <p v-if="title && (selected || isSearchable)" class="titleText">
       {{ title }}
     </p>
@@ -157,7 +158,11 @@ export default {
       type: Number,
       required: false,
       default: 99999,
-    }
+    },
+    isFullWidth: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   components: {
@@ -288,6 +293,7 @@ export default {
     onKeyPress (e) {
       if (this.isOpen) {
         if (e.key === 'ArrowDown') {
+          e.preventDefault()
           if (this.highlightedIndex !== null) {
             if (this.highlightedIndex === this.filteredOptions.length - 1) {
               this.highlightedIndex = 0
@@ -301,6 +307,7 @@ export default {
           }
         }
         else if (e.key === 'ArrowUp') {
+          e.preventDefault()
           if (this.highlightedIndex !== null) {
             if (this.highlightedIndex === 0) {
               this.highlightedIndex = this.filteredOptions.length-1
@@ -331,7 +338,7 @@ export default {
     },
 
     minWidthString () {
-      if (this.width) {
+      if (this.width || this.isFullWidth) {
         return ''
       }
       if (this.minWidth) {
@@ -344,6 +351,9 @@ export default {
     },
 
     widthString () {
+      if (this.isFullWidth) {
+        return 'width: 100%'
+      }
       if (this.width) {
         return `width: ${this.width}px`
       }
