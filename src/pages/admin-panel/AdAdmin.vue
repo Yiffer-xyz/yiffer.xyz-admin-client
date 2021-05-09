@@ -127,7 +127,7 @@
                       {{adStatus}}
                     </option>
                   </select>
-                  <textarea v-if="editedAd.status === 'NEEDS CORRECTION'"
+                  <textarea v-if="editedAd.status === adStatuses.needsCorrection || editedAd.status === adStatuses.activeNeedsCorrection"
                             v-model="editedAd.correctionNote"
                             rows="3"
                             class="mt-4"
