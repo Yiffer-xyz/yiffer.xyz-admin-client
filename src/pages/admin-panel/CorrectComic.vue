@@ -242,7 +242,6 @@ export default {
     
     async findComicLinks () {
       let comicData = await comicApi.getComic(this.comic.name)
-      console.log(comicData)
       this.previousComic = comicData.previousComic ? 
         this.comicList.find(c => c.name === comicData.previousComic)
         : undefined

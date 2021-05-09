@@ -50,7 +50,6 @@ export default {
   watch: {
     fetchStates (newFetchState) {
       for (let fetchState of newFetchState) {
-        console.log(newFetchState)
         if (fetchState.fetched) {
           this.currentMessage = this.successMessage
           this.currentMessageType = 'success'

@@ -61,8 +61,8 @@
     <footer class="footer" style="display: flex;"> 
       <p style="display: flex;">
         Made by
-        <a href="https://twitter.com/Melon_mow" target="_blank" class="underline-link ml-4">
-          <TwitterIcon/>Melon
+        <a href="https://twitter.com/LewdMalann" target="_blank" class="underline-link ml-4">
+          <TwitterIcon/>Malann
         </a>
       </p>
     </footer>

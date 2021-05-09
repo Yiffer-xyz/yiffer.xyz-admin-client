@@ -210,7 +210,6 @@ export default {
       if (response.success) {
         this.responseMessage = `Successfully processed suggestion of ${suggestionData.name} (${isApproved ? 'added' : 'rejected'})`
         this.responseMessageType = 'success'
-        console.log('asdasd')
         this.suggestionIdBeingActioned = null
         this.getComicSuggestions()
       }
