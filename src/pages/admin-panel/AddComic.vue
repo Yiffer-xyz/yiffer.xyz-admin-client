@@ -275,39 +275,46 @@ export default {
         tag: this.tag,
         cat: this.cat,
         state: this.state,
-        keywords: this.selectedKeywords,
+        keywordIds: this.selectedKeywords.map(kw => kw.id),
         previousComic: this.previousComic ? this.previousComic.id : null,
         nextComic: this.nextComic ? this.nextComic.id : null
 			}
       
       this.responseMessageType = 'info'
-			let response = await comicApi.addNewComic(uploadData, {pageFiles: this.selectedFiles, thumbnailFile: this.thumbnailFile}, this.updateUploadProgress)
-	
-			if (response.success) {
-        this.responseMessage = `Success adding ${this.comicName}, thank you! An administrator will review the new comic,
-          and then (hopefully) add it! Your suggested comic will now appear under "Pending comics".`
-        this.responseMessageType = 'success'
-
-				this.uploadPercent = undefined,
-        this.comicName = ''
-        this.artist = undefined
-        this.cat = undefined
-        this.tag = undefined
-        this.state = undefined
-        this.selectedFiles = []
-				this.selectedKeywords = []
-				this.thumbnailFile = undefined
-        document.getElementById('newPageFilesAddComic').value = ''
-				this.$emit('refresh-pending-comics')
+      try {
+        await comicApi.addNewComic(
+          uploadData,
+          this.selectedFiles,
+          this.thumbnailFile,
+          this.updateUploadProgress
+        )
       }
-      else {
-        this.responseMessage = 'Error adding comic: ' + response.message
+      catch (err) {
+        this.responseMessage = err.message
         this.responseMessageType = 'error'
+        return
       }
+	
+      this.responseMessage = `Success adding ${this.comicName}! An admin will review the comic,
+        and then (hopefully) publish it! Your suggested comic will now appear under "Pending comics".`
+      this.responseMessageType = 'success'
+      this.uploadPercent = undefined,
+      this.comicName = ''
+      this.artist = undefined
+      this.cat = undefined
+      this.tag = undefined
+      this.state = undefined
+      this.selectedFiles = []
+      this.selectedKeywords = []
+      this.thumbnailFile = undefined
+      this.nextComic = undefined
+      this.previousComic = undefined
+      document.getElementById('newPageFilesAddComic').value = ''
+      this.$emit('refresh-pending-comics')
 		},
 		
-		updateUploadProgress (progressEvent) {
-			this.responseMessage = `Uploading... ${this.uploadPercent = Math.round((progressEvent.loaded/progressEvent.total)*100)}%`
+		updateUploadProgress (progressPercent) {
+			this.responseMessage = `Uploading... ${this.uploadPercent = progressPercent}%`
 		},
     
     closeResponseMessage () { this.responseMessage = '' },

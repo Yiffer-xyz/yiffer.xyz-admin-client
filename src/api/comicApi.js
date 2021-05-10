@@ -1,6 +1,7 @@
 import axios from 'axios'
 import config from '@/config.json'
 let baseUrl = config.apiBaseUrl
+import multipartFileUpload from '@/utils/multipartFileUpload'
 
 export default {
   async getComicsPaginated ({categories, tags, keywordIds, search, order, page}) {
@@ -62,23 +63,25 @@ export default {
     else { return {success: false, message: response.data.error} }
   },
 
-  async addNewComic (comicData, {pageFiles, thumbnailFile}, progressFunction) {
-    let formData = new FormData()
-    for (var key in comicData) {
-      if (key === 'keywords') { formData.append('keywordIds', comicData['keywords'].map(kw => kw.id)) }
-      formData.append(key, comicData[key])
-    }
-    for (var pageFile of pageFiles) { formData.append('pageFile', pageFile) }
-    if (thumbnailFile) { formData.append('thumbnailFile', thumbnailFile) }
+  async addNewComic (comicData, pageFiles, thumbnailFile, reportProgressPercentFunc) {
+    let regularFieldsWithNames = Object.entries(comicData)
 
-    let response = await axios.post(baseUrl + '/comics',
-      formData, {
-        headers: {'Content-Type': 'multipart/form-data'},
-        onUploadProgress: progressEvent => progressFunction(progressEvent)
-      }
+    let filesWithNames = []
+    if (thumbnailFile) {
+      filesWithNames.push(['thumbnailFile', thumbnailFile])
+    }
+    for (var pageFile of pageFiles) {
+      filesWithNames.push(['pageFile', pageFile])
+    }
+
+    await multipartFileUpload(
+      regularFieldsWithNames,
+      filesWithNames,
+      baseUrl + '/comics',
+      reportProgressPercentFunc,
     )
-    if (!response.data.error) { return {success: true} }
-    else { return {success: false, message: response.data.error} }
+
+    return
   },
 
   async addThumbnailToPendingComic (comicData, thumbnailImage) {

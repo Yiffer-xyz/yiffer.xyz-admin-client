@@ -1,5 +1,6 @@
 {
   "apiBaseUrl": "/api",
   "comicsBucketName": "https://storage.googleapis.com/yiffer-comics/comics",
-  "paidImagesBucketName": "https://storage.googleapis.com/yiffer-paid-images"
+  "paidImagesBucketName": "https://storage.googleapis.com/yiffer-paid-images",
+  "maxUploadSizeMB": 99
 }
