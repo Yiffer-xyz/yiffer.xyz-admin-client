@@ -1,12 +1,10 @@
 <template>
   <div class="admin-content-box" @click="openComponent" :class="{'admin-content-box-open': isOpen}">
-    <h2 @click="closeComponent" class="cursorPointer">Tag suggestions
+    <h2 @click="closeComponent" class="cursorPointer adminHeader">Tag suggestions
       <span v-if="keywordSuggestionList.length>0" class="red-color"> ({{keywordSuggestionList.length}})</span>
       <span v-else style="color: #999;">(0)</span>
     </h2>
     <span class="admin-content-box-inner" v-if="isOpen">
-      <p class="margin-bottom-8">Tags suggested by users pending approval will appear here.</p>
-
       <FetchResponseMessage :fetchStates="[keywordSuggestionSubmit]" 
                             :successMessage="successMessage" 
                             disableElevation

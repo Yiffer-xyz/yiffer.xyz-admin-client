@@ -1,6 +1,6 @@
 <template>
   <div class="admin-content-box" @click="openComponent" :class="{'admin-content-box-open': isOpen}">
-    <h2 @click="closeComponent" class="cursorPointer">Correct comic data</h2>
+    <h2 @click="closeComponent" class="cursorPointer adminHeader">Correct comic data</h2>
     <span class="admin-content-box-inner" v-if="isOpen">
 
       <ResponseMessage :message="responseMessage" :messageType="responseMessageType" @closeMessage="closeResponseMessage"

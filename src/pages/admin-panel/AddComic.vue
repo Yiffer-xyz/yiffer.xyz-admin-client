@@ -1,6 +1,6 @@
 <template>
   <div class="admin-content-box" @click="openComponent" :class="{'admin-content-box-open': isOpen}">
-    <h2 @click="closeComponent" class="cursorPointer">Add new comic</h2>
+    <h2 @click="closeComponent" class="cursorPointer adminHeader">Add new comic</h2>
     <span class="admin-content-box-inner description-text" v-if="isOpen">
 
       <span style="max-width: 700px;">

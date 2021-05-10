@@ -1,6 +1,6 @@
 <template>
   <div class="admin-content-box" @click="openComponent" :class="{'admin-content-box-open': isOpen}">
-    <h2 @click="closeComponent" class="cursorPointer" v-if="!isAddingNewArtist">
+    <h2 @click="closeComponent" class="cursorPointer adminHeader" v-if="!isAddingNewArtist">
       Artist Manager
     </h2>
     <span class="admin-content-box-inner" v-if="isOpen">

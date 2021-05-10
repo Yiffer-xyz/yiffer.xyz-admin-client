@@ -1,6 +1,6 @@
 <template>
   <div class="admin-content-box" @click="openComponent" :class="{'admin-content-box-open': isOpen}">
-    <h2 @click="closeComponent" class="cursorPointer">Mod applications
+    <h2 @click="closeComponent" class="cursorPointer adminHeader">Mod applications
       <span v-if="numberOfUnprocessedApplications>0" class="red-color"> ({{numberOfUnprocessedApplications}})</span>
       <span v-else style="color: #999;">(0)</span>
     </h2>

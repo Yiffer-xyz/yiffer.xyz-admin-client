@@ -186,6 +186,10 @@ export default {
 <style lang="scss">
 @import "../scss/shadows.scss";
 
+.adminHeader {
+  user-select: none;
+}
+
 .mdi-arrow {
   font-size: 28px;
 }
@@ -272,9 +276,11 @@ export default {
     cursor: initial;
   }
   h2 {
-    margin-bottom: 8px;
+    margin-bottom: 0.75rem;
+    margin-top: 0.5rem;
     @media (max-width: 900px) {
-      margin-bottom: 4px;
+      margin-bottom: 0.5rem;
+      margin-top: 0.25rem;
     }
   }
 

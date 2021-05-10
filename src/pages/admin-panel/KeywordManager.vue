@@ -1,6 +1,6 @@
 <template>
   <div class="admin-content-box" @click="openComponent" :class="{'admin-content-box-open': isOpen}">
-    <h2 @click="closeComponent" class="cursorPointer">Tag manager</h2>
+    <h2 @click="closeComponent" class="cursorPointer adminHeader">Tag manager</h2>
     <span class="admin-content-box-inner paddedAdminBox" v-if="isOpen" ref="innerAdminBox">
 
       <ResponseMessage :message="responseMessage" :messageType="responseMessageType" @closeMessage="closeResponseMessage"

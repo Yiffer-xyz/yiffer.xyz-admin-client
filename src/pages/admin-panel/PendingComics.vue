@@ -1,6 +1,6 @@
 <template>
   <div class="admin-content-box" @click="openComponent" :class="{'admin-content-box-open': isOpen}">
-    <h2 @click="closeComponent" class="cursorPointer">Pending comics
+    <h2 @click="closeComponent" class="cursorPointer adminHeader">Pending comics
       <span style="margin-right: 5px;">
         <span v-if="pendingComics.length>0" class="red-color">({{pendingComics.length}})</span>
         <span v-else style="color: #999; margin-right: 5px;">(0)</span>

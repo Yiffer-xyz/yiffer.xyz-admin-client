@@ -1,6 +1,6 @@
 <template>
   <div class="admin-content-box" @click="openComponent" :class="{'admin-content-box-open': isOpen}">
-    <h2 @click="closeComponent" class="cursorPointer">Mod log</h2>
+    <h2 @click="closeComponent" class="cursorPointer adminHeader">Mod log</h2>
     <span class="admin-content-box-inner" v-if="isOpen">
 
 			<button class="y-button y-button-neutral" @click="getModLogData()">
