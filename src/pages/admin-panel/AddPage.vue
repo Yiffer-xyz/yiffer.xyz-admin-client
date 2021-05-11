@@ -190,7 +190,7 @@ export default {
     },
 
     showLastPage (comic) {
-      comic.lastPageUrl = `${config.comicsBucketName}/${comic.name}/${this.formattedPageNumber(comic.numberOfPages)}.jpg`
+      comic.lastPageUrl = `${config.comicsBaseUrl}/${comic.name}/${this.formattedPageNumber(comic.numberOfPages)}.jpg`
       comic.name = ' ' + comic.name + ' '
     },
 

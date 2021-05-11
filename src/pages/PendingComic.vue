@@ -6,7 +6,7 @@
       <h2 class="mt-32">Thumbnail</h2>
       
       <span v-if="comic.hasThumbnail">
-        <img :src="`${config.comicsBucketName}/${comic.name}/thumbnail.webp`"/>
+        <img :src="`${config.comicsBaseUrl}/${comic.name}/thumbnail.webp`"/>
       </span>
 
       <ResponseMessage :message="thumbnailResponseMessage"
@@ -122,7 +122,7 @@
       <div style="display: flex; flex-direction: column; align-items: center;">
         <img  
           v-for="pageNumber in comic.numberOfPages" 
-          :src="`${config.comicsBucketName}/${comic.name}/${formattedPageNumber(pageNumber)}.jpg`"
+          :src="`${config.comicsBaseUrl}/${comic.name}/${formattedPageNumber(pageNumber)}.jpg`"
           :key="pageNumber"
           :class="['comic-page', 'image-fit-full', 'comic-page-pending']"/>
       </div>
