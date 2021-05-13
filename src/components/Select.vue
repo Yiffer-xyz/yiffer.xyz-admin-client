@@ -1,8 +1,10 @@
 <template>
   <div :class="`customSelect ${classes} ${isSearchable ? '' : 'cursorPointer'}`"
        id="customSelect"
-       tabindex="0"
-       @blur="isOpen = false"
+       :tabindex="isSearchable ? 'none' : '0'"
+       @blur="onBlur"
+       @click="onSelectedClicked"
+       ref="outerContainer"
        :style="`${wrapperStyle}; ${minWidthString}; ${widthString}`">
     <p v-if="title && (selected || isSearchable)" class="titleText">
       {{ title }}
@@ -18,8 +20,7 @@
            placeholderStyle: !selected,
            selectWithIconRight: hasIconRight,
          }"
-         v-if="!isSearchable"
-         @click="isOpen = !isOpen">
+         v-if="!isSearchable">
       {{ selected ? selected.text : title }}
     </div>
     
@@ -35,7 +36,7 @@
              borderTheme1: borderTheme1,
              borderTheme2: borderTheme2,
            }"
-           @click="isOpen = !isOpen || searchText"
+           @click="isOpen = true"
            v-model="searchText"/>    
 
     <input type="text" v-else
@@ -51,6 +52,10 @@
              borderTheme2: borderTheme2,
            }"
            @click="() => {
+             $emit('searchSelectedClicked')
+             isOpen = true
+           }"
+           @focus="() => {
              $emit('searchSelectedClicked')
              isOpen = true
            }"
@@ -70,6 +75,7 @@
          ref="selectItemContainer">
       <div
         v-for="(option, index) of filteredOptions"
+        class="selectOption"
         :key="option.text"
         :class="{highlightedOption: highlightedIndex === index}"
         :ref="`option${index}`"
@@ -196,7 +202,10 @@ export default {
 
     highlightedIndex (newIndex) {
       if (newIndex !== null && this.$refs[`option${newIndex}`]) {
-        this.$refs[`option${newIndex}`][0].scrollIntoView({ block: 'nearest', inline: 'start' })
+        let option = this.$refs[`option${newIndex}`][0]
+        if (option) {
+          option.scrollIntoView({ block: 'nearest', inline: 'start' })
+        }
       }
     },
 
@@ -206,7 +215,7 @@ export default {
       if (this.isSearchable && this.isOpen) {
         setTimeout(() => {
           window.addEventListener('click', this.closeSearchableResults)
-        }, 15)
+        }, 250)
 
         this.scrollToTopIfPossible()
       }
@@ -221,6 +230,21 @@ export default {
   },
 
   methods: {
+    onBlur () {
+      this.isOpen = false
+    },
+
+    onSelectedClicked (e) {
+      if (!this.isSearchable) {
+        if (e.target.classList.contains('selectOption')) {
+          this.isOpen = false
+        }
+        else {
+          this.isOpen = !this.isOpen
+        }
+      }
+    },
+
     async waitMillisec (millisec) {
       return new Promise((resolve) => {
         setTimeout(() => resolve(), millisec)
@@ -291,6 +315,15 @@ export default {
     },
 
     onKeyPress (e) {
+      if (!this.isSearchable) {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === ' ') {
+          if (this.$refs.outerContainer.isSameNode(document.activeElement)) {
+            e.preventDefault()
+            this.isOpen = true
+          }
+        }
+      }
+
       if (this.isOpen) {
         if (e.key === 'ArrowDown') {
           e.preventDefault()
@@ -320,8 +353,9 @@ export default {
             this.highlightedIndex = this.filteredOptions.length-1
           }
         }
-        else if (e.key === 'Enter') {
-          if (this.highlightedIndex === null && this.filteredOptions.length > 0) {
+        else if (e.key === 'Enter' || e.key === ' ') {
+          if (this.highlightedIndex === null && this.filteredOptions.length > 0
+              && this.isSearchable) {
             this.onOptionSelected(this.filteredOptions[0])
           }
           else if (this.highlightedIndex !== null) {
@@ -417,7 +451,7 @@ input {
   font-size: 1rem;
   color: #333;
   &::placeholder {
-    filter: opacity(0.4);
+    filter: opacity(0.5);
   }
   background: transparent;
 }
@@ -445,6 +479,10 @@ input {
     position: absolute;
     right: 5px;
     top: 12px;
+  }
+
+  &:focus {
+    background: rgba($themeGreen1, 0.25);
   }
 }
 
@@ -540,6 +578,10 @@ input {
 }
 
 .dark {
+  .customSelect:focus {
+    background: rgba($themeGreen1, 0.15);
+  }
+
   .customSelect .selected,
   .items,
   .items div {
