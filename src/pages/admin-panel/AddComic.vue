@@ -156,7 +156,7 @@
 
         <Select :options="keywordOptions"
                 isSearchable
-                :resetValue="selectResetValue"
+                :resetValue="kwResetValue"
                 searchPlaceholder="Search for tags"
                 @change="newVal => addSelectedKeyword(newVal)"
                 class="mb-16"/>
@@ -186,8 +186,6 @@
 </template>
 
 <script>
-import CheckboxIcon from 'vue-material-design-icons/CheckboxMarkedCircle.vue'
-
 import comicApi from '@/api/comicApi'
 import ResponseMessage from '@/components/ResponseMessage.vue'
 import Select from '@/components/Select.vue'
@@ -204,7 +202,6 @@ export default {
 
 	components: {
     ResponseMessage, Select, TextInput,
-    CheckboxIcon, 
   },
 
   data: function () {
@@ -243,7 +240,7 @@ export default {
       if (!this.selectedKeywords.find(kw => kw.id === keyword.id)) {
         this.selectedKeywords.push(keyword)
       }
-      this.selectResetValue = Math.random().toString()
+      this.kwResetValue = Math.random().toString()
     },
 
     removePreviousLink () {
@@ -318,6 +315,7 @@ export default {
       this.tag = undefined
       this.state = undefined
       this.selectResetValue = Math.random().toString()
+      this.kwResetValue = Math.random().toString()
       this.selectedFiles = []
       this.selectedKeywords = []
       this.thumbnailFile = undefined
