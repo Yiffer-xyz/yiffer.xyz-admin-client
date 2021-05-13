@@ -1,179 +1,180 @@
 <template>
   <div class="admin-content-box" @click="openComponent" :class="{'admin-content-box-open': isOpen}">
     <h2 @click="closeComponent" class="cursorPointer adminHeader">Add new comic</h2>
-    <span class="admin-content-box-inner description-text" v-if="isOpen">
+    <span class="admin-content-box-inner description-text" v-if="isOpen" ref="innerAdminBox">
 
-      <span style="max-width: 700px;">
-      <p>
-        - Files must be either .jpg or .png. File name does not matter, except for ordering.<br/>
-        - It is <i>very important</i> that pages are named in some ascending order.<br/>
-        Example:
-        <span class="courier">[01.jpg, 02.jpg, ...]</span>, or 
-        <span class="courier">[a.jpg, b.jpg, ...]</span>. Note that
-        <span class="courier">[1.jpg, 2.jpg, ...]</span> will not work for more than 9 pages!
-      </p>
+        <p class="link-color cursorPointer textAlignLeft"
+          @click="isShowingInstructions = !isShowingInstructions">
+          {{isShowingInstructions ? 'Hide instructions' : 'Click to show must-know instructions'}}
+        </p>
 
-      <p class="margin-top-8">
-        - Adding a thumbnail is optional. If you don't someone else will later. <br/>
-        - Thumbnails are precisely <u>200x283</u> pixels.<br/>
-        - If the comic has a cover page, this should be used in the thumbnail. Otherwise, choose an image representing the comic well,
-        but not too lewd if possible.<br/>
-        - GIMP is a great tool for making thumbnails. Don't use MSPaint, it destroys the image when scaling.
-      </p>
+        <div style="max-width: 700px;" v-if="isShowingInstructions">
+          <p>
+            - Files must be either .jpg or .png. File name does not matter, except for ordering.<br/>
+            - It is <i>very important</i> that pages are named in some ascending order.<br/>
+            Example:
+            <span class="courier">[01.jpg, 02.jpg, ...]</span>, or 
+            <span class="courier">[a.jpg, b.jpg, ...]</span>. Note that
+            <span class="courier">[1.jpg, 2.jpg, ...]</span> will not work for more than 9 pages!
+          </p>
 
-      <p class="margin-top-8">
-        - Adding tags is also optional. Again, someone else will have to do it if you don't. 
-        You can also add tags after finishing this, from the "Pending comics" list.
-      </p>
-      </span>
+          <p class="margin-top-8">
+            - Adding a thumbnail is optional. If you don't someone else will later. <br/>
+            - Thumbnails are precisely <u>200x283</u> pixels.<br/>
+            - If the comic has a cover page, this should be used in the thumbnail. Otherwise, choose an image representing the comic well,
+            but not too lewd if possible. Crop edges off of thumbnails.<br/>
+            - There are many good resize/crop tools for making thumbnails. Don't use MSPaint, it destroys the image when scaling.
+          </p>
 
-      <ResponseMessage :message="responseMessage" :messageType="responseMessageType" @closeMessage="closeResponseMessage"
-                       class="margin-top-8"/>
+          <p class="margin-top-8">
+            - Adding tags is also optional. Again, someone else will have to do it if you don't. 
+            You can also add tags after finishing this, from the "Pending comics" list.
+          </p>
+        </div>
 
-      <p class="admin-mini-header no-margin-bot" style="margin-top: 16px;">
-        Comic details <CheckboxIcon v-if="detailsFilledIn"/>
-      </p>
-      <table id="newComicTable">
-        <tr>
-          <td>
-            <p>Comic name</p>
-          </td>
-          <td>
-            <input type="text" v-model="comicName">
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>Artist</p>
-          </td>
-          <td>
-            <select v-model="artist">
-              <option v-for="artist in artistList" :key="artist.name" :value="artist">
-                {{artist.name}}
-              </option>
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>Category</p>
-          </td>
-          <td>
-            <select v-model="cat">
-              <option value="Furry">Furry</option>
-              <option value="MLP">MLP</option>
-              <option value="Pokemon">Pokemon</option>
-              <option value="Other">Other</option>
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>Classification</p>
-          </td>
-          <td>
-            <select v-model="tag">
-              <option value="M">M</option>
-              <option value="F">F</option>
-              <option value="MF">MF</option>
-              <option value="MM">MM</option>
-              <option value="FF">FF</option>
-              <option value="MF+">MF+</option>
-              <option value="I">I</option>
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>State</p>
-          </td>
-          <td>
-            <select v-model="state">
-              <option value="wip">WIP</option>
-              <option value="finished">Finished</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-          </td>
-        </tr>
-      </table>
+      <div>
+        <ResponseMessage :message="responseMessage"
+                         :messageType="responseMessageType"
+                         @closeMessage="closeResponseMessage"
+                         class="margin-top-8"
+                         style="max-width: 23rem;"/>
+          
+        <p class="admin-mini-header mt-16 mb-8">
+          Basic info
+        </p>
+        <div class="verticalFlex alignItemsStart">
 
-      <!-- PREVIOUS AND NEXT COMIC LINKS -->
-      <p class="admin-mini-header" style="margin-top: 16px; margin-bottom: 4px;">Comic links</p>
-      <div class="horizontalFlex flex-wrap">
-        <p>Previous comic </p>
-        <select v-model="previousComic" class="margin-bottom-1" style="margin-left: 6px;">
-          <option v-for="comic in comicList" :key="comic.id" :value="comic">
-            {{comic.name}}
-          </option>
-        </select>
-        <button v-if="previousComic" class="y-button y-button-neutral button-with-icon" 
-                style="margin-left: 4px; margin-top: 2px;" @click="removePreviousLink()">
-          <CrossIcon/> Remove link
+          <TextInput :value="comicName"
+                      @change="newName => comicName = newName"
+                      textAlign="left"
+                      title="Comic name"
+                      class="mb-24"
+                      style="width: 100%;"/>
+
+          <Select :options="artistOptions"
+                  title="Artist"
+                  isSearchable
+                  searchKeepSelected
+                  initialWidth="10rem"
+                  :searchSelected="artist ? artist.name : null"
+                  :resetValue="artistResetValue"
+                  @searchSelectedClicked="artist = null"
+                  @change="onArtistSelect"
+                  class="mb-24"
+                  style="width: 100%;"/>        
+
+          <div class="horizontalFlex width100 justifyStart">
+            <Select :options="categoryOptions"
+                    title="Category"
+                    @change="newCat => cat = newCat"
+                    class="tagCatSelects mb-24 mr-16"
+                    :resetValue="selectResetValue"/>  
+
+            <Select :options="tagOptions"
+                    title="Classification"
+                    @change="newVal => tag = newVal"
+                    class="tagCatSelects ml-8"
+                    :resetValue="selectResetValue"/>   
+          </div>
+
+          <Select :options="stateOptions"
+                  title="State"
+                  initialWidth="10rem"
+                  isFullWidth
+                  @change="newVal => state = newVal"
+                  :resetValue="selectResetValue"/>  
+        </div>
+
+        <!-- PREVIOUS AND NEXT COMIC LINKS -->
+        <p class="admin-mini-header textAlignLeft mt-32">
+          Comic links
+        </p>
+        <Select :options="comicOptions"
+                title="Previous comic"
+                isSearchable
+                searchKeepSelected
+                searchPlaceholder="None if left blank"
+                initialWidth="16rem"
+                :maxWidth="maxContentWidth"
+                :searchSelected="previousComic ? previousComic.name : null"
+                :resetValue="prevComicResetValue"
+                @searchSelectedClicked="previousComic = null"
+                @change="onPrevComicSelect"/>
+
+        <Select :options="comicOptions"
+                title="Next comic"
+                isSearchable
+                searchKeepSelected
+                searchPlaceholder="None if left blank"
+                initialWidth="16rem"
+                class="mt-24"
+                :maxWidth="maxContentWidth"
+                :searchSelected="nextComic ? nextComic.name : null"
+                :resetValue="nextComicResetValue"
+                @searchSelectedClicked="nextComic = null"
+                @change="onNextComicSelect"/>
+
+
+
+        <p class="admin-mini-header no-margin-bot mt-32">
+          Pages
+        </p>
+        <form enctype="multipart/form-data" novalidate class="mt-4 inputUploadForm">
+          <div class="pretty-input-upload">
+            <input type="file" multiple="true" @change="processFileUploadChange" id="newPageFilesAddComic" accept="image/x-png,image/jpeg" class="input-file"/>
+            <p>Select files</p>
+          </div>
+        </form>
+        <p v-if="filesAreInput" class="mb-0 mt-8">
+          <b>{{selectedFiles.length}}</b> Selected files:
+        </p>
+        <p class="courier" v-for="fileName in selectedFileNames" :key="fileName">
+          {{fileName}}
+        </p>
+
+
+        <p class="admin-mini-header no-margin-bot mt-32">
+          Thumbnail
+        </p>
+        <form enctype="multipart/form-data" novalidate class="mt-4 inputUploadForm">
+          <div class="pretty-input-upload">
+            <input type="file" @change="processThumbNailUploadChange" accept="image/x-png,image/jpeg" class="input-file"/>
+            <p>Select file</p>
+          </div>
+        </form>
+        <p v-if="thumbnailFile">Selected file: 
+          <span class="courier">{{thumbnailFile.name}}</span>
+        </p>
+        <p class="red-color bold" v-if="errorMessageThumbnail" style="max-width: 20rem;">
+          {{errorMessageThumbnail}}
+        </p>
+
+        <p class="admin-mini-header no-margin-bot mt-32">
+          Tags
+        </p>
+        <p>Optional, but appreciated!</p>
+
+        <Select :options="keywordOptions"
+                isSearchable
+                :resetValue="selectResetValue"
+                searchPlaceholder="Search for tags"
+                @change="newVal => addSelectedKeyword(newVal)"
+                class="mb-16"/>
+
+        <p v-for="keyword in selectedKeywords" 
+          @click="removeKeywordFromSelection(keyword)" 
+          :key="keyword.id" class="selected-add-keyword">
+          {{keyword.name}}
+        </p>
+
+        <p class="admin-mini-header no-margin-bot" style="margin-top: 32px;">Finish</p>
+        <button v-if="!readyForUpload" class="y-button y-button-disabled" style="margin-top: 4px;">
+          Fill in all details and add pages before finishing!
+        </button>
+        <button @click="confirmAddComic()" v-else class="y-button" style="margin-top: 4px;">
+          Add comic!
         </button>
       </div>
-      <div class="horizontalFlex flex-wrap margin-top-4">
-        <p>Next comic </p>
-        <select v-model="nextComic" class="margin-bottom-1" style="margin-left: 6px;">
-          <option v-for="comic in comicList" :key="comic.id" :value="comic">
-            {{comic.name}}
-          </option>
-        </select>
-        <button v-if="nextComic" class="y-button y-button-neutral button-with-icon" 
-                style="margin-left: 4px; margin-top: 2px;" @click="removeNextLink()">
-          <CrossIcon/> Remove link
-        </button>
-      </div>
-
-
-      <p class="admin-mini-header no-margin-bot" style="margin-top: 16px;">Add pages <CheckboxIcon v-if="filesAreInput"/></p>
-      <form enctype="multipart/form-data" novalidate style="margin-top: 4px;">
-        <div class="pretty-input-upload">
-          <input type="file" multiple="true" @change="processFileUploadChange" id="newPageFilesAddComic" accept="image/x-png,image/jpeg" class="input-file"/>
-          <p>Select files</p>
-        </div>
-      </form>
-      <p v-if="filesAreInput" style="margin-bottom: 0px;"><b>{{selectedFiles.length}}</b> Selected files:</p>
-      <p v-if="filesAreInput" class="courier">{{selectedFileNames.join(', ')}}</p>
-
-
-      <p class="admin-mini-header no-margin-bot" style="margin-top: 16px;">Add thumbnail <CheckboxIcon v-if="thumbnailFile"/></p>
-      <form enctype="multipart/form-data" novalidate style="margin: 4px 0;">
-        <div class="pretty-input-upload">
-          <input type="file" @change="processThumbNailUploadChange" accept="image/x-png,image/jpeg" class="input-file"/>
-          <p>Select file</p>
-        </div>
-      </form>
-      <p v-if="thumbnailFile">Selected file: 
-        <span class="courier">{{thumbnailFile.name}}</span>
-      </p>
-      <p class="red-color bold" v-if="errorMessageThumbnail">{{errorMessageThumbnail}}</p>
-
-      <p class="admin-mini-header no-margin-bot margin-top-16">Add tags <CheckboxIcon v-if="selectedKeywords.length"/></p>
-      <p>Adding tags is optional, but appreciated!</p>
-      <div class="horizontalFlex margin-top-4">
-        <div class="verticalFlex">
-          <select size="10" style="margin-bottom: 0" v-model="selectedKeyword" @keyup.13="addSelectedKeyword()"> 
-            <option v-for="keyword in allKeywords.payload" :key="keyword.name" :value="keyword">{{keyword.name}}</option>
-          </select>
-          <button class="y-button y-button-small y-button-neutral" @click="addSelectedKeyword()" style="width: 100%; margin-top: 1px;">
-            <RightArrow/>
-          </button>
-        </div>
-      
-        <div class="verticalFlex" style="margin-left: 15px;">
-          <p style="margin-bottom: 6px;">Click to <span class="red-color">remove</span></p>
-          <p v-for="keyword in selectedKeywords" @click="removeKeywordFromSelection(keyword)" 
-             :key="keyword.name" class="selected-add-keyword">{{keyword.name}}</p>
-        </div>
-      </div>
-
-      <p class="admin-mini-header no-margin-bot" style="margin-top: 32px;">Finish</p>
-      <button v-if="!readyForUpload" class="y-button y-button-disabled" style="margin-top: 4px;">
-        Fill in all details and add pages before finishing!
-      </button>
-      <button @click="confirmAddComic()" v-else class="y-button" style="margin-top: 4px;">
-        Add comic!
-      </button>
 
       <menu-up-icon @click="closeComponent" class="mdi-arrow close-component-arrow"/>
     </span>
@@ -186,11 +187,11 @@
 
 <script>
 import CheckboxIcon from 'vue-material-design-icons/CheckboxMarkedCircle.vue'
-import RightArrow from 'vue-material-design-icons/ArrowRight.vue'
-import CrossIcon from 'vue-material-design-icons/Close.vue'
 
 import comicApi from '@/api/comicApi'
 import ResponseMessage from '@/components/ResponseMessage.vue'
+import Select from '@/components/Select.vue'
+import TextInput from '@/components/TextInput.vue'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -202,13 +203,14 @@ export default {
   },
 
 	components: {
-    ResponseMessage,
-    CheckboxIcon, RightArrow, CrossIcon, 
+    ResponseMessage, Select, TextInput,
+    CheckboxIcon, 
   },
 
   data: function () {
     return {
 			isOpen: false,
+      isShowingInstructions: false,
       comicName: '',
       artist: undefined,
       tag: undefined,
@@ -224,10 +226,26 @@ export default {
       errorMessageThumbnail: '',
       responseMessage: '',
       responseMessageType: 'info',
+      artistResetValue: null,
+      categoryOptions,
+      tagOptions,
+      stateOptions,
+      maxContentWidth: 9999,
+      prevComicResetValue: null,
+      nextComicResetValue: null,
+      kwResetValue: null,
+      selectResetValue: null,
     }
   },
 
   methods: {
+    addSelectedKeyword (keyword) {
+      if (!this.selectedKeywords.find(kw => kw.id === keyword.id)) {
+        this.selectedKeywords.push(keyword)
+      }
+      this.selectResetValue = Math.random().toString()
+    },
+
     removePreviousLink () {
       this.previousComic = undefined
     },
@@ -258,12 +276,6 @@ export default {
 			fileReader.readAsDataURL(this.thumbnailFile)
 		},
 
-    addSelectedKeyword () {
-      if (!this.selectedKeywords.find(kw => kw.id === this.selectedKeyword.id)) {
-        this.selectedKeywords.push(this.selectedKeyword)
-      }
-    },
-
     removeKeywordFromSelection (keyword) {
       this.selectedKeywords.splice(this.selectedKeywords.findIndex(kw => kw.id===keyword.id), 1)
     },
@@ -290,7 +302,8 @@ export default {
         )
       }
       catch (err) {
-        this.responseMessage = err.message
+        console.log(err)
+        this.responseMessage = err.response?.data || 'Unknown server error'
         this.responseMessageType = 'error'
         return
       }
@@ -304,6 +317,7 @@ export default {
       this.cat = undefined
       this.tag = undefined
       this.state = undefined
+      this.selectResetValue = Math.random().toString()
       this.selectedFiles = []
       this.selectedKeywords = []
       this.thumbnailFile = undefined
@@ -312,8 +326,24 @@ export default {
       document.getElementById('newPageFilesAddComic').value = ''
       this.$emit('refresh-pending-comics')
 		},
+
+    onArtistSelect (artistName) {
+      this.artist = this.artistList.find(a => a.name === artistName)
+      this.artistResetValue = Math.random().toString()
+    },
+
+    onPrevComicSelect (prevComic) {
+      this.previousComic = this.comicList.find(c => c.id === prevComic.id)
+      this.prevComicResetValue = Math.random().toString()
+    },
+
+    onNextComicSelect (nextComic) {
+      this.nextComic = this.comicList.find(c => c.id === nextComic.id)
+      this.nextComicResetValue = Math.random().toString()
+    },
 		
 		updateUploadProgress (progressPercent) {
+      console.log(progressPercent)
 			this.responseMessage = `Uploading... ${this.uploadPercent = progressPercent}%`
 		},
     
@@ -326,26 +356,83 @@ export default {
 
   computed: {
     ...mapGetters(['allKeywords']),
-    filesAreInput () { return this.selectedFiles.length > 0 },
-    selectedFileNames () { return this.selectedFiles.map( file => file.name ) },
-    detailsFilledIn () { return this.comicName && this.artist && this.tag && this.cat && this.state },
-    readyForUpload () { return this.detailsFilledIn && this.selectedFiles.length>0 && !this.errorMessageThumbnail }
+
+    artistOptions () {
+      return this.artistList.map(a => ({text: a.name, value: a.name}))
+    },
+
+    comicOptions () {
+      return this.comicList.map(c => ({text: c.name, value: c}))
+    },
+
+    keywordOptions () {
+      if (!this.allKeywords.fetched) {
+        return []
+      }
+
+      let selectedKwIds = this.selectedKeywords.map(kw => kw.id)
+
+      return this.allKeywords.payload
+        .filter(kw => !selectedKwIds.includes(kw.id))
+        .map(kw => ({text: kw.name, value: kw}))
+    },
+
+    filesAreInput () {
+      return this.selectedFiles.length > 0
+    },
+
+    selectedFileNames () {
+      return this.selectedFiles.map(file => file.name)
+    },
+
+    detailsFilledIn () {
+      return this.comicName && this.artist && this.tag && this.cat && this.state
+    },
+
+    readyForUpload () {
+      return this.detailsFilledIn && this.selectedFiles.length>0 && !this.errorMessageThumbnail
+    }
 	},
+
+  watch: {
+    isOpen () {
+      setTimeout(() => {
+        if (this.$refs.innerAdminBox && document.body.clientWidth < 400) {
+          this.maxContentWidth = this.$refs.innerAdminBox.clientWidth - 32
+        }
+      }, 25)
+    }
+  }
 }
+
+const categoryOptions = [
+  {text: 'Furry', value: 'Furry'},
+  {text: 'MLP', value: 'MLP'},
+  {text: 'Pokemon', value: 'Pokemon'},
+  {text: 'Other', value: 'Other'},
+]
+
+const tagOptions = [
+  {text: 'M', value: 'M'},
+  {text: 'F', value: 'F'},
+  {text: 'MF', value: 'MF'},
+  {text: 'MM', value: 'MM'},
+  {text: 'FF', value: 'FF'},
+  {text: 'MF+', value: 'MF+'},
+  {text: 'I', value: 'I'},
+]
+
+const stateOptions = [
+  {text: 'WIP', value: 'wip'},
+  {text: 'Finished', value: 'finished'},
+  {text: 'Cancelled', value: 'cancelled'},
+]
 </script>
 
-<style lang="scss">
-#newComicTable {
-  input, p, td, select {
-    margin-bottom: 0px;
-    text-align: left;
-  }
-  input, select {
-    width: 100%;
-    box-sizing: border-box;
-  }
-  td {
-    padding: 2px 4px;
+<style lang="scss" scoped>
+.tagCatSelects {
+  @media (min-width: 380px) {
+    // flex-grow: 1;
   }
 }
 </style>

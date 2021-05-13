@@ -46,10 +46,12 @@ export default async function multipartUpload (
     await axios.post(url,
       allRequestBodies[0], {
         headers: {'Content-Type': 'multipart/form-data'},
-        onUploadProgress: progressEvent => reportProgressPercentFunc(
-          Math.round((progressEvent.loaded/progressEvent.total)*100)
-        )
-      }
+        onUploadProgress: progressEvent => {
+          reportProgressPercentFunc(
+            Math.round((progressEvent.loaded/progressEvent.total)*100)
+          )
+        }
+      },
     )
 
     return
@@ -72,7 +74,6 @@ export default async function multipartUpload (
           onUploadProgress: progressEvent => {
             let thisFrac = progressEvent.loaded / progressEvent.total
             let totalFrac = (i + thisFrac/numBodies) / numBodies
-            console.log(thisFrac, totalFrac)
             reportProgressPercentFunc(Math.round(totalFrac * 100))
           }
         }

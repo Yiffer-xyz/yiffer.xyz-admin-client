@@ -190,6 +190,15 @@ $buttonBorderWidth: 2px;
   }
 }
 
+.inputUploadForm {
+  &:focus-within {
+    .pretty-input-upload {
+      background-color: $themeBlueDarker;
+      border-color: $themeBlueDarker;
+    }
+  }
+}
+
 .pretty-input-upload {
   @include simpleShadowSmallBtn;
   outline: none;
@@ -212,7 +221,7 @@ $buttonBorderWidth: 2px;
   justify-content: center;
   align-items: center;
 
-  &:hover, &:focus {
+  &:hover, &:focus, &:active {
     background-color: $themeBlueDarker;
     border-color: $themeBlueDarker;
   }
