@@ -315,6 +315,14 @@ export default {
     },
 
     onKeyPress (e) {
+      if (this.isSearchable) {
+        if (e.key === 'Tab') {
+          this.isOpen = false
+          this.searchText = ''
+          return
+        }
+      }
+
       if (!this.isSearchable) {
         if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === ' ') {
           if (this.$refs.outerContainer.isSameNode(document.activeElement)) {
