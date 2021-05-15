@@ -131,7 +131,9 @@
         <p class="courier" v-for="fileName in selectedFileNames" :key="fileName">
           {{fileName}}
         </p>
-
+        <p>
+          <i>Make sure these are ordered correctly!</i>
+        </p>
 
         <p class="admin-mini-header no-margin-bot mt-32">
           Thumbnail
@@ -250,7 +252,8 @@ export default {
       this.nextComic = undefined
     },
     processFileUploadChange (changeEvent) {
-      this.selectedFiles = [...changeEvent.target.files]
+      let eventFiles = [...changeEvent.target.files]
+      this.selectedFiles = eventFiles.sort((f1, f2) => f1.name > f2.name ? 1 : -1)
     },
 
     processThumbNailUploadChange (changeEvent) {
