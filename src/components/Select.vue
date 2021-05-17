@@ -321,6 +321,13 @@ export default {
           this.searchText = ''
           return
         }
+        if (e.key === ' ') {
+          if (this.$refs.selectInput1 && this.$refs.selectInput1.isSameNode(document.activeElement)) {
+            this.searchText += ' '
+            e.preventDefault()
+            return
+          }
+        }
       }
 
       if (!this.isSearchable) {
