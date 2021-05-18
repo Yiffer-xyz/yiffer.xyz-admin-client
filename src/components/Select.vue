@@ -215,7 +215,7 @@ export default {
       if (this.isSearchable && this.isOpen) {
         setTimeout(() => {
           window.addEventListener('click', this.closeSearchableResults)
-        }, 250)
+        }, 125)
 
         this.scrollToTopIfPossible()
       }
