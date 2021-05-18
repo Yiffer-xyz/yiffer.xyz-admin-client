@@ -115,12 +115,12 @@ export default {
     else { return {success: false, message: response.data.error} }
   },
 
-  async addPagesToPendingComic (comicData, newPagesList, progressFunction) {
+  async uploadPendingComicPages (mode, comicData, newPagesList, progressFunction) {
     let formData = new FormData()
     formData.append('comicName', comicData.name)
     for (var newPageFile of newPagesList) { formData.append('newPages', newPageFile) }
 
-    let response = await axios.post(`${baseUrl}/pendingcomics/${comicData.id}/addpages`,
+    let response = await axios.post(`${baseUrl}/pendingcomics/${comicData.id}/${mode}`,
       formData, {
         headers: {'Content-Type': 'multipart/form-data'},
         onUploadProgress: progressEvent => progressFunction(progressEvent)

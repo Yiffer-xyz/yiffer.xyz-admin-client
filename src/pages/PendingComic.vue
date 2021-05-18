@@ -57,7 +57,7 @@
             </p>
 
             <p v-if="comic && comic.keywords.length === 0">
-              No tags yet {{comic.keywords.length}} ds
+              No tags yet
             </p>
 
             <p v-for="keyword in comic.keywords"
@@ -106,12 +106,19 @@
         </div>
       </div>
 
-      <h2 class="margin-top-32">Comic pages</h2>
-      <button v-if="!appendPages"
-              @click="appendPages = true"
-              class="y-button y-button-neutral marginAuto mt-4 fitContent">
-        Append pages
-      </button>
+      <h2 class="mt-16 mb-8">Comic pages</h2>
+      <div class="horizontalFlex marginAuto">
+        <button v-if="!isAppendingOrReplacingPages"
+                @click="isAppendingPages = true"
+                class="y-button mr-8">
+          Append pages
+        </button>
+        <button v-if="!isAppendingOrReplacingPages"
+                @click="isReplacingPages = true"
+                class="y-button">
+          Replace all pages
+        </button>
+      </div>
 
       <Loading v-if="isSubmittingPages"
                style="margin-top: 0.5rem;"
@@ -120,24 +127,46 @@
       <ResponseMessage :message="pagesResponseMessage"
                        :messageType="pagesResponseMessageType"
                        @closeMessage="() => pagesResponseMessage = ''"
-                       outsideStyle="margin-top: 1rem;" />
+                       class="mt-24 mb-24"/>
 
-      <span v-if="appendPages && !isSubmittingPages"
-            style="display: flex; align-items: center; flex-direction: column; mt-4">
-        <form enctype="multipart/form-data" novalidate>
-          <div class="pretty-input-upload">
-            <input type="file" multiple="true" @change="processApendFilesUploadChange" id="appendPagesFiles" accept="image/x-png,image/jpeg" class="input-file"/>
-            <p>Select files</p>
-          </div>
-        </form>
+      <div v-if="isAppendingOrReplacingPages && !isSubmittingPages" class="verticalFlex">
+        <div class="horizontalFlex">
+          <button class="y-button y-button-neutral mr-8" @click="cancelAppendingOrReplacingPages"> 
+            Cancel
+          </button>
+          <form enctype="multipart/form-data" novalidate>
+            <div class="pretty-input-upload">
+              <input type="file" multiple="true" @change="processApendFilesUploadChange" id="appendPagesFiles" accept="image/x-png,image/jpeg" class="input-file"/>
+              <p v-if="isAppendingPages">
+                Select files to append
+              </p>
+              <p v-else>
+                Select new files
+              </p>
+            </div>
+          </form>
+        </div>
 
-        <p v-if="filesAreInput" class="margin-top-4 no-margin-bot"><b>{{selectedFiles.length}}</b> Selected files:</p>
-        <p v-if="filesAreInput" class="courier">{{selectedFileNames.join(', ')}}</p>
+        <div v-if="filesAreInput" class="marginAuto mt-8 verticalFlex alignItemsStart fitContent">
+          <p>
+            <b>{{selectedFiles.length}}</b> Selected files:
+          </p>
+          <p class="courier" v-for="fileName in selectedFileNames" :key="fileName">
+            {{fileName}}
+          </p>
+          <p>
+            <i>Make sure these are ordered correctly!</i>
+          </p>
 
-        <button v-if="selectedFiles.length" @click="uploadAppendPages" class="y-button margin-top-8">Submit {{selectedFiles.length}} pages</button>
-      </span>
+          <button v-if="selectedFiles.length" @click="uploadPages" class="y-button mt-8 button-with-icon">
+            <CheckIcon/>
+            {{isAppendingPages ? 'Append' : 'Replace all current pages with these'}}
+            {{selectedFiles.length}} pages
+          </button>
+        </div>
+      </div>
 
-      <div class="horizontalFlex margin-top-16">
+      <div class="horizontalFlex mt-8" :style="{visibility: isAppendingOrReplacingPages ? 'hidden' : 'visible'}">
         <button @click="fitImages('full')" class="y-button y-button-neutral" style="margin: 4px;">Full size</button>
         <button @click="fitImages('fit')" class="y-button y-button-neutral" style="margin: 4px;">Fit images to page</button>
         <button @click="fitImages('small')" class="y-button y-button-neutral" style="margin: 4px;">Small</button>
@@ -146,7 +175,7 @@
       <div style="display: flex; flex-direction: column; align-items: center;">
         <img  
           v-for="pageNumber in comic.numberOfPages" 
-          :src="`${config.comicsBaseUrl}/${comic.name}/${formattedPageNumber(pageNumber)}.jpg`"
+          :src="`${config.comicsBaseUrl}/${comic.name}/${formattedPageNumber(pageNumber)}.jpg?${randomQueryString}`"
           :key="pageNumber"
           :class="['comic-page', 'image-fit-full', 'comic-page-pending']"/>
       </div>
@@ -199,8 +228,12 @@ export default {
       selectedKeywords: [],
       keywordsToDelete: [],
       thumbnailFile: undefined,
-      appendPages: false,
+
+      isAppendingPages: false,
+      isReplacingPages: false,
+      
       selectedFiles: [],
+
       uploadPercent: undefined,
       comicLoadErrorMessage: '',
 
@@ -218,6 +251,7 @@ export default {
       pagesResponseMessageType: 'error',
 
       kwSelectResetValue: null,
+      randomQueryString: Math.random().toString(),
     }
   },
 
@@ -225,6 +259,10 @@ export default {
     ...mapGetters([
       'allKeywords', 'alphabeticKeywordList',
     ]),
+
+    isAppendingOrReplacingPages () {
+      return this.isReplacingPages || this.isAppendingPages
+    },
 
     keywordOptions () {
       let existingKwIds = this.comic.keywords.map(kw => kw.id)
@@ -235,8 +273,12 @@ export default {
         .map(kw => ({text: kw.name, value: kw}))
     },
 
-    filesAreInput () { return this.selectedFiles.length > 0 },
-    selectedFileNames () { return this.selectedFiles.map( file => file.name ) },
+    filesAreInput () {
+      return this.selectedFiles.length > 0 
+    },
+    selectedFileNames () {
+      return this.selectedFiles.map( file => file.name )
+    },
   },
 
   async mounted () {
@@ -349,19 +391,27 @@ export default {
     processApendFilesUploadChange (changeEvent) {
       this.selectedFiles = [...changeEvent.target.files]
     },
+
+    cancelAppendingOrReplacingPages () {
+      this.selectedFiles = []
+      this.isAppendingPages = false
+      this.isReplacingPages = false
+    },
     
-    async uploadAppendPages () {
+    async uploadPages () {
+      let mode = this.isAppendingPages ? 'addpages' : 'replacepages'
       this.isSubmittingPages = true
-      let response = await comicApi.addPagesToPendingComic(this.comic, this.selectedFiles, this.updateUploadProgress)
+      let response = await comicApi.uploadPendingComicPages(mode, this.comic, this.selectedFiles, this.updateUploadProgress)
       this.isSubmittingPages = false
 
       this.uploadPercent = undefined
 
       if (response.success) {
-        this.pagesResponseMessage = `Success adding ${this.selectedFiles.length} pages to comic!`
+        this.pagesResponseMessage = `Success appending ${this.selectedFiles.length} pages to comic!`
         this.pagesResponseMessageType = 'success'
         this.selectedFiles = []
-        this.appendPages = false
+        this.isAppendingPages = false
+        this.isReplacingPages = false
         this.comic.numberOfPages = 0
         this.reloadComic()
       }
