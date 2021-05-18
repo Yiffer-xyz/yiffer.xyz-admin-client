@@ -40,21 +40,27 @@ export default {
   },
 
   async addKeywordsToPendingComic (comicData, keywordList) {
-    let response = await axios.post(`${baseUrl}/pendingcomics/${comicData.id}/addkeywords`, {
-      keywords: keywordList
-    })
-
-    if (!response.data.error) { return {success: true} }
-    else { return {success: false, message: response.data.error} }
+    try {
+      await axios.post(`${baseUrl}/pendingcomics/${comicData.id}/addkeywords`, {
+        keywords: keywordList
+      })
+      return {}
+    }
+    catch (err) {
+      return {error: err.response?.status}
+    }
   },
 
   async removeKeywordsFromPendingComic (comicData, keywordList) {
-    let response = await axios.post(`${baseUrl}/pendingcomics/${comicData.id}/removeKeywords`, {
-      keywords: keywordList
-    })
-
-    if (!response.data.error) { return {success: true} }
-    else { return {success: false, message: response.data.error} }
+    try {
+      await axios.post(`${baseUrl}/pendingcomics/${comicData.id}/removeKeywords`, {
+        keywords: keywordList
+      })
+      return {}
+    }
+    catch (err) {
+      return {error: err.response?.status}
+    }
   },
 
   async createKeyword (keyword) {

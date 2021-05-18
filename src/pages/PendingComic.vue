@@ -12,75 +12,99 @@
       <ResponseMessage :message="thumbnailResponseMessage"
                        :messageType="thumbnailResponseMessageType"
                        @closeMessage="() => thumbnailResponseMessage = ''"
-                       outsideStyle="margin-top: 0.5rem;" />
+                       class="mt-16 mb-16" />
 
-      <Loading v-if="isSubmittingThumbnail" text="Submitting" />
-
-      <span v-else style="display: flex; align-items: center; flex-direction: column;">
+      <span style="display: flex; align-items: center; flex-direction: column;">
         <p v-if="!comic.hasThumbnail">
           There is no thumbnail yet! Help out by adding one? Find the guidelines in the mod panel's Adding new comic section.
         </p>
-        <form enctype="multipart/form-data" novalidate style="width: fit-content" class="margin-top-8">
+        <form enctype="multipart/form-data" v-if="!thumbnailFile" novalidate style="width: fit-content" class="margin-top-8">
           <div class="pretty-input-upload">
             <input type="file" multiple="false" @change="processFileUploadChange" id="newPageFiles" accept="image/x-png,image/jpeg" class="input-file"/>
-            <p v-if="!comic.hasThumbnail">Select file</p>
-            <p v-else>Add new thumbnail</p>
+            <p v-if="!comic.hasThumbnail">
+              Select file
+            </p>
+            <p v-else>
+              Replace thumbnail
+            </p>
           </div>
         </form>
-        <button v-if="thumbnailFile" @click="processNewThumbnail()" class="y-button margin-top-8">
-          Add {{thumbnailFile.name}} as thumbnail
-        </button>
+        <div class="horizontalFlex mt-8" v-if="thumbnailFile">
+          <button class="y-button y-button-neutral mr-8" @click="thumbnailFile = null">
+            Cancel
+          </button>
+          <LoadingButton iconType="check"
+                         :isLoading="isSubmittingThumbnail"
+                         @click="processNewThumbnail()"
+                         :text="`Replace thumbnail with ${thumbnailFile.name}`"
+                         class="y-button button-with-icon">
+            
+          </LoadingButton>
+        </div>
       </span>
 
 
-      <h2 class="margin-top-32">Tags</h2>
-      <p v-if="comic.keywords.length === 0">No tags have been added.</p>
-      
       <ResponseMessage :message="keywordResponseMessage"
                        :messageType="keywordResponseMessageType"
                        @closeMessage="() => keywordResponseMessage = ''"
-                       outsideStyle="margin-top: 0.5rem;" />
+                       outsideStyle="margin-top: 2rem;" />
 
-      <Loading v-if="isSubmittingKeywords" text="Submitting" style="padding-top: 5.5rem; height: 6.5rem;"/>
+      <div class="mt-32 width100">
+        <div class="tagsContainer">
+          <div class="verticalFlex alignItemsStart">
+            <p class="admin-mini-header">
+              Existing tags
+            </p>
 
-      <div v-else class="horizontalFlex" style="width: 100%; margin-top: 8px;">
-        <div class="verticalFlex" style="margin: 0 12px 0 0;">
-          <p class="admin-mini-header">Tag list</p>
-          <select size="8" style="margin-bottom: 0" v-model="selectedKeyword" @keyup.13="addSelectedKeyword()"> 
-            <option v-for="keyword in keywordsNotInComic" :key="keyword.name" :value="keyword">{{keyword.name}}</option>
-          </select>
-          <button class="y-button y-button-small y-button-neutral" @click="addSelectedKeyword()" style="width: 100%; margin-top: 1px;">
-            <RightArrow/>
-          </button>
-        </div>
-      
-        <div class="verticalFlex" style="margin: 0 12px 0 12px;">
-          <p class="admin-mini-header">Tags you're adding</p>
-          <p v-if="selectedKeywords.length > 0" style="margin-bottom: 6px;">Click tag to <span class="red-color">remove</span></p>
-          <p v-for="keyword in selectedKeywords" @click="removeKeywordFromSelection(keyword)" 
-             :key="keyword.name" class="selected-add-keyword">{{keyword.name}}</p>
-          <button class="y-button" v-if="selectedKeywords.length > 0"
-                  @click="confirmAddKeywords()" style="margin: 6px auto 0 auto;">
-            Add tags
-          </button>
-        </div>
-      
-        <div class="verticalFlex" style="margin: 0 0 0 12px;">
-          <p class="admin-mini-header">This comic's tags</p>
-          <p v-if="comic.keywords.length > 0" style="margin-bottom: 6px;">
-            Click tags to <span class="red-color">remove</span>
-          </p>
-          <p v-for="keyword in comic.keywords" @click="addOrRemoveKeywordToDeleteList(keyword)" 
-             :key="keyword.name" class="selected-add-keyword" 
-             :class="{'keyword-to-be-deleted': keywordsToDelete.findIndex(kw=>kw.id===keyword.id)>=0}">{{keyword.name}}</p>
-          <button @click="confirmRemoveKeywords()" class="y-button y-button-red"
-                  v-if="keywordsToDelete.length > 0" style="margin: 6px auto 0 auto;">
-            Remove tags
-          </button>
+            <p v-if="comic && comic.keywords.length === 0">
+              No tags yet {{comic.keywords.length}} ds
+            </p>
+
+            <p v-for="keyword in comic.keywords"
+                @click="addOrRemoveKeywordToDeleteList(keyword)" 
+                :key="keyword.id" class="selected-add-keyword" 
+                :class="{'keyword-to-be-deleted': keywordsToDelete.findIndex(kw=>kw.id===keyword.id)>=0}">
+              {{keyword.name}}
+            </p>
+
+            <LoadingButton text="Remove tags"
+                           iconType="check"
+                           :style="{visibility: keywordsToDelete.length > 0 ? 'visible' : 'hidden'}"
+                           :isLoading="isSubmittingRemoveKw"
+                           color="error"
+                           class="mt-8"
+                           @click="confirmRemoveKeywords()"/>
+          </div>
+
+          <div class="verticalFlex fitContent alignItemsStart">
+            <p class="admin-mini-header newTagsHeader">
+              New tags
+            </p>
+
+            <Select :options="keywordOptions"
+                    isSearchable
+                    :resetValue="kwSelectResetValue"
+                    searchPlaceholder="Search for tags"
+                    @change="newVal => addSelectedKeyword(newVal)"
+                    @searchSelectedClicked="logit"
+                    class="mb-16"
+                    style="margin-top: -1rem;"/>
+
+            <p v-for="keyword in selectedKeywords" 
+              @click="removeKeywordFromSelection(keyword)" 
+              :key="keyword.id" class="selected-add-keyword">
+              {{keyword.name}}
+            </p>
+
+            <LoadingButton text="Add tags"
+                            v-if="selectedKeywords.length > 0"
+                            iconType="check"
+                            :isLoading="isSubmittingAddKw"
+                            class="mt-8"
+                            @click="confirmAddKeywords()"/>
+          </div>
         </div>
       </div>
-
-
 
       <h2 class="margin-top-32">Comic pages</h2>
       <button v-if="!appendPages"
@@ -141,10 +165,12 @@
 
 <script>
 import UpArrow from 'vue-material-design-icons/ArrowUp.vue'
-import BackArrow from 'vue-material-design-icons/Undo.vue'
-import RightArrow from 'vue-material-design-icons/ArrowRight.vue'
+import CheckIcon from 'vue-material-design-icons/Check.vue'
 import ResponseMessage from '@/components/ResponseMessage.vue'
 import Loading from '@/components/LoadingIndicator.vue'
+import Select from '@/components/Select.vue'
+import TextInput from '@/components/TextInput.vue'
+import LoadingButton from '@/components/LoadingButton.vue'
 
 import comicApi from '@/api/comicApi'
 import keywordApi from '@/api/keywordApi'
@@ -156,10 +182,12 @@ export default {
 
   components: {
     UpArrow,
-    BackArrow,
-    RightArrow,
+    CheckIcon,
     ResponseMessage,
     Loading,
+    Select,
+    TextInput,
+    LoadingButton,
   },
 
   data: function () {
@@ -180,32 +208,49 @@ export default {
       thumbnailResponseMessage: '',
       thumbnailResponseMessageType: 'error',
 
-      isSubmittingKeywords: false,
       keywordResponseMessage: '',
-      keywordResponseMessageType: 'error',
+      keywordResponseMessageType: 'success',
+      isSubmittingAddKw: false,
+      isSubmittingRemoveKw: false,
 
       isSubmittingPages: false,
       pagesResponseMessage: '',
       pagesResponseMessageType: 'error',
+
+      kwSelectResetValue: null,
     }
   },
 
   computed: {
     ...mapGetters([
-      'allKeywords',
+      'allKeywords', 'alphabeticKeywordList',
     ]),
+
+    keywordOptions () {
+      let existingKwIds = this.comic.keywords.map(kw => kw.id)
+      let selectedKwIds = this.selectedKeywords.map(kw => kw.id)
+
+      return this.alphabeticKeywordList
+        .filter(kw => !existingKwIds.includes(kw.id) && !selectedKwIds.includes(kw.id))
+        .map(kw => ({text: kw.name, value: kw}))
+    },
+
     filesAreInput () { return this.selectedFiles.length > 0 },
     selectedFileNames () { return this.selectedFiles.map( file => file.name ) },
   },
 
   async mounted () {
     this.reloadComic()
+
     if (!this.allKeywords.fetched && !this.allKeywords.fetching) {
       this.$store.dispatch('fetchKeywordList')
     }
   },
 
   methods: {
+    logit () {
+      console.log('ittt')
+    },
     processFileUploadChange (changeEvent) {
       this.thumbnailFile = changeEvent.target.files[0]
     },
@@ -247,56 +292,57 @@ export default {
       }
     },
 
-    addSelectedKeyword () {
-      if (!this.selectedKeywords.find(kw => kw.id === this.selectedKeyword.id)) {
-        this.selectedKeywords.push(this.selectedKeyword)
+    addSelectedKeyword (keyword) {
+      if (!this.selectedKeywords.find(kw => kw.id === keyword.id)) {
+        this.selectedKeywords.push(keyword)
       }
+      this.kwSelectResetValue = Math.random().toString()
     },
 
     removeKeywordFromSelection (keyword) {
-      this.selectedKeywords.splice(this.selectedKeywords.findIndex(kw => kw.id === keyword.id), 1)
+      this.selectedKeywords.splice(this.selectedKeywords.findIndex(kw => kw.id===keyword.id), 1)
     },
 
-    addOrRemoveKeywordToDeleteList (keyword) {
-      if (!this.keywordsToDelete.find(kw => kw.id === keyword.id)) {
+    async addOrRemoveKeywordToDeleteList (keyword) {
+      if (!this.keywordsToDelete.find(kw => kw.id===keyword.id)) {
         this.keywordsToDelete.push(keyword)
       }
       else {
-        this.keywordsToDelete.splice(this.keywordsToDelete.findIndex(kw => kw.id === keyword.id), 1)
+        this.keywordsToDelete.splice(this.keywordsToDelete.findIndex(kw => kw.id===keyword.id), 1)
       }
     },
     
     async confirmAddKeywords () {
-      this.isSubmittingKeywords = true
+      this.isSubmittingAddKw = true
       let response = await keywordApi.addKeywordsToPendingComic(this.comic, this.selectedKeywords)
-      this.isSubmittingKeywords = false
+      this.isSubmittingAddKw = false
 
-      if (response.success) {
+      if ('error' in response) {
+        this.keywordResponseMessage = 'Error adding tags: ' + response.error
+        this.keywordResponseMessageType = 'error'
+      }
+      else {
         this.keywordResponseMessage = 'Successfully added tags!'
         this.keywordResponseMessageType = 'success'
         this.selectedKeywords = []
         this.reloadComic()
       }
-      else {
-        this.keywordResponseMessage = 'Error adding tags: ' + response.message
-        this.keywordResponseMessageType = 'error'
-      }
     },
 
     async confirmRemoveKeywords () {
-      this.isSubmittingKeywords = true
+      this.isSubmittingRemoveKw = true
       let response = await keywordApi.removeKeywordsFromPendingComic(this.comic, this.keywordsToDelete)
-      this.isSubmittingKeywords = false
+      this.isSubmittingRemoveKw = false
 
-      if (response.success) {
+      if ('error' in response) {
+        this.keywordResponseMessage = 'Error removing tags: ' + response.error
+        this.keywordResponseMessageType = 'error'
+      }
+      else {
         this.keywordResponseMessage = 'Successfully removed tags!'
         this.keywordResponseMessageType = 'success'
         this.keywordsToDelete = []
         this.reloadComic()
-      }
-      else {
-        this.keywordResponseMessage = 'Error removing tags: ' + response.message
-        this.keywordResponseMessageType = 'error'
       }
     },
     
@@ -380,6 +426,26 @@ export default {
 </script>
 
 <style lang="scss">
+.tagsContainer {
+  display: grid;
+  grid-template-columns: auto auto;
+  width: fit-content;
+  margin: auto;
+  &>div:first-child {
+    @media (min-width: 501px) {
+      margin-right: 2.5rem;
+    }
+    @media (max-width: 500px) {
+      margin-bottom: 1rem;
+    }
+  }
+
+  @media (max-width: 500px) {
+    min-width: 0;
+    grid-template-columns: auto;
+    justify-content: center;
+  }
+}
 .image-fit-full {
   max-width: 100vw;
   max-height: 100vh;
