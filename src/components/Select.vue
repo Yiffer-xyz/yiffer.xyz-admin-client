@@ -10,7 +10,8 @@
       {{ title }}
     </p>
 
-    <div class="selected"
+    <div v-if="!isSearchable"
+         class="selected"
          :style="{'border-color': overrideBorderColor}"
          :class="{
            open: isOpen,
@@ -19,12 +20,12 @@
            borderTheme2: borderTheme2,
            placeholderStyle: !selected,
            selectWithIconRight: hasIconRight,
-         }"
-         v-if="!isSearchable">
+         }">
       {{ selected ? selected.text : title }}
     </div>
     
-    <input type="text" v-else-if="!searchSelected"
+    <input v-else-if="!searchSelected"
+           type="text"
            class="selected"
            ref="selectInput1"
            autocomplete="off"
@@ -39,7 +40,8 @@
            @click="isOpen = true"
            v-model="searchText"/>    
 
-    <input type="text" v-else
+    <input type="text"
+           v-else
            ref="selectInput2"
            class="selected cursorPointer"
            autocomplete="off"
@@ -429,7 +431,7 @@ export default {
     },
   },
 
-  data() {
+  data () {
     return {
       selected: this.defaultValue,
       searchText: '',
