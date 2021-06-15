@@ -68,7 +68,7 @@
                     title="Category"
                     @change="newCat => cat = newCat"
                     class="tagCatSelects mb-24 mr-16"
-                    :resetValue="selectResetValue"/>  
+                    :resetValue="selectResetValue"/>
 
             <Select :options="tagOptions"
                     title="Classification"

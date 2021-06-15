@@ -125,6 +125,7 @@ $buttonBorderWidth: 2px;
   box-shadow: none;
   &:hover {
     box-shadow: none;
+    cursor: not-allowed;
   }
 }
 
