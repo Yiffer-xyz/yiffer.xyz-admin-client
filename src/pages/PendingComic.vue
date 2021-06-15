@@ -6,7 +6,7 @@
       <h2 class="mt-32">Thumbnail</h2>
       
       <span v-if="comic.hasThumbnail">
-        <img :src="`${config.comicsBaseUrl}/${comic.name}/thumbnail.webp`"/>
+        <img :src="`${config.comicsBaseUrl}/${comic.name}/thumbnail.webp?${randomQueryString}`"/>
       </span>
 
       <ResponseMessage :message="thumbnailResponseMessage"
