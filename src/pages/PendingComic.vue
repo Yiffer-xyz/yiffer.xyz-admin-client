@@ -3,10 +3,23 @@
     <h1>Pending: {{$route.params.comicName}}</h1>
     <span v-if="comic">
 
+      <LoadingButton v-if="$store.getters.userData.userType === 'admin' && publishResponseMessageType !== 'success'"
+                     :isLoading="isPublishingComic"
+                     class="y-button button-with-icon marginAuto mt-32"
+                     :isDisabled="!canPublish"
+                     @click="processComic"
+                     iconType="check"
+                     :text="`Approve & publish comic${hasChangedData ? ' (unsaved changes)' : ''}`"/>
+      
+      <ResponseMessage :message="publishResponseMessage"
+                       :messageType="publishResponseMessageType"
+                       preventClose
+                       class="mt-16 mb-16" />
+
       <h2 class="mt-32">Thumbnail</h2>
       
       <span v-if="comic.hasThumbnail">
-        <img :src="`${config.comicsBaseUrl}/${comic.name}/thumbnail.webp?${randomQueryString}`"/>
+        <img :src="`${config.comicsBaseUrl}/${$route.params.comicName}/thumbnail.webp?${randomQueryString}`"/>
       </span>
 
       <ResponseMessage :message="thumbnailResponseMessage"
@@ -86,7 +99,6 @@
                     :resetValue="kwSelectResetValue"
                     searchPlaceholder="Search for tags"
                     @change="newVal => addSelectedKeyword(newVal)"
-                    @searchSelectedClicked="logit"
                     class="mb-16"
                     style="margin-top: -1rem;"/>
 
@@ -106,7 +118,105 @@
         </div>
       </div>
 
-      <h2 class="mt-16 mb-8">Comic pages</h2>
+
+      <!-- COMIC DATA -->
+      <h2 class="mt-32 mb-8">Comic data</h2>
+
+      <ResponseMessage :message="updateDataResponseMessage"
+                       :messageType="updateDataResponseMessageType"
+                       @closeMessage="() => updateDataResponseMessage = ''"
+                       class="mt-16 mb-16" />
+
+      <div class="verticalFlex alignItemsStart fitContent marginAuto">
+        <TextInput :value="comic.name"
+                    @change="newName => comic.name = newName"
+                    textAlign="left"
+                    title="Comic name"
+                    class="mb-24"
+                    style="width: 100%;"/>
+
+        <Select :options="artistOptions"
+                title="Artist"
+                isSearchable
+                searchKeepSelected
+                initialWidth="10rem"
+                :defaultValue="selectedArtist"
+                :searchSelected="selectedArtist ? selectedArtist.name : null"
+                :resetValue="artistResetValue"
+                @searchSelectedClicked="selectedArtist = null"
+                @change="onArtistSelect"
+                class="mb-24"
+                style="width: 100%;"/>
+
+        <div class="horizontalFlex width100 justifyStart">
+          <Select :options="categoryOptions"
+                  title="Category"
+                  :defaultValue="{text: comic.cat, value: comic.cat}"
+                  @change="newCat => comic.cat = newCat"
+                  class="tagCatSelects mb-24 mr-16"
+                  initialWidth="6rem"
+                  :resetValue="allSelectResetValue"/>
+
+          <Select :options="tagOptions"
+                  title="Classification"
+                  :defaultValue="{text: comic.tag, value: comic.tag}"
+                  @change="newVal => comic.tag = newVal"
+                  class="tagCatSelects ml-8"
+                  initialWidth="6rem"
+                  :resetValue="allSelectResetValue"/>   
+        </div>
+
+        <Select :options="stateOptions"
+                title="State"
+                :defaultValue="stateOptions.find(so => so.value === comic.state)"
+                initialWidth="10rem"
+                isFullWidth
+                @change="onStateSelect"
+                :resetValue="allSelectResetValue"/>  
+
+        <!-- PREVIOUS AND NEXT COMIC LINKS -->
+        <p class="admin-mini-header textAlignLeft mt-32">
+          Comic links
+        </p>
+        <Select :options="comicOptions"
+                title="Previous comic"
+                isSearchable
+                searchKeepSelected
+                searchPlaceholder="None if left blank"
+                initialWidth="16rem"
+                :defaultValue="comic.previousComic ? comicOptions.find(co => co.value.name === comic.previousComic) : null"
+                :searchSelected="comic.previousComic ? comic.previousComic.name : null"
+                :resetValue="prevComicResetValue"
+                @searchSelectedClicked="comic.previousComic = null"
+                @change="onPrevComicSelect"/>
+
+        <Select :options="comicOptions"
+                title="Next comic"
+                isSearchable
+                searchKeepSelected
+                searchPlaceholder="None if left blank"
+                initialWidth="16rem"
+                class="mt-24"
+                :defaultValue="comic.nextComic ? comicOptions.find(co => co.value.name === comic.nextComic) : null"
+                :searchSelected="comic.nextComic ? comic.nextComic.name : null"
+                :resetValue="nextComicResetValue"
+                @searchSelectedClicked="comic.nextComic = null"
+                @change="onNextComicSelect"/>
+
+        <div class="horizontalFlex mt-16" v-if="hasChangedData">
+          <button class="y-button y-button-neutral mr-8"
+                  @click="resetComicData">
+            Reset
+          </button>
+          <LoadingButton :isLoading="isSubmittingDataUpdate"
+                         @click="submitDataUpdate"
+                         text="Save changes"
+                         iconType="save"/>
+        </div>
+      </div>
+
+
+      <h2 class="mt-48 mb-8">Comic pages</h2>
       <div class="horizontalFlex marginAuto">
         <button v-if="!isAppendingOrReplacingPages"
                 @click="isAppendingPages = true"
@@ -175,7 +285,7 @@
       <div style="display: flex; flex-direction: column; align-items: center;">
         <img  
           v-for="pageNumber in comic.numberOfPages" 
-          :src="`${config.comicsBaseUrl}/${comic.name}/${formattedPageNumber(pageNumber)}.jpg?${randomQueryString}`"
+          :src="`${config.comicsBaseUrl}/${$route.params.comicName}/${formattedPageNumber(pageNumber)}.jpg?${randomQueryString}`"
           :key="pageNumber"
           :class="['comic-page', 'image-fit-full', 'comic-page-pending']"/>
       </div>
@@ -200,9 +310,11 @@ import Loading from '@/components/LoadingIndicator.vue'
 import Select from '@/components/Select.vue'
 import TextInput from '@/components/TextInput.vue'
 import LoadingButton from '@/components/LoadingButton.vue'
+import { doFetch } from '@/utils/statefulFetch'
 
 import comicApi from '@/api/comicApi'
 import keywordApi from '@/api/keywordApi'
+import artistApi from '@/api/artistApi'
 import { mapGetters } from 'vuex'
 import config from '@/config.json'
 
@@ -223,6 +335,7 @@ export default {
     return {
       config,
       comic: undefined,
+      initialComic: undefined,
       keywordsNotInComic: [],
       selectedKeyword: undefined,
       selectedKeywords: [],
@@ -252,13 +365,67 @@ export default {
 
       kwSelectResetValue: null,
       randomQueryString: Math.random().toString(),
+
+      isSubmittingDataUpdate: false,
+      updateDataResponseMessage: '',
+      updateDataResponseMessageType: 'error',
+
+      isPublishingComic: false,
+      publishResponseMessage: '',
+      publishResponseMessageType: 'error',
+
+      selectedArtist: null,
+      artistResetValue: null,
+      allSelectResetValue: null,
+      prevComicResetValue: null,
+      nextComicResetValue: null,
+      categoryOptions,
+      tagOptions,
+      stateOptions,
     }
   },
 
   computed: {
     ...mapGetters([
-      'allKeywords', 'alphabeticKeywordList',
+      'allKeywords',
+      'alphabeticKeywordList',
+      'artistList',
+      'allComics',
+      'comicList',
+      'pendingComics',
     ]),
+
+    hasChangedData () {
+      let comicKeys = ['tag', 'cat', 'name', 'state']
+      for (let key of comicKeys) {
+        if (this.comic[key] !== this.initialComic[key]) {
+          return true
+        }
+      }
+
+      if (this.comic.nextComic?.id !== this.initialComic.nextComic?.id) {
+        return true
+      }
+      if (this.comic.previousComic?.id !== this.initialComic.previousComic?.id) {
+        return true
+      }
+
+      if (this.selectedArtist?.id !== this.initialComic?.artistId) {
+        return true
+      }
+
+      return false
+    },
+
+    artistOptions () {
+      return this.artistList.payload.map(a => ({text: a.name, value: a}))
+    },
+
+    comicOptions () {
+      let comicsMapped = this.allComics.payload.map(c => ({text: c.name, value: c}))
+      let pendingComicsMapped = this.pendingComics.payload.map(c => ({text: `PENDING: ${c.name}`, value: c}))
+      return comicsMapped.concat(pendingComicsMapped)
+    },
 
     isAppendingOrReplacingPages () {
       return this.isReplacingPages || this.isAppendingPages
@@ -279,20 +446,65 @@ export default {
     selectedFileNames () {
       return this.selectedFiles.map( file => file.name )
     },
+
+    canPublish () {
+      console.log(this.initialComic.keywords.length > 0)
+      return this.initialComic 
+        && this.initialComic.keywords && this.initialComic.keywords.length > 0
+        && this.initialComic.hasThumbnail
+        && !this.hasChangedData
+    }
   },
 
   async mounted () {
     this.reloadComic()
 
+    if (!this.artistList.fetched && !this.artistList.fetching) {
+      doFetch(this.$store.commit, 'artistList', artistApi.getArtistList())
+    }
     if (!this.allKeywords.fetched && !this.allKeywords.fetching) {
       this.$store.dispatch('fetchKeywordList')
+    }
+    if (!this.allComics.fetched && !this.allComics.fetching) {
+      doFetch(this.$store.commit, 'allComics', comicApi.getAllComics())
+    }
+    if (!this.pendingComics.fetched && !this.pendingComics.fetching) {
+      doFetch(this.$store.commit, 'pendingComics', comicApi.getPendingComics(), comics => (
+        comics.map(c => ({...c, isPending: true}))
+      ))
     }
   },
 
   methods: {
-    logit () {
-      console.log('ittt')
+    onArtistSelect (artist) {
+      this.selectedArtist = artist
+      this.artistResetValue = Math.random().toString()
     },
+
+    onStateSelect (newState) {
+      this.comic.state = newState
+    },
+
+    onPrevComicSelect (prevComic) {
+      this.comic.previousComic = prevComic
+      this.prevComicResetValue = Math.random().toString()
+    },
+
+    onNextComicSelect (nextComic) {
+      this.comic.nextComic = nextComic
+      this.nextComicResetValue = Math.random().toString()
+    },
+
+    resetComicData () {
+      this.comic = { ...this.initialComic }
+      let randomVal = Math.random().toString()
+      this.selectedArtist = this.initialComic.selectedArtist
+      this.artistResetValue = randomVal
+      this.allSelectResetValue = randomVal
+      this.prevComicResetValue = randomVal
+      this.nextComicResetValue = randomVal
+    },
+
     processFileUploadChange (changeEvent) {
       this.thumbnailFile = changeEvent.target.files[0]
     },
@@ -387,6 +599,41 @@ export default {
         this.reloadComic()
       }
     },
+
+    async submitDataUpdate () {
+      this.isSubmittingDataUpdate = true
+      let result = await comicApi.updatePendingComicData(
+        this.comic.id, this.comic.name, this.selectedArtist.id, this.comic.cat, this.comic.tag, this.comic.state,
+        this.comic.nextComic ? {id: this.comic.nextComic.id, isPending: this.comic.nextComic.isPending } : null,
+        this.comic.previousComic ? {id: this.comic.previousComic.id, isPending: this.comic.previousComic.isPending } : null,
+      )
+      this.isSubmittingDataUpdate = false
+
+      if (result.success) {
+        this.updateDataResponseMessage = `Success updating ${this.comic.name}`
+        this.updateDataResponseMessageType = 'success'
+        this.reloadComic()
+      }
+      else {
+        this.updateDataResponseMessage = `Error: ${result.message}`
+        this.updateDataResponseMessageType = 'error'
+      }
+    },
+
+    async processComic () {
+      this.isPublishingComic = true
+			let response = await comicApi.processPendingComic(this.initialComic.id, true)
+      this.isPublishingComic = false
+      
+      if (response.success) {
+        this.publishResponseMessage = `Published ${this.initialComic.name}`
+        this.publishResponseMessageType = 'success'
+			}
+			else {
+        this.publishResponseMessage = response.message
+        this.publishResponseMessageType = 'error'
+			}
+    },
     
     processApendFilesUploadChange (changeEvent) {
       this.selectedFiles = [...changeEvent.target.files]
@@ -442,6 +689,13 @@ export default {
       let response = await comicApi.getPendingComic(this.$route.params.comicName)
       if (response.success) {
         this.comic = response.result
+        this.initialComic = {
+          ...this.comic,
+          selectedArtist: {name: response.result.artistName, id: response.result.artistId}
+        }
+
+        this.selectedArtist = {name: response.result.artistName, id: response.result.artistId}
+
         this.keywordsNotInComic = this.allKeywords.payload
           .filter(kw => !this.comic.keywords.find(comicKw => comicKw.id === kw.id))
           .sort((kw1, kw2) => kw1.name > kw2.name ? 1 : -1)
@@ -473,6 +727,29 @@ export default {
     }
   },
 }
+
+const categoryOptions = [
+  {text: 'Furry', value: 'Furry'},
+  {text: 'MLP', value: 'MLP'},
+  {text: 'Pokemon', value: 'Pokemon'},
+  {text: 'Other', value: 'Other'},
+]
+
+const tagOptions = [
+  {text: 'M', value: 'M'},
+  {text: 'F', value: 'F'},
+  {text: 'MF', value: 'MF'},
+  {text: 'MM', value: 'MM'},
+  {text: 'FF', value: 'FF'},
+  {text: 'MF+', value: 'MF+'},
+  {text: 'I', value: 'I'},
+]
+
+const stateOptions = [
+  {text: 'WIP', value: 'wip'},
+  {text: 'Finished', value: 'finished'},
+  {text: 'Cancelled', value: 'cancelled'},
+]
 </script>
 
 <style lang="scss">

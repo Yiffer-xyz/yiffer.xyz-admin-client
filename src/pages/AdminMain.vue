@@ -38,17 +38,18 @@
                       @refresh-comic-list="refreshComicList" />
 
       <correct-comic :comicList="allComics.payload" 
-                     :artistList="artistList"
+                     :artistList="artistList.payload"
                      @refresh-comic-list="refreshComicList" />
 
       <page-manager :comicList="allComics.payload"
                     @refresh-comic-list="refreshComicList" />
 
-      <add-comic :artistList="artistList" 
+      <add-comic :artistList="artistList.payload" 
                  :comicList="allComics.payload"
+                 :pendingComics="pendingComics"
                  @refresh-pending-comics="refreshPendingComics" />
 
-      <artist-manager :artistList="artistList"
+      <artist-manager :artistList="artistList.payload"
                       @refresh-artist-list="refreshArtistList" />
 
       <pending-comics :pendingComics="pendingComics"
@@ -125,7 +126,6 @@ export default {
     return {
       isMiniStatusShown: false,
       alphabeticComicList: [],
-      artistList: [],
       keywordSuggestionList: [],
       pendingComics: [],
     }
@@ -137,6 +137,7 @@ export default {
       'userData',
       'allKeywords',
       'isDarkTheme',
+      'artistList',
     ]),
 
     isSomeError () {
@@ -151,7 +152,9 @@ export default {
     if (!this.allKeywords.fetched && !this.allKeywords.fetching) {
       this.$store.dispatch('fetchKeywordList')
     }
-    this.artistList = await ArtistApi.getArtistList()
+    if (!this.artistList.fetched && !this.artistList.fetching) {
+      doFetch(this.$store.commit, 'artistList', ArtistApi.getArtistList())
+    }
     this.refreshPendingComics()
   },
 
@@ -160,10 +163,11 @@ export default {
       doFetch(this.$store.commit, 'allComics', comicApi.getAllComics())
     },
     async refreshArtistList () {
-      this.artistList = await ArtistApi.getArtistList()
+      doFetch(this.$store.commit, 'artistList', ArtistApi.getArtistList())
     },
     async refreshPendingComics () {
-      this.pendingComics = await comicApi.getPendingComics()
+      let pendingComics = await comicApi.getPendingComics()
+      this.pendingComics = pendingComics.map(c => ({...c, isPending: true}))
     },
   },
 

@@ -68,7 +68,7 @@
                     title="Category"
                     @change="newCat => cat = newCat"
                     class="tagCatSelects mb-24 mr-16"
-                    :resetValue="selectResetValue"/>  
+                    :resetValue="selectResetValue"/>
 
             <Select :options="tagOptions"
                     title="Classification"
@@ -200,6 +200,7 @@ export default {
   props: {
     artistList: Array,
     comicList: Array,
+    pendingComics: Array,
   },
 
 	components: {
@@ -288,10 +289,14 @@ export default {
         cat: this.cat,
         state: this.state,
         keywordIds: this.selectedKeywords.map(kw => kw.id),
-        previousComic: this.previousComic ? this.previousComic.id : null,
-        nextComic: this.nextComic ? this.nextComic.id : null
+        previousComic: this.previousComic
+          ? { id: this.previousComic.id, isPending: this.previousComic.isPending }
+          : null,
+        nextComic: this.nextComic
+          ? { id: this.nextComic.id, isPending: this.nextComic.isPending }
+          : null
 			}
-      
+
       this.responseMessageType = 'info'
       try {
         await comicApi.addNewComic(
@@ -334,18 +339,32 @@ export default {
     },
 
     onPrevComicSelect (prevComic) {
-      this.previousComic = this.comicList.find(c => c.id === prevComic.id)
+      if (prevComic.isPending) {
+        this.previousComic = this.pendingComics.find(c => c.id === prevComic.id)
+      }
+      else {
+        this.previousComic = this.comicList.find(c => c.id === prevComic.id)
+      }
       this.prevComicResetValue = Math.random().toString()
     },
 
     onNextComicSelect (nextComic) {
-      this.nextComic = this.comicList.find(c => c.id === nextComic.id)
+      if (nextComic.isPending) {
+        this.nextComic = this.pendingComics.find(c => c.id === nextComic.id)
+      }
+      else {
+        this.nextComic = this.comicList.find(c => c.id === nextComic.id)
+      }
       this.nextComicResetValue = Math.random().toString()
     },
 		
 		updateUploadProgress (progressPercent) {
-      console.log(progressPercent)
-			this.responseMessage = `Uploading... ${this.uploadPercent = progressPercent}%`
+      if (progressPercent === 100) {
+        this.responseMessage = `Uploading... ${this.uploadPercent = 100}% - now processing!`
+      }
+      else {
+        this.responseMessage = `Uploading... ${this.uploadPercent = progressPercent}%`
+      }
 		},
     
     closeResponseMessage () { this.responseMessage = '' },
@@ -363,7 +382,9 @@ export default {
     },
 
     comicOptions () {
-      return this.comicList.map(c => ({text: c.name, value: c}))
+      let comicsMapped = this.comicList.map(c => ({text: c.name, value: c}))
+      let pendingComicsMapped = this.pendingComics.map(c => ({text: `PENDING: ${c.name}`, value: c}))
+      return comicsMapped.concat(pendingComicsMapped)
     },
 
     keywordOptions () {

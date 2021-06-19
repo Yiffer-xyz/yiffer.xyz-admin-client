@@ -98,6 +98,20 @@ export default {
     else { return {success: false, message: response.data.error} }
   },
 
+  async updatePendingComicData (comicId, comicName, artistId, cat, tag, state, nextComic, previousComic) {
+    try {
+      let body = {
+        comicName, artistId, cat, tag, state, nextComic, previousComic,
+      }
+
+      await axios.put(`${baseUrl}/pendingcomics/${comicId}`, body)
+      return {success: true}
+    }
+    catch (err) {
+      return {success: false, message: err?.response?.data || 'Unknown error updating comic data'}
+    }
+  },
+
   async addPagesToComic (comicData, newPagesList, progressFunction) {
     let formData = new FormData()
     formData.append('comicName', comicData.name)

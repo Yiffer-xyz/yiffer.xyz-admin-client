@@ -20,6 +20,9 @@ export default async function multipartUpload (
   let currentFormData = new FormData()
 
   for (let [fieldKey, fieldVal] of regularFieldsWithNames) {
+    if (typeof fieldVal === 'object' && fieldVal !== null) {
+      fieldVal = JSON.stringify(fieldVal)
+    }
     currentFormData.append(fieldKey, fieldVal)
   }
   let currentBatchSize = 0
