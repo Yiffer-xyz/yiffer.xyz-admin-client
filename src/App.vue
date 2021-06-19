@@ -73,13 +73,12 @@
 import TwitterIcon from 'vue-material-design-icons/Twitter.vue'
 import DarkIcon from 'vue-material-design-icons/LightbulbOutline.vue'
 import LightIcon from 'vue-material-design-icons/Lightbulb.vue'
-import HomeIcon from 'vue-material-design-icons/Home.vue'
 
 import { mapGetters } from 'vuex'
 
 export default {
   components: {
-    TwitterIcon, DarkIcon, LightIcon, HomeIcon,
+    TwitterIcon, DarkIcon, LightIcon,
   },
 
   metaInfo() {

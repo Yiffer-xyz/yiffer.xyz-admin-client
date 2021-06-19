@@ -46,6 +46,7 @@
 
       <add-comic :artistList="artistList.payload" 
                  :comicList="allComics.payload"
+                 :pendingComics="pendingComics"
                  @refresh-pending-comics="refreshPendingComics" />
 
       <artist-manager :artistList="artistList.payload"
@@ -165,7 +166,8 @@ export default {
       doFetch(this.$store.commit, 'artistList', ArtistApi.getArtistList())
     },
     async refreshPendingComics () {
-      this.pendingComics = await comicApi.getPendingComics()
+      let pendingComics = await comicApi.getPendingComics()
+      this.pendingComics = pendingComics.map(c => ({...c, isPending: true}))
     },
   },
 

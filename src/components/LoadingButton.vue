@@ -1,9 +1,10 @@
 <template>
   <button type="submit"
           class="yButtonSubmit"
+          :disabled="isDisabled"
           :class="{
             yBtnIconPadding: iconType || isLoading,
-            yButtonDisabled: isDisabled,
+            'y-button-disabled': isDisabled,
             yButtonLoading: isLoading,
             yButtonSubmitRed: color === 'error',
           }"
@@ -118,15 +119,6 @@ $buttonBorderWidth: 2px;
 .yBtnIconPadding {
   padding-right: $buttonPaddingSides+2px;
   padding-left: $buttonPaddingSides - 2px;
-}
-
-.yButtonDisabled {
-  opacity: 0.6;
-  box-shadow: none;
-  &:hover {
-    box-shadow: none;
-    cursor: not-allowed;
-  }
 }
 
 .yButtonLoading {

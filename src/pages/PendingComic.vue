@@ -3,6 +3,19 @@
     <h1>Pending: {{$route.params.comicName}}</h1>
     <span v-if="comic">
 
+      <LoadingButton v-if="$store.getters.userData.userType === 'admin' && publishResponseMessageType !== 'success'"
+                     :isLoading="isPublishingComic"
+                     class="y-button button-with-icon marginAuto mt-32"
+                     :isDisabled="!canPublish"
+                     @click="processComic"
+                     iconType="check"
+                     :text="`Approve & publish comic${hasChangedData ? ' (unsaved changes)' : ''}`"/>
+      
+      <ResponseMessage :message="publishResponseMessage"
+                       :messageType="publishResponseMessageType"
+                       preventClose
+                       class="mt-16 mb-16" />
+
       <h2 class="mt-32">Thumbnail</h2>
       
       <span v-if="comic.hasThumbnail">
@@ -107,7 +120,13 @@
 
 
       <!-- COMIC DATA -->
-      <h2 class="mt-16 mb-8">Comic data</h2>
+      <h2 class="mt-32 mb-8">Comic data</h2>
+
+      <ResponseMessage :message="updateDataResponseMessage"
+                       :messageType="updateDataResponseMessageType"
+                       @closeMessage="() => updateDataResponseMessage = ''"
+                       class="mt-16 mb-16" />
+
       <div class="verticalFlex alignItemsStart fitContent marginAuto">
         <TextInput :value="comic.name"
                     @change="newName => comic.name = newName"
@@ -152,7 +171,7 @@
                 :defaultValue="stateOptions.find(so => so.value === comic.state)"
                 initialWidth="10rem"
                 isFullWidth
-                @change="newVal => comic.state = newVal.value"
+                @change="onStateSelect"
                 :resetValue="allSelectResetValue"/>  
 
         <!-- PREVIOUS AND NEXT COMIC LINKS -->
@@ -185,10 +204,12 @@
                 @change="onNextComicSelect"/>
 
         <div class="horizontalFlex mt-16" v-if="hasChangedData">
-          <button class="y-button y-button-neutral mr-8">
+          <button class="y-button y-button-neutral mr-8"
+                  @click="resetComicData">
             Reset
           </button>
           <LoadingButton :isLoading="isSubmittingDataUpdate"
+                         @click="submitDataUpdate"
                          text="Save changes"
                          iconType="save"/>
         </div>
@@ -346,6 +367,13 @@ export default {
       randomQueryString: Math.random().toString(),
 
       isSubmittingDataUpdate: false,
+      updateDataResponseMessage: '',
+      updateDataResponseMessageType: 'error',
+
+      isPublishingComic: false,
+      publishResponseMessage: '',
+      publishResponseMessageType: 'error',
+
       selectedArtist: null,
       artistResetValue: null,
       allSelectResetValue: null,
@@ -364,6 +392,7 @@ export default {
       'artistList',
       'allComics',
       'comicList',
+      'pendingComics',
     ]),
 
     hasChangedData () {
@@ -374,9 +403,14 @@ export default {
         }
       }
 
-      // todo links
+      if (this.comic.nextComic?.id !== this.initialComic.nextComic?.id) {
+        return true
+      }
+      if (this.comic.previousComic?.id !== this.initialComic.previousComic?.id) {
+        return true
+      }
 
-      if (this.selectedArtist.id !== this.initialComic.artistId) {
+      if (this.selectedArtist?.id !== this.initialComic?.artistId) {
         return true
       }
 
@@ -388,7 +422,9 @@ export default {
     },
 
     comicOptions () {
-      return this.allComics.payload.map(c => ({text: c.name, value: c}))
+      let comicsMapped = this.allComics.payload.map(c => ({text: c.name, value: c}))
+      let pendingComicsMapped = this.pendingComics.payload.map(c => ({text: `PENDING: ${c.name}`, value: c}))
+      return comicsMapped.concat(pendingComicsMapped)
     },
 
     isAppendingOrReplacingPages () {
@@ -410,6 +446,14 @@ export default {
     selectedFileNames () {
       return this.selectedFiles.map( file => file.name )
     },
+
+    canPublish () {
+      console.log(this.initialComic.keywords.length > 0)
+      return this.initialComic 
+        && this.initialComic.keywords && this.initialComic.keywords.length > 0
+        && this.initialComic.hasThumbnail
+        && !this.hasChangedData
+    }
   },
 
   async mounted () {
@@ -424,12 +468,21 @@ export default {
     if (!this.allComics.fetched && !this.allComics.fetching) {
       doFetch(this.$store.commit, 'allComics', comicApi.getAllComics())
     }
+    if (!this.pendingComics.fetched && !this.pendingComics.fetching) {
+      doFetch(this.$store.commit, 'pendingComics', comicApi.getPendingComics(), comics => (
+        comics.map(c => ({...c, isPending: true}))
+      ))
+    }
   },
 
   methods: {
     onArtistSelect (artist) {
       this.selectedArtist = artist
       this.artistResetValue = Math.random().toString()
+    },
+
+    onStateSelect (newState) {
+      this.comic.state = newState
     },
 
     onPrevComicSelect (prevComic) {
@@ -439,8 +492,17 @@ export default {
 
     onNextComicSelect (nextComic) {
       this.comic.nextComic = nextComic
-      console.log(nextComic)
       this.nextComicResetValue = Math.random().toString()
+    },
+
+    resetComicData () {
+      this.comic = { ...this.initialComic }
+      let randomVal = Math.random().toString()
+      this.selectedArtist = this.initialComic.selectedArtist
+      this.artistResetValue = randomVal
+      this.allSelectResetValue = randomVal
+      this.prevComicResetValue = randomVal
+      this.nextComicResetValue = randomVal
     },
 
     processFileUploadChange (changeEvent) {
@@ -537,6 +599,41 @@ export default {
         this.reloadComic()
       }
     },
+
+    async submitDataUpdate () {
+      this.isSubmittingDataUpdate = true
+      let result = await comicApi.updatePendingComicData(
+        this.comic.id, this.comic.name, this.selectedArtist.id, this.comic.cat, this.comic.tag, this.comic.state,
+        this.comic.nextComic ? {id: this.comic.nextComic.id, isPending: this.comic.nextComic.isPending } : null,
+        this.comic.previousComic ? {id: this.comic.previousComic.id, isPending: this.comic.previousComic.isPending } : null,
+      )
+      this.isSubmittingDataUpdate = false
+
+      if (result.success) {
+        this.updateDataResponseMessage = `Success updating ${this.comic.name}`
+        this.updateDataResponseMessageType = 'success'
+        this.reloadComic()
+      }
+      else {
+        this.updateDataResponseMessage = `Error: ${result.message}`
+        this.updateDataResponseMessageType = 'error'
+      }
+    },
+
+    async processComic () {
+      this.isPublishingComic = true
+			let response = await comicApi.processPendingComic(this.initialComic.id, true)
+      this.isPublishingComic = false
+      
+      if (response.success) {
+        this.publishResponseMessage = `Published ${this.initialComic.name}`
+        this.publishResponseMessageType = 'success'
+			}
+			else {
+        this.publishResponseMessage = response.message
+        this.publishResponseMessageType = 'error'
+			}
+    },
     
     processApendFilesUploadChange (changeEvent) {
       this.selectedFiles = [...changeEvent.target.files]
@@ -592,8 +689,10 @@ export default {
       let response = await comicApi.getPendingComic(this.$route.params.comicName)
       if (response.success) {
         this.comic = response.result
-        this.initialComic = {...this.comic}
-        console.log(this.initialComic)
+        this.initialComic = {
+          ...this.comic,
+          selectedArtist: {name: response.result.artistName, id: response.result.artistId}
+        }
 
         this.selectedArtist = {name: response.result.artistName, id: response.result.artistId}
 
