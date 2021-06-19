@@ -33,7 +33,7 @@
         </p>
         <form enctype="multipart/form-data" v-if="!thumbnailFile" novalidate style="width: fit-content" class="margin-top-8">
           <div class="pretty-input-upload">
-            <input type="file" multiple="false" @change="processFileUploadChange" id="newPageFiles" accept="image/x-png,image/jpeg" class="input-file"/>
+            <input type="file" multiple="false" @change="processFileUploadChange" id="newPageFiles" accept="image/png,image/jpeg" class="input-file"/>
             <p v-if="!comic.hasThumbnail">
               Select file
             </p>
@@ -246,7 +246,7 @@
           </button>
           <form enctype="multipart/form-data" novalidate>
             <div class="pretty-input-upload">
-              <input type="file" multiple="true" @change="processApendFilesUploadChange" id="appendPagesFiles" accept="image/x-png,image/jpeg" class="input-file"/>
+              <input type="file" multiple="true" @change="processApendFilesUploadChange" id="appendPagesFiles" accept="image/png,image/jpeg" class="input-file"/>
               <p v-if="isAppendingPages">
                 Select files to append
               </p>

@@ -121,7 +121,7 @@
         </p>
         <form enctype="multipart/form-data" novalidate class="mt-4 inputUploadForm">
           <div class="pretty-input-upload">
-            <input type="file" multiple="true" @change="processFileUploadChange" id="newPageFilesAddComic" accept="image/x-png,image/jpeg" class="input-file"/>
+            <input type="file" multiple="true" @change="processFileUploadChange" id="newPageFilesAddComic" accept="image/png,image/jpeg" class="input-file"/>
             <p>Select files</p>
           </div>
         </form>
@@ -140,7 +140,7 @@
         </p>
         <form enctype="multipart/form-data" novalidate class="mt-4 inputUploadForm">
           <div class="pretty-input-upload">
-            <input type="file" @change="processThumbNailUploadChange" accept="image/x-png,image/jpeg" class="input-file"/>
+            <input type="file" @change="processThumbNailUploadChange" accept="image/png,image/jpeg" class="input-file"/>
             <p>Select file</p>
           </div>
         </form>

@@ -81,7 +81,7 @@
         <span v-if="insertPageAfterNumber" style="display: flex; align-items: center; flex-direction: column;">
           <form enctype="multipart/form-data" novalidate class="margin-top-16 no-margin-bot" style="width: fit-content">
             <div class="pretty-input-upload">
-              <input type="file" @change="processFileUploadChange" accept="image/x-png,image/jpeg" class="input-file"/>
+              <input type="file" @change="processFileUploadChange" accept="image/png,image/jpeg" class="input-file"/>
               <p>Select file</p>
             </div>
           </form>
@@ -111,7 +111,7 @@
         <h2 style="margin-top: 32px;">Replace thumbnail</h2>
         <form enctype="multipart/form-data" novalidate class="no-margin-bot" style="width: fit-content">
           <div class="pretty-input-upload">
-            <input type="file" @change="processThumbnailUploadChange" accept="image/x-png,image/jpeg" class="input-file"/>
+            <input type="file" @change="processThumbnailUploadChange" accept="image/png,image/jpeg" class="input-file"/>
             <p>Select file</p>
           </div>
         </form>

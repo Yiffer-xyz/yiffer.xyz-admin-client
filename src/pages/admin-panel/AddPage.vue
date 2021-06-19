@@ -41,7 +41,7 @@
         
         <form enctype="multipart/form-data" novalidate class="mt-32">
           <div class="pretty-input-upload">
-            <input type="file" multiple="true" @change="processFileUploadChange" id="newPageFiles" accept="image/x-png,image/jpeg" class="input-file"/>
+            <input type="file" multiple="true" @change="processFileUploadChange" id="newPageFiles" accept="image/png,image/jpeg" class="input-file"/>
             <p>Select files</p>
           </div>
         </form>
