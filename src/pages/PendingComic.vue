@@ -36,6 +36,12 @@
         <p v-if="!comic.hasThumbnail">
           There is no thumbnail yet! Help out by adding one? Find the guidelines in the mod panel's Adding new comic section.
         </p>
+
+        <p v-if="comic.hasThumbnail && thumbnailFile"
+           class="thumbnailNotice">
+          IMPORTANT: When replacing a thumbnail, you should <i>not</i> use the existing one and resize it. This will reduce the overall quality of the resulting thumbnail. Please, use a high-resolution image, typically one of the comic's pages, and crop/resize that.
+        </p>
+
         <form enctype="multipart/form-data" v-if="!thumbnailFile" novalidate style="width: fit-content" class="margin-top-8">
           <div class="pretty-input-upload">
             <input type="file" multiple="false" @change="processFileUploadChange" id="newPageFiles" accept="image/png,image/jpeg" class="input-file"/>
@@ -54,7 +60,7 @@
           <LoadingButton iconType="check"
                          :isLoading="isSubmittingThumbnail"
                          @click="processNewThumbnail()"
-                         :text="`Replace thumbnail with ${thumbnailFile.name}`"
+                         :text="`Submit ${thumbnailFile.name}`"
                          class="y-button button-with-icon">
             
           </LoadingButton>
@@ -803,5 +809,11 @@ const stateOptions = [
 }
 .comic-page-pending {
   margin: 6px;
+}
+.thumbnailNotice {
+  max-width: 40rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0 0.5rem;
 }
 </style>
