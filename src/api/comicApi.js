@@ -156,6 +156,16 @@ export default {
     if (!response.data.error) { return {success: true} }
   },
 
+  async setPendingComicNeedingFix (comicId, errorText) {
+    try {
+      await axios.patch(`${baseUrl}/pendingcomics/${comicId}/set-error`, {errorText: errorText})
+      return {success: true}
+    }
+    catch (err) {
+      return {success: false, message: err?.response?.data || 'Unknown error updating comic data'}
+    }
+  },
+
   async rateComic (comicId, newRating) {
     let response = await axios.post(`${baseUrl}/comics/${comicId}/rate`, {rating: newRating})
     if (response.data.error) { return {success: false, message: response.data.error} }

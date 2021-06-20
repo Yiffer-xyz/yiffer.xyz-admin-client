@@ -2,7 +2,6 @@
   <span>
     <h1>Pending: {{$route.params.comicName}}</h1>
     <span v-if="comic">
-
       <LoadingButton v-if="$store.getters.userData.userType === 'admin' && publishResponseMessageType !== 'success'"
                      :isLoading="isPublishingComic"
                      class="y-button button-with-icon marginAuto mt-32"
@@ -10,7 +9,13 @@
                      @click="processComic"
                      iconType="check"
                      :text="`Approve & publish comic${hasChangedData ? ' (unsaved changes)' : ''}`"/>
-      
+
+      <LoadingButton v-if="$store.getters.userData.userType === 'admin'"
+                     :isLoading="isMarkingComicErrorThumb"
+                     class="y-button y-button-neutral marginAuto mt-16"
+                     @click="markComicErrorThumb"
+                     :text="comic.errorText === 'Thumbnail' ? 'Remove needing thumbnail fix status' : 'Mark as needing thumbnail fix'"/>
+
       <ResponseMessage :message="publishResponseMessage"
                        :messageType="publishResponseMessageType"
                        preventClose
@@ -354,6 +359,8 @@ export default {
       thumbnailResponseMessage: '',
       thumbnailResponseMessageType: 'error',
 
+      isMarkingComicErrorThumb: false,
+
       keywordResponseMessage: '',
       keywordResponseMessageType: 'success',
       isSubmittingAddKw: false,
@@ -448,7 +455,6 @@ export default {
     },
 
     canPublish () {
-      console.log(this.initialComic.keywords.length > 0)
       return this.initialComic 
         && this.initialComic.keywords && this.initialComic.keywords.length > 0
         && this.initialComic.hasThumbnail
@@ -618,6 +624,20 @@ export default {
         this.updateDataResponseMessage = `Error: ${result.message}`
         this.updateDataResponseMessageType = 'error'
       }
+    },
+
+    async markComicErrorThumb () {
+      this.isMarkingComicErrorThumb = true
+      if (this.initialComic.errorText === 'Thumbnail') {
+        await comicApi.setPendingComicNeedingFix(this.initialComic.id, null)
+        this.comic.errorText = null
+      }
+      else {
+        await comicApi.setPendingComicNeedingFix(this.initialComic.id, 'Thumbnail')
+        this.comic.errorText = 'Thumbnail'
+      }
+      this.isMarkingComicErrorThumb = false
+      this.reloadComic()
     },
 
     async processComic () {

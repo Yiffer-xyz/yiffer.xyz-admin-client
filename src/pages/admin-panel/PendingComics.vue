@@ -2,16 +2,7 @@
   <div class="admin-content-box" @click="openComponent" :class="{'admin-content-box-open': isOpen}">
     <h2 @click="closeComponent" class="cursorPointer adminHeader">Pending comics
       <span style="margin-right: 5px;">
-        <span v-if="pendingComics.length>0" class="red-color">({{pendingComics.length}})</span>
-        <span v-else style="color: #999; margin-right: 5px;">(0)</span>
-      </span>
-      <span style="margin-right: 5px;">
-        <span v-if="comicsMissingKeywords>0">({{comicsMissingKeywords}})</span>
-        <span v-else style="color: #999; margin-right: 5px;">(0)</span>
-      </span>
-      <span>
-        <span v-if="comicsMissingThumbnails>0">({{comicsMissingThumbnails}})</span>
-        <span v-else style="color: #999;">(0)</span>
+        <span>({{pendingComics.length}})</span>
       </span>
     </h2>
     <span class="admin-content-box-inner" v-if="isOpen">
@@ -20,20 +11,31 @@
                       class="margin-bottom-10 margin-top-10"/>
 
       <div v-if="pendingComics.length > 0" class="verticalFlex" style="max-width: 100%;">
-        <p>You can add keywords, a thumbnail, or more pages by <u>clicking the comic title</u>. <br/>
-        Comics are approved by admins.<br/>
-        The <span class="red-color">numbers</span> in the header mean (1) amount of pending comics, (2) how many are missing tags, and (3) how many are missing a thumbnail.</p>
+        <div class="verticalFlex alignItemsStart marginAuto">
+          <p style="text-align: left;" class="mt-8">
+            You can add keywords, a thumbnail, or more pages by <u>clicking the comic title</u>. <br/>
+          </p>
+          <p class="mt-8">
+            Comics are published by admins.
+          </p>
+
+          <div class="mt-8">
+            <input type="checkbox" id="showAllDataCheckbox" v-model="showAllData" style="margin: 0 0.5rem 0 0">
+            <label for="showAllDataCheckbox">Show all data</label>
+          </div>
+        </div>
 
         <div class="scrolling-table-container" style="margin: 8px auto 0 auto">
           <table class="yTable">
             <thead>
               <tr>
                 <th>Comic name</th>
-                <th>Artist</th>
-                <th>Category</th>
-                <th>Class.</th>
-                <th>Pages</th>
-                <th>State</th>
+                <th>Error</th>
+                <th v-if="showAllData">Artist</th>
+                <th v-if="showAllData">Category</th>
+                <th v-if="showAllData">Class.</th>
+                <th v-if="showAllData">Pages</th>
+                <th v-if="showAllData">State</th>
                 <th>Tags</th>
                 <th>Thumbnail</th>
                 <th>Mod name</th>
@@ -43,26 +45,43 @@
             <tbody>
               <tr v-for="pendingComic in pendingComics" :key="pendingComic.id">
                 <td>
-                  <router-link :to="`/pending-comic/${pendingComic.name}`" target="_blank" class="underline-link">
+                  <router-link :to="`/pending-comic/${pendingComic.name}`"
+                               target="_blank"
+                               class="underline-link"
+                               :class="{'red-color': !isComicApprovable(pendingComic)}">
                     {{pendingComic.name}} <RightArrow/>
                   </router-link>
                 </td>
-                <td>
+
+                <td class="red-color">{{pendingComic.errorText}}</td>
+
+                <td v-if="showAllData">
                   <a :href="`https://yiffer.xyz/artist/${pendingComic.artist}`" target="_blank" class="underline-link">
                     {{pendingComic.artist}}
                   </a>
                 </td>
-                <td>{{pendingComic.tag}}</td>
-                <td>{{pendingComic.cat}}</td>
-                <td>{{pendingComic.numberOfPages}}</td>
-                <td>{{pendingComic.state}}</td>
-                <td v-if="pendingComic.keywords.length>0"><CheckboxIcon/></td> <td v-else>-</td>
-                <td v-if="pendingComic.hasThumbnail"><CheckboxIcon/></td> <td v-else>-</td>
+
+                <td v-if="showAllData">{{pendingComic.tag}}</td>
+                <td v-if="showAllData">{{pendingComic.cat}}</td>
+                <td v-if="showAllData">{{pendingComic.numberOfPages}}</td>
+                <td v-if="showAllData">{{pendingComic.state}}</td>
+                
+                <td v-if="pendingComic.keywords.length>0">
+                  <CheckboxIcon/>
+                </td>
+                <td v-else>-</td>
+
+                <td v-if="pendingComic.hasThumbnail">
+                  <CheckboxIcon/>
+                </td>
+                <td v-else>-</td>
+
                 <td>{{pendingComic.modName}}</td>
+
                 <td v-if="$store.getters.userData.userType === 'admin'">
                   <div class="horizontal-wrapper-4">
                     <button @click="processComic(pendingComic.id, true, pendingComic.name)" 
-                            v-if="pendingComic.keywords.length > 0 && pendingComic.hasThumbnail"
+                            v-if="isComicApprovable(pendingComic)"
                             class="y-button">
                       Approve
                     </button>
@@ -112,6 +131,7 @@ export default {
 
   data: function () {
     return {
+      showAllData: false,
       isOpen: false,
       responseMessage: '',
       responseMessageType: 'info',
@@ -119,6 +139,10 @@ export default {
   },
 
   methods: {
+    isComicApprovable (comic) {
+      return comic.keywords.length > 0 && comic.hasThumbnail && !comic.errorText
+    },
+
     async processComic (comicId, isApproved, comicName) {
 			let response = await comicApi.processPendingComic(comicId, isApproved)
       
