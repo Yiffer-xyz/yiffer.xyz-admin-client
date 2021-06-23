@@ -51,7 +51,7 @@
 									<button 
 										@click="processSuggestion(suggestion, true)"
 										class="y-button button-with-icon">
-										<CheckIcon Title=""/> I've added the comic
+										<CheckIcon Title=""/> Adding/added the comic
 									</button>
 									<button 
 										@click="initRejectAndAddToList(suggestion)"
