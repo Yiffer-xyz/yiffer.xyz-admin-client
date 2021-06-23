@@ -138,18 +138,48 @@
         <p class="admin-mini-header no-margin-bot mt-32">
           Thumbnail
         </p>
-        <form enctype="multipart/form-data" novalidate class="mt-4 inputUploadForm">
-          <div class="pretty-input-upload">
-            <input type="file" @change="processThumbNailUploadChange" accept="image/png,image/jpeg" class="input-file"/>
-            <p>Select file</p>
+        <div class="cropContainer"
+             :class="{'borderedContainer': isThumbnailReadyForCrop}"
+             v-if="!isThumbnailConfirmed">
+          <ImageCropper buttonText="Select file (click/drop)"
+                        @imageReady="isReady => isThumbnailReady = isReady"
+                        @readyForCrop="isReadyForCrop => setReadyForCrop('new', isReadyForCrop)"
+                        @handleImage="data => croppedThumbnail = data"
+                        :key="resizerKey"
+                        v-if="!isPageThumbnailReadyForCrop"/>
+
+          <ImageCropper buttonText="Crop page 1 as thumbnail"
+                        @imageReady="isReady => isThumbnailReady = isReady"
+                        @readyForCrop="isReadyForCrop => setReadyForCrop('page', isReadyForCrop)"
+                        @handleImage="data => croppedThumbnail = data"
+                        disableUpload
+                        @disabledUploadClick="setPage1ThumbnailFile"
+                        :externalFile="externalThumbnailFile"
+                        :key="resizerKey + 'a'"
+                        :isDisabled="!selectedFiles || selectedFiles.length < 1"
+                        v-if="!isNewFileThumbnailReadyForCrop"/>
+
+          <hr v-if="isThumbnailReadyForCrop || isPageThumbnailReadyForCrop" class="mt-16"/>
+
+          <div class="horizontalFlex mt-16" v-if="isThumbnailReadyForCrop || isPageThumbnailReadyForCrop">
+            <button class="y-button y-button-neutral mr-8" @click="resetResizer">
+              Cancel thumbnail
+            </button>
+            <button class="y-button button-with-icon"
+                    :disabled="!isThumbnailReady"
+                    :class="{'y-button-disabled': !isThumbnailReady}"
+                    @click="confirmThumbnail">
+              <CheckIcon/> Confirm thumbnail
+            </button>
           </div>
-        </form>
-        <p v-if="thumbnailFile">Selected file: 
-          <span class="courier">{{thumbnailFile.name}}</span>
-        </p>
-        <p class="red-color bold" v-if="errorMessageThumbnail" style="max-width: 20rem;">
-          {{errorMessageThumbnail}}
-        </p>
+        </div>
+
+        <div v-if="isThumbnailConfirmed">
+          <img :src="croppedThumbnail.base64"/>
+          <button class="y-button y-button-neutral button-with-icon" @click="resetResizer">
+            <CrossIcon/> Remove thumbnail
+          </button>
+        </div>
 
         <p class="admin-mini-header no-margin-bot mt-32">
           Tags
@@ -192,7 +222,10 @@ import comicApi from '@/api/comicApi'
 import ResponseMessage from '@/components/ResponseMessage.vue'
 import Select from '@/components/Select.vue'
 import TextInput from '@/components/TextInput.vue'
+import ImageCropper from '@/components/ImageCropper.vue'
 import { mapGetters } from 'vuex'
+import CheckIcon from 'vue-material-design-icons/Check.vue'
+import CrossIcon from 'vue-material-design-icons/Close.vue'
 
 export default {
   name: 'correctComic',
@@ -204,7 +237,8 @@ export default {
   },
 
 	components: {
-    ResponseMessage, Select, TextInput,
+    ResponseMessage, Select, TextInput, ImageCropper,
+    CheckIcon, CrossIcon,
   },
 
   data: function () {
@@ -220,7 +254,6 @@ export default {
       nextComic: undefined,
       selectedFiles: [],
       selectedKeywords: [],
-      thumbnailFile: undefined,
 			selectedKeyword: undefined,
       uploadPercent: undefined,
       errorMessageThumbnail: '',
@@ -235,10 +268,59 @@ export default {
       nextComicResetValue: null,
       kwResetValue: null,
       selectResetValue: null,
+
+      isThumbnailReady: false,
+      isThumbnailReadyForCrop: false,
+      isNewFileThumbnailReadyForCrop: false,
+      isPageThumbnailReadyForCrop: false,
+      resizerKey: Math.random().toString(),
+      croppedThumbnail: null,
+      externalThumbnailFile: null,
+      isThumbnailConfirmed: false,
     }
   },
 
   methods: {
+    setReadyForCrop (cropperType, isReady) {
+      if (isReady) {
+        if (cropperType === 'page') {
+          this.isPageThumbnailReadyForCrop = true
+          this.isNewFileThumbnailReadyForCrop = false
+        }
+        else if (cropperType === 'new') {
+          this.isNewFileThumbnailReadyForCrop = true
+          this.isPageThumbnailReadyForCrop = false
+        }
+      }
+      else {
+        this.isNewFileThumbnailReadyForCrop = false
+        this.isPageThumbnailReadyForCrop = false
+        this.croppedThumbnail = null
+        this.externalThumbnailFile = null
+      }
+
+      this.isThumbnailReadyForCrop = isReady
+    },
+
+    async setPage1ThumbnailFile () {
+      this.externalThumbnailFile = this.selectedFiles[0]
+    },
+
+    confirmThumbnail () {
+      this.isThumbnailConfirmed = true
+    },
+
+    resetResizer () {
+      this.isThumbnailReady = false
+      this.isThumbnailReadyForCrop = false
+      this.resizerKey = Math.random().toString()
+      this.isNewFileThumbnailReadyForCrop = false
+      this.isPageThumbnailReadyForCrop = false
+      this.croppedThumbnail = null
+      this.externalThumbnailFile = null
+      this.isThumbnailConfirmed = false
+    },
+
     addSelectedKeyword (keyword) {
       if (!this.selectedKeywords.find(kw => kw.id === keyword.id)) {
         this.selectedKeywords.push(keyword)
@@ -256,26 +338,6 @@ export default {
       let eventFiles = [...changeEvent.target.files]
       this.selectedFiles = eventFiles.sort((f1, f2) => f1.name > f2.name ? 1 : -1)
     },
-
-    processThumbNailUploadChange (changeEvent) {
-      this.thumbnailFile = changeEvent.target.files[0]
-      this.processNewThumbnail()
-    },
-
-		async processNewThumbnail () {
-			this.errorMessageThumbnail = ''
-			let fileReader = new FileReader()
-			fileReader.onload = () => {
-				let tempImage = new Image()
-				tempImage.src = fileReader.result
-				tempImage.onload = () => {
-					if (tempImage.width !== 200 || tempImage.height !== 283) {
-						this.errorMessageThumbnail = `Sorry, the image does not match the 200x283 pixel requirement (is ${tempImage.width}x${tempImage.height}).`
-					}
-				}
-			}
-			fileReader.readAsDataURL(this.thumbnailFile)
-		},
 
     removeKeywordFromSelection (keyword) {
       this.selectedKeywords.splice(this.selectedKeywords.findIndex(kw => kw.id===keyword.id), 1)
@@ -302,12 +364,11 @@ export default {
         await comicApi.addNewComic(
           uploadData,
           this.selectedFiles,
-          this.thumbnailFile,
+          this.croppedThumbnail.file,
           this.updateUploadProgress
         )
       }
       catch (err) {
-        console.log(err)
         this.responseMessage = err.response?.data || 'Unknown server error'
         this.responseMessageType = 'error'
         return
@@ -456,5 +517,13 @@ const stateOptions = [
   @media (min-width: 380px) {
     // flex-grow: 1;
   }
+}
+
+.cropContainer {
+  border-radius: 4px;
+}
+.borderedContainer {
+  border: 3px solid $themeGreen1;
+  padding: 1rem;
 }
 </style>
