@@ -42,31 +42,40 @@
           IMPORTANT: When replacing a thumbnail, you should <i>not</i> use the existing one and resize it. This will reduce the overall quality of the resulting thumbnail. Please, use a high-resolution image, typically one of the comic's pages, and crop/resize that.
         </p>
 
-        <form enctype="multipart/form-data" v-if="!thumbnailFile" novalidate style="width: fit-content" class="margin-top-8">
-          <div class="pretty-input-upload">
-            <input type="file" multiple="false" @change="processFileUploadChange" id="newPageFiles" accept="image/png,image/jpeg" class="input-file"/>
-            <p v-if="!comic.hasThumbnail">
-              Select file
-            </p>
-            <p v-else>
-              Replace thumbnail
-            </p>
+        <div class="cropContainer" :class="{'borderedContainer': isThumbnailReadyForCrop}">
+          <ImageCropper :buttonText="comic.hasThumbnail ? 'Replace thumbnail (click/drop)' : 'Select file (click/drop)'"
+                        @imageReady="isReady => isThumbnailReady = isReady"
+                        @readyForCrop="isReadyForCrop => setReadyForCrop('new', isReadyForCrop)"
+                        @handleImage="data => croppedThumbnail = data.file"
+                        :key="resizerKey"
+                        v-if="!isPageThumbnailReadyForCrop"/>
+
+          <!-- TODO -->
+          <!-- <ImageCropper buttonText="Crop page 1 as thumbnail"
+                        @imageReady="isReady => isThumbnailReady = isReady"
+                        @readyForCrop="isReadyForCrop => setReadyForCrop('page', isReadyForCrop)"
+                        @handleImage="data => croppedThumbnail = data.file"
+                        disableUpload
+                        @disabledUploadClick="setPage1ThumbnailFile"
+                        :externalFile="externalThumbnailFile"
+                        :key="resizerKey + 'a'"
+                        v-if="!isNewFileThumbnailReadyForCrop"/> -->
+
+          <hr v-if="isThumbnailReadyForCrop || isPageThumbnailReadyForCrop" class="mt-16"/>
+
+          <div class="horizontalFlex mt-16" v-if="isThumbnailReadyForCrop || isPageThumbnailReadyForCrop">
+            <button class="y-button y-button-neutral mr-8" @click="resetResizer">
+              Cancel
+            </button>
+            <LoadingButton iconType="check"
+                           :isLoading="isSubmittingThumbnail"
+                           :isDisabled="!isThumbnailReady"
+                           @click="uploadThumbnailImage()"
+                           text="Submit thumbnail"
+                           class="y-button button-with-icon"/>
           </div>
-        </form>
-        <div class="horizontalFlex mt-8" v-if="thumbnailFile">
-          <button class="y-button y-button-neutral mr-8" @click="thumbnailFile = null">
-            Cancel
-          </button>
-          <LoadingButton iconType="check"
-                         :isLoading="isSubmittingThumbnail"
-                         @click="processNewThumbnail()"
-                         :text="`Submit ${thumbnailFile.name}`"
-                         class="y-button button-with-icon">
-            
-          </LoadingButton>
         </div>
       </span>
-
 
       <ResponseMessage :message="keywordResponseMessage"
                        :messageType="keywordResponseMessageType"
@@ -74,6 +83,8 @@
                        outsideStyle="margin-top: 2rem;" />
 
       <div class="mt-32 width100">
+        <h2 class="mt-32">Tags</h2>
+
         <div class="tagsContainer">
           <div class="verticalFlex alignItemsStart">
             <p class="admin-mini-header">
@@ -298,6 +309,7 @@
           v-for="pageNumber in comic.numberOfPages" 
           :src="`${config.comicsBaseUrl}/${$route.params.comicName}/${formattedPageNumber(pageNumber)}.jpg?${randomQueryString}`"
           :key="pageNumber"
+          :id="`comicPage${pageNumber}`"
           :class="['comic-page', 'image-fit-full', 'comic-page-pending']"/>
       </div>
 
@@ -316,6 +328,7 @@
 <script>
 import UpArrow from 'vue-material-design-icons/ArrowUp.vue'
 import CheckIcon from 'vue-material-design-icons/Check.vue'
+import ImageCropper from '@/components/ImageCropper.vue'
 import ResponseMessage from '@/components/ResponseMessage.vue'
 import Loading from '@/components/LoadingIndicator.vue'
 import Select from '@/components/Select.vue'
@@ -328,6 +341,7 @@ import keywordApi from '@/api/keywordApi'
 import artistApi from '@/api/artistApi'
 import { mapGetters } from 'vuex'
 import config from '@/config.json'
+import { urlToFile } from '@/utils/imageUtils'
 
 export default {
   name: 'pendingComic',
@@ -339,6 +353,7 @@ export default {
     Loading,
     Select,
     TextInput,
+    ImageCropper,
     LoadingButton,
   },
 
@@ -364,6 +379,14 @@ export default {
       isSubmittingThumbnail: false,
       thumbnailResponseMessage: '',
       thumbnailResponseMessageType: 'error',
+      croppedThumbnail: null,
+      externalThumbnailFile: null,
+
+      isThumbnailReady: false,
+      isThumbnailReadyForCrop: false,
+      isNewFileThumbnailReadyForCrop: false,
+      isPageThumbnailReadyForCrop: false,
+      resizerKey: Math.random().toString(),
 
       isMarkingComicErrorThumb: false,
 
@@ -488,6 +511,42 @@ export default {
   },
 
   methods: {
+    setReadyForCrop (cropperType, isReady) {
+      if (isReady) {
+        if (cropperType === 'page') {
+          this.isPageThumbnailReadyForCrop = true
+          this.isNewFileThumbnailReadyForCrop = false
+        }
+        else if (cropperType === 'new') {
+          this.isNewFileThumbnailReadyForCrop = true
+          this.isPageThumbnailReadyForCrop = false
+        }
+      }
+      else {
+        this.isNewFileThumbnailReadyForCrop = false
+        this.isPageThumbnailReadyForCrop = false
+        this.croppedThumbnail = null
+        this.externalThumbnailFile = null
+      }
+
+      this.isThumbnailReadyForCrop = isReady
+    },
+
+    async setPage1ThumbnailFile () {
+      // todo
+      // this.externalThumbnailFile = page1File
+    },
+    
+    resetResizer () {
+      this.isThumbnailReady = false
+      this.isThumbnailReadyForCrop = false
+      this.resizerKey = Math.random().toString()
+      this.isNewFileThumbnailReadyForCrop = false
+      this.isPageThumbnailReadyForCrop = false
+      this.croppedThumbnail = null
+      this.externalThumbnailFile = null
+    },
+
     onArtistSelect (artist) {
       this.selectedArtist = artist
       this.artistResetValue = Math.random().toString()
@@ -521,36 +580,19 @@ export default {
       this.thumbnailFile = changeEvent.target.files[0]
     },
     
-    async processNewThumbnail () {
-      let fileReader = new FileReader()
-      fileReader.onload = () => {
-        let tempImage = new Image()
-        tempImage.src = fileReader.result
-        tempImage.onload = () => {
-          if (tempImage.width !== 200 || tempImage.height !== 283) {
-            this.thumbnailResponseMessage = `The image does not match the 200x283 pixel requirement (is ${tempImage.width}x${tempImage.height}).`
-            this.thumbnailResponseMessageType = 'error'
-          }
-          else {
-            this.uploadThumbnailImage()
-          }
-        }
-      }
-      fileReader.readAsDataURL(this.thumbnailFile)
-    },
-
     async uploadThumbnailImage () {
       this.thumbnailResponseMessage = ''
 
       this.isSubmittingThumbnail = true
-      let response = await comicApi.addThumbnailToPendingComic(this.comic, this.thumbnailFile)
+      let response = await comicApi.addThumbnailToPendingComic(this.comic, this.croppedThumbnail)
       this.isSubmittingThumbnail = false
 
       if (response.success) {
         this.thumbnailResponseMessage = 'Success adding thumbnail!'
         this.thumbnailResponseMessageType = 'success'
-        window.location.reload()
         this.thumbnailFile = undefined
+        this.randomQueryString = Math.random().toString()
+        this.resetResizer()
       }
       else {
         this.thumbnailResponseMessage = 'Error adding thumbnail: ' + response.message
@@ -778,7 +820,7 @@ const stateOptions = [
 ]
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .tagsContainer {
   display: grid;
   grid-template-columns: auto auto;
@@ -815,5 +857,13 @@ const stateOptions = [
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
   padding: 0 0.5rem;
+}
+
+.cropContainer {
+  padding: 1rem;
+  border-radius: 4px;
+}
+.borderedContainer {
+  border: 3px solid $themeGreen1;
 }
 </style>

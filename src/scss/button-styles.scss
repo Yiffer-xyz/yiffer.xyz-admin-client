@@ -102,8 +102,9 @@ $buttonBorderWidth: 2px;
   background: transparent;
   background-color: transparent;
   box-shadow: none;
-  border: 1px solid $themeRed2;
+  border: 2px solid $themeRed2;
   color: $themeRed2;
+  font-weight: 600;
   svg {
     color: $themeRed2;
   }
@@ -190,6 +191,15 @@ $buttonBorderWidth: 2px;
   }
 }
 
+.iconButton {
+  span {
+    margin-right: 4px;
+  }
+  svg {
+    margin-bottom: 2px;
+  }
+}
+
 .inputUploadForm {
   &:focus-within {
     .pretty-input-upload {
@@ -209,7 +219,7 @@ $buttonBorderWidth: 2px;
   background-color: $themeBlueDark;
   color: white;
   border: 2px solid $themeBlueDark;
-  width: 12rem;
+  width: 13rem;
   word-break: keep-all;
   transition: background-color 100ms, border-color 100ms, box-shadow 100ms;
   padding: 4px 0;
@@ -241,7 +251,7 @@ $buttonBorderWidth: 2px;
   p {
     font-size: 14px;
     color: white;
-    font-weight: 400;
+    font-weight: 600;
   }
 
   &:hover, &:focus {

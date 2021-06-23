@@ -6,6 +6,8 @@ import VueCookies from 'vue-cookies'
 import "vue-material-design-icons/styles.css"
 import breakpoint from 'better-vue-breakpoints'
 import Meta from 'vue-meta';
+import VueCroppie from "vue-croppie";
+import 'croppie/croppie.css'
 
 import MenuDown from "vue-material-design-icons/ChevronDown.vue"
 import MenuUp from "vue-material-design-icons/ChevronUp.vue"
@@ -17,6 +19,8 @@ Vue.config.productionTip = false
 Vue.use(VueCookies)
 
 Vue.use(Meta);
+
+Vue.use(VueCroppie);
 
 Vue.use(breakpoint, {
   xs: 500,
