@@ -11,6 +11,8 @@
         <div style="max-width: 700px;" v-if="isShowingInstructions">
           <p>
             - Files must be either .jpg or .png. File name does not matter, except for ordering.<br/>
+          </p>
+          <p class="mt-16">
             - It is <i>very important</i> that pages are named in some ascending order.<br/>
             Example:
             <span class="courier">[01.jpg, 02.jpg, ...]</span>, or 
@@ -18,16 +20,13 @@
             <span class="courier">[1.jpg, 2.jpg, ...]</span> will not work for more than 9 pages!
           </p>
 
-          <p class="margin-top-8">
-            - Adding a thumbnail is optional. If you don't someone else will later. <br/>
-            - Thumbnails are precisely <u>200x283</u> pixels.<br/>
+          <p class="mt-16">
             - If the comic has a cover page, this should be used in the thumbnail. Otherwise, choose an image representing the comic well,
-            but not too lewd if possible. Crop edges off of thumbnails.<br/>
-            - There are many good resize/crop tools for making thumbnails. Don't use MSPaint, it destroys the image when scaling.
+            but not too lewd if possible. Crop edges off of thumbnails!<br/>
           </p>
 
-          <p class="margin-top-8">
-            - Adding tags is also optional. Again, someone else will have to do it if you don't. 
+          <p class="mt-16">
+            - Adding tags is optional. Someone else will have to do it if you don't. 
             You can also add tags after finishing this, from the "Pending comics" list.
           </p>
         </div>
