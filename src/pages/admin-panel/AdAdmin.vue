@@ -308,9 +308,14 @@ export default {
         customExpiryDate,
         this.editedAd.payment,
       ))
+      let adIndex = this.displayedAds.findIndex(ad => ad.id === this.editedAd.id)
 
-      if (result) {
-        let adIndex = this.displayedAds.findIndex(ad => ad.id === this.editedAd.id)
+      if (this.editedAd.status === 'DELETED') {
+        this.displayedAds.splice(adIndex, 1)
+        this.successMessage = `Successfully deleted ${this.editedAd.id}`
+        this.cancelEditing()
+      }
+      else if (result) {
         this.$set(this.displayedAds, adIndex, result)
         this.successMessage = `Successfully edited ${this.editedAd.id}`
         this.cancelEditing()
@@ -365,7 +370,7 @@ export default {
       else if ([adStatuses.needsCorrection, adStatuses.awaitingPayment, adStatuses.activeNeedsCorrection].includes(status)) {
         return 'monoWarning'
       }
-      else if ([adStatuses.ended, adStatuses.cancelled].includes(status)) {
+      else if ([adStatuses.ended].includes(status)) {
         return 'monoError'
       }
       else {
@@ -391,7 +396,7 @@ const adStatuses = {
   activeButPending: 'ACTIVE BUT PENDING',
   activeNeedsCorrection: 'ACTIVE BUT NEEDS CORR.',
   ended: 'ENDED',
-  cancelled: 'CANCELLED',
+  deleted: 'DELETED',
 }
 </script>
 
