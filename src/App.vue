@@ -84,7 +84,7 @@ export default {
   metaInfo() {
     return {
       meta: [
-        {name: 'theme-color', content: '#de2a60'},
+        {name: 'theme-color', content: '#a4f5e4'},
         {name: 'twitter:card', content: 'summary'},
         {vmid: 'twitterTitle', name: 'twitter:title', content: 'Advertising - Yiffer.xyz'},
         {vmid: 'twitterDesc', name: 'twitter:description', content: "Advertise on the internet's best furry comics website!"},
