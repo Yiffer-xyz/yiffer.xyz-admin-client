@@ -17,7 +17,7 @@
               <th>Comic name</th>
               <th>Suggestion</th>
               <th>Suggester</th>
-              <th>Action</th>
+              <th class="textAlignCenter">Action</th>
             </tr>
           </thead>
           <tbody>

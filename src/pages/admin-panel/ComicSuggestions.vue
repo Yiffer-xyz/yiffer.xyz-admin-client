@@ -5,14 +5,13 @@
       <span v-else style="color: #999;">(0)</span>
     </h2>
     <span class="admin-content-box-inner description-text" v-if="isOpen">
-      <p>Comics suggested by users will appear here. For any comics in the list that should be added, do add them via 'Add Comic' below. Then, <i>after</i> that is done, come back here.</p>
       <p class="margin-bottom-8 margin-top-8">
-				- Click '<u>Added</u>' when the comic has been uploaded (here, in the admin panel, via <i>Add new comic</i>). Please don't choose this before you have uploaded the comic.
+				- Click '<u>Adding/added</u>' BEFORE you start adding the comic.
 				<br/>
 				- Click '<u>Reject, add to rejected-list</u>' if the comic fails to meet the criteria listed  
 				<a href="https://yiffer.xyz/suggestcomic" target="_blank" class="underline-link">here</a>. This will show up in the list of previously rejected comics, along with a reason you may specify. Users can see this and it will prevent them from suggesting the same comic again.
 				<br/>
-        - Click '<u>Reject as spam/dupl.</u>' if the comic has been suggested before, or if it's not a serious suggestion.
+        - Click '<u>Reject as spam/duplicate</u>' if the comic has been suggested before, or if it's not a serious suggestion.
 				<br/>
 				<br/>
 				Please don't hesitate to ask for opinions in the mod Telegram chat!
@@ -25,27 +24,17 @@
         <table class="yTable">
           <thead>
             <tr>
+              <th class="textAlignCenter">Action</th>
               <th>Comic name</th>
               <th>Artist</th>
               <th>Links and comments</th>
               <th>User/IP</th>
-              <th>Action</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(suggestion, index) in unprocessedSuggestions" :key="index">
-              <td>{{suggestion.name}}</td>
-              <td>{{suggestion.artist || ''}}</td>
-              <td style="white-space: pre-wrap;">{{suggestion.description}}</td>
-              <td>{{suggestion.user}}</td>
               <td>
-                <button v-if="!suggestionIdBeingActioned"
-                        @click="onSuggestionActionClick(suggestion)"
-                        class="y-button">
-                  Choose action...
-                </button>
-
-								<div v-else-if="suggestionIdBeingActioned === suggestion.id 
+								<div v-if="suggestionIdBeingActioned === suggestion.id 
                   && !suggestion.isRejectingAndAddingToList"
                      class="verticalFlex">
 									<button 
@@ -61,7 +50,7 @@
 									<button
 										@click="processSuggestion(suggestion, false, false)"
 										class="y-button y-button-red button-with-icon margin-top-8">
-										<DeleteIcon/> Reject as spam/dupl.
+										<DeleteIcon/> Reject as spam/duplicate
 									</button>
 									<button
 										@click="suggestionIdBeingActioned = null"
@@ -69,6 +58,14 @@
 										Cancel
 									</button>
 								</div>
+
+                <button v-else
+                        @click="onSuggestionActionClick(suggestion)"
+                        class="y-button"
+                        :class="{'y-button-disabled': suggestionIdBeingActioned}"
+                        :disabled="suggestionIdBeingActioned">
+                  Choose action...
+                </button>
 
                 <!-- REJECT AND ADD TO LIST -->
                 <div v-if="suggestion.isRejectingAndAddingToList" class="verticalFlex alignItemsStart">
@@ -88,6 +85,10 @@
                     </button>
                 </div>
               </td>
+              <td>{{suggestion.name}}</td>
+              <td>{{suggestion.artist || ''}}</td>
+              <td style="white-space: pre-wrap;">{{suggestion.description}}</td>
+              <td>{{suggestion.user}}</td>
             </tr>
           </tbody>
         </table>
@@ -109,23 +110,23 @@
       <table v-if="showProcessedSuggestions" class="yTable">
         <thead>
           <tr>
+            <th>Action</th>
             <th>Comic name</th>
             <th>Artist</th>
             <th>Links and comments</th>
             <th>User/IP</th>
             <th>Mod</th>
-            <th>Action</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(suggestion, index) in processedSuggestions" :key="index">
+            <td v-if="suggestion.verdict === 'added'"><CheckboxIcon/> Added</td>
+            <td v-else>Rejected</td>
             <td>{{suggestion.name}}</td>
             <td>{{suggestion.artist || ''}}</td>
             <td style="word-break: break-word;">{{suggestion.description}}</td>
             <td>{{suggestion.user}}</td>
             <td>{{suggestion.mod}}</td>
-            <td v-if="suggestion.verdict === 'added'"><CheckboxIcon/> Added</td>
-            <td v-else>Rejected</td>
           </tr>
         </tbody>
       </table>
