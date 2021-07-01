@@ -39,7 +39,7 @@
                 <th>Tags</th>
                 <th>Thumbnail</th>
                 <th>Mod name</th>
-                <th v-if="$store.getters.userData.userType === 'admin'">Action</th>
+                <th v-if="$store.getters.userData.userType === 'admin'" class="textAlignCenter">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -66,15 +66,15 @@
                 <td v-if="showAllData">{{pendingComic.numberOfPages}}</td>
                 <td v-if="showAllData">{{pendingComic.state}}</td>
                 
-                <td v-if="pendingComic.keywords.length>0">
-                  <CheckboxIcon/>
+                <td v-if="pendingComic.keywords.length>0" class="textAlignCenter">
+                  {{pendingComic.keywords.length}}
                 </td>
-                <td v-else>-</td>
+                <td v-else class="textAlignCenter">-</td>
 
-                <td v-if="pendingComic.hasThumbnail">
+                <td v-if="pendingComic.hasThumbnail" class="textAlignCenter">
                   <CheckboxIcon/>
                 </td>
-                <td v-else>-</td>
+                <td v-else class="textAlignCenter">-</td>
 
                 <td>{{pendingComic.modName}}</td>
 
