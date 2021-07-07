@@ -5,6 +5,7 @@ import Login from '@/pages/Login.vue'
 import AdminMain from '@/pages/AdminMain.vue'
 import PendingComic from '@/pages/PendingComic.vue'
 import NoAccess from '@/pages/NoAccess.vue'
+import Instructions from '@/pages/Instructions.vue'
 
 Vue.use(Router)
 
@@ -67,6 +68,11 @@ export default new Router({
       meta: {
         redirectOnLogin: true,
       },
+    },
+    {
+      path: '/instructions',
+      name: 'instructions',
+      component: Instructions,
     },
     {
       path: '/no-access',
