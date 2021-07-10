@@ -8,13 +8,33 @@
                      :isDisabled="!canPublish"
                      @click="processComic"
                      iconType="check"
+                     color="primary"
                      :text="`Approve & publish comic${hasChangedData ? ' (unsaved changes)' : ''}`"/>
 
-      <LoadingButton v-if="$store.getters.userData.userType === 'admin'"
-                     :isLoading="isMarkingComicErrorThumb"
+      <p v-if="comic.errorText" class="mt-32">
+        Error: {{comic.errorText}}
+      </p>
+
+      <LoadingButton v-if="$store.getters.userData.userType === 'admin' && comic.errorText"
+                     :isLoading="isMarkingComicError"
                      class="y-button y-button-neutral marginAuto mt-16"
-                     @click="markComicErrorThumb"
-                     :text="comic.errorText === 'Thumbnail' ? 'Remove needing thumbnail fix status' : 'Mark as needing thumbnail fix'"/>
+                     @click="markComicError(null)"
+                     color="neutral"
+                     text="Remove error status"/>
+
+      <LoadingButton v-if="$store.getters.userData.userType === 'admin' && !comic.errorText"
+                     :isLoading="isMarkingComicError"
+                     class="y-button y-button-neutral marginAuto mt-16"
+                     @click="markComicError('Thumbnail')"
+                     color="neutral"
+                     text="Mark as needing thumbnail fix"/>
+
+      <LoadingButton v-if="$store.getters.userData.userType === 'admin' && !comic.errorText"
+                     :isLoading="isMarkingComicError"
+                     class="y-button y-button-neutral marginAuto mt-16"
+                     @click="markComicError('Varying page res.')"
+                     color="neutral"
+                     text="Page resolution too varying"/>
 
       <ResponseMessage :message="publishResponseMessage"
                        :messageType="publishResponseMessageType"
@@ -388,7 +408,7 @@ export default {
       isPageThumbnailReadyForCrop: false,
       resizerKey: Math.random().toString(),
 
-      isMarkingComicErrorThumb: false,
+      isMarkingComicError: false,
 
       keywordResponseMessage: '',
       keywordResponseMessageType: 'success',
@@ -674,17 +694,19 @@ export default {
       }
     },
 
-    async markComicErrorThumb () {
-      this.isMarkingComicErrorThumb = true
-      if (this.initialComic.errorText === 'Thumbnail') {
+    async markComicError (errorType) {
+      this.isMarkingComicError = true
+
+      if (!errorType) {
         await comicApi.setPendingComicNeedingFix(this.initialComic.id, null)
         this.comic.errorText = null
       }
       else {
-        await comicApi.setPendingComicNeedingFix(this.initialComic.id, 'Thumbnail')
-        this.comic.errorText = 'Thumbnail'
+        await comicApi.setPendingComicNeedingFix(this.initialComic.id, errorType)
+        this.comic.errorText = errorType
       }
-      this.isMarkingComicErrorThumb = false
+
+      this.isMarkingComicError = false
       this.reloadComic()
     },
 

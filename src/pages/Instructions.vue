@@ -41,7 +41,7 @@
 
       <h3>Keep page sizes equal &amp; don't use resized pages</h3>
       <p>
-        In general, try to keep the size of a comic's pages similar. If, for instance, a comic that's already been uploaded has all of its pages in a "regular" size (say, 1400px tall) but you find a new one in a huge size (for example 3000px tall), please look for another version - typically found on the artist's FA or twitter.
+        In general, try to keep the size of a comic's pages similar. If, for instance, a comic that's already been uploaded has all of its pages in a "regular" size (say, 1400px tall) but you find a new one in a huge size (for example 3000px tall), please look for another version - typically found on the artist's FA or twitter. It might feel "wrong" to "downgrade" a comic's pages from being 2600x3200 px to, say, 1300x1600 px - but trust me, most readers prefer this, as the latter is still more than big enough to be readable, and will load much quicker.
         <br>
         <br>
         When uploading a comic the same principles apply, try to keep the pages the same size. If you find all the pages in a regular quality and only a few in a higher one, please just use the regular quality ones, as long as they're not unreasonably small.
