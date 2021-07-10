@@ -156,6 +156,16 @@ export default {
     if (!response.data.error) { return {success: true} }
   },
 
+  async schedulePendingComic (comicId, scheduledTime) {
+    try {
+      await axios.post(`${baseUrl}/pendingcomics/${comicId}/schedule`, {scheduledTime})
+      return true
+    }
+    catch (err) {
+      return {error: err?.response?.data || 'Unknown error scheduling comic'}
+    }
+  },
+
   async setPendingComicNeedingFix (comicId, errorText) {
     try {
       await axios.patch(`${baseUrl}/pendingcomics/${comicId}/set-error`, {errorText: errorText})

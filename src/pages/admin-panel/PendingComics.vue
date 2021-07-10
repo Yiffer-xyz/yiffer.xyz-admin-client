@@ -31,6 +31,7 @@
               <tr>
                 <th>Comic name</th>
                 <th>Error</th>
+                <th v-if="isAnyScheduledComic">Scheduled</th>
                 <th v-if="showAllData">Artist</th>
                 <th v-if="showAllData">Category</th>
                 <th v-if="showAllData">Class.</th>
@@ -54,6 +55,10 @@
                 </td>
 
                 <td class="red-color">{{pendingComic.errorText}}</td>
+
+                <td v-if="isAnyScheduledComic">
+                  {{formatDateStr(pendingComic.scheduledPublish)}}
+                </td>
 
                 <td v-if="showAllData">
                   <a :href="`https://yiffer.xyz/artist/${pendingComic.artist}`" target="_blank" class="underline-link">
@@ -81,13 +86,45 @@
                 <td v-if="$store.getters.userData.userType === 'admin'">
                   <div class="horizontal-wrapper-4">
                     <button @click="processComic(pendingComic.id, true, pendingComic.name)" 
-                            v-if="isComicApprovable(pendingComic)"
-                            class="y-button">
+                            v-if="isComicApprovable(pendingComic) && !isThisComicBeingScheduled(pendingComic.id)"
+                            :disabled="isOtherComicBeingScheduled(pendingComic.id)"
+                            class="y-button"
+                            :class="{'y-button-disabled': isOtherComicBeingScheduled(pendingComic.id)}">
                       Approve
                     </button>
+                    <button @click="startSchedulingComic(pendingComic.id)"
+                            v-if="isComicApprovable(pendingComic) && !isThisComicBeingScheduled(pendingComic.id)"
+                            :disabled="isOtherComicBeingScheduled(pendingComic.id)"
+                            class="y-button"
+                            :class="{'y-button-disabled': isOtherComicBeingScheduled(pendingComic.id)}">
+                      Schedule
+                    </button>
                     <button @click="processComic(pendingComic.id, false, pendingComic.name)"
-                            class="y-button y-button-red">
+                            :disabled="isOtherComicBeingScheduled(pendingComic.id)"
+                            v-if="!isThisComicBeingScheduled(pendingComic.id)"
+                            class="y-button y-button-red"
+                            :class="{'y-button-disabled': isOtherComicBeingScheduled(pendingComic.id)}">
                       Reject
+                    </button>
+
+                    <input type="date"
+                           v-if="comicIdBeingScheduled === pendingComic.id"
+                           v-model="scheduledTime"/>
+
+                    <button class="y-button yButtonRound"
+                            @click="scheduleComic(pendingComic.name)"
+                            v-if="comicIdBeingScheduled === pendingComic.id">
+                      <SaveIcon/>
+                    </button>
+                    <button class="y-button y-button-red yButtonRound"
+                            @click="scheduleComic(pendingComic.name, true)"
+                            v-if="comicIdBeingScheduled === pendingComic.id && pendingComic.scheduledPublish">
+                      <DeleteIcon/>
+                    </button>
+                    <button class="y-button yButtonRound y-button-red y-button-red-outline"
+                            @click="comicIdBeingScheduled = null"
+                            v-if="comicIdBeingScheduled === pendingComic.id">
+                      <CancelIcon/>
                     </button>
                   </div>
                 </td>
@@ -113,16 +150,20 @@
 <script>
 import CheckboxIcon from 'vue-material-design-icons/CheckboxMarkedCircle.vue'
 import RightArrow from 'vue-material-design-icons/ArrowRight.vue'
+import CancelIcon from 'vue-material-design-icons/Close.vue'
+import SaveIcon from 'vue-material-design-icons/ContentSave.vue'
+import DeleteIcon from 'vue-material-design-icons/TrashCanOutline.vue'
 
 import comicApi from '@/api/comicApi'
 import ResponseMessage from '@/components/ResponseMessage.vue'
+import { format } from 'date-fns'
 
 export default {
   name: 'pendingComics',
 
 	components: {
     ResponseMessage,
-		CheckboxIcon, RightArrow,
+		CheckboxIcon, RightArrow, CancelIcon, SaveIcon, DeleteIcon,
   },
   
   props: {
@@ -133,14 +174,32 @@ export default {
     return {
       showAllData: false,
       isOpen: false,
+
       responseMessage: '',
       responseMessageType: 'info',
+
+      comicIdBeingScheduled: null,
+      scheduledTime: new Date().toISOString().substr(0,10),
+      scheduleResponseMessage: '',
+      scheduleResponseMessageType: 'info',
     }
   },
 
   methods: {
     isComicApprovable (comic) {
       return comic.keywords.length > 0 && comic.hasThumbnail && !comic.errorText
+    },
+
+    startSchedulingComic (comicId) {
+      this.comicIdBeingScheduled = comicId;
+      this.scheduledTime = new Date().toISOString().substr(0,10);
+    },
+
+    formatDateStr(dateStr) {
+      if (!dateStr) { 
+        return ''
+      }
+      return format(new Date(dateStr), 'MMM do')
     },
 
     async processComic (comicId, isApproved, comicName) {
@@ -160,6 +219,29 @@ export default {
 			}
     },
 
+    async scheduleComic (comicName, isClear) {
+			let response = await comicApi.schedulePendingComic(this.comicIdBeingScheduled, isClear ? null : this.scheduledTime)
+      
+      if (response.error) {
+        this.responseMessage = response.error
+        this.responseMessageType = 'error'
+			}
+			else {
+        this.responseMessage = `Success scheduling ${comicName}`
+        this.responseMessageType = 'success'
+        this.$emit('refresh-pending-comics')
+        this.comicIdBeingScheduled = null
+			}
+    },
+
+    isOtherComicBeingScheduled (comicId) {
+      return this.comicIdBeingScheduled && this.comicIdBeingScheduled !== comicId
+    },
+
+    isThisComicBeingScheduled (comicId) {
+      return this.comicIdBeingScheduled && this.comicIdBeingScheduled === comicId
+    },
+
     closeResponseMessage () { this.responseMessage = '' },
 
     openComponent () { if (!this.isOpen) { setTimeout( () => this.isOpen = true, 15 ) } },
@@ -168,8 +250,17 @@ export default {
   },
 
   computed: {
-    comicsMissingKeywords () { return this.pendingComics.filter(c => c.keywords.length === 0).length },
-    comicsMissingThumbnails () { return this.pendingComics.filter(c => !c.hasThumbnail).length },
+    comicsMissingKeywords () {
+      return this.pendingComics.filter(c => c.keywords.length === 0).length
+    },
+
+    comicsMissingThumbnails () {
+      return this.pendingComics.filter(c => !c.hasThumbnail).length
+    },
+
+    isAnyScheduledComic () {
+      return this.pendingComics.filter(c => c.scheduledPublish).length > 0
+    }
   }
 }
 </script>
