@@ -193,16 +193,16 @@ export default {
 
     async insertPage () {
       this.setResponseMessage('info', 'Inserting...')
-      let response = await comicApi.insertComicPage(this.comic.name, this.comic.id, this.imageToInsert,
-                                                    this.insertPageAfterNumber, this.updateUploadProgress)
-
-      if (response.success) {
+      try {
+        await comicApi.insertComicPage(this.comic.name, this.comic.id,
+          this.imageToInsert, this.insertPageAfterNumber, this.updateUploadProgress)
         this.setResponseMessage('success', 'Successfully inserted new page ' + (Number(this.insertPageAfterNumber)+1))
         this.$store.dispatch('refreshOneComicInList', this.comic.name)
         this.imageToInsert = undefined
       }
-      else {
-        this.setResponseMessage('error', 'Error inserting page: ' + response.message)
+      catch (err) {
+        this.setResponseMessage('error', err.response?.data || 'Unknown server error')
+        return
       }
     },
 

@@ -117,7 +117,7 @@ export default {
     formData.append('comicName', comicData.name)
     for (var file of newPagesList) { formData.append('newPages', file)  }
 
-    let response = await axios.post(
+    await axios.post(
       `${baseUrl}/comics/${comicData.id}/addpages`,
       formData,
       {
@@ -125,8 +125,8 @@ export default {
         onUploadProgress: progressEvent => progressFunction(progressEvent)
       }
     )
-    if (!response.data.error) { return {success: true} }
-    else { return {success: false, message: response.data.error} }
+
+    return
   },
 
   async uploadPendingComicPages (mode, comicData, newPagesList, progressFunction) {
@@ -202,15 +202,14 @@ export default {
     formData.append('insertAfterPageNumber', insertAfterPageNumber)
     formData.append('newPageFile', imageFile)
 
-    let response = await axios.post(baseUrl + '/insertcomicpage',
+    await axios.post(baseUrl + '/insertcomicpage',
       formData, {
         headers: {'Content-Type': 'multipart/form-data'},
         onUploadProgress: progressEvent => progressFunction(progressEvent)
       }
     )
 
-    if (response.data.error) { return {success: false, message: response.data.error} }
-    if (!response.data.error) { return {success: true} }
+    return
   },
 
   async deleteComicPage (comicName, comicId, pageNumber) { //todo MOVE OUT OF HERE, TO MISC

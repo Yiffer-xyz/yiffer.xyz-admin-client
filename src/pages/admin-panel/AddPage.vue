@@ -164,19 +164,20 @@ export default {
 
     async uploadFiles () {
       this.isSubmitting = true
-      let response = await comicApi.addPagesToComic(this.comic, this.selectedFiles, this.updateUploadProgress)
-      this.isSubmitting = false
-
-      if (response.success) {
+      try {
+        await comicApi.addPagesToComic(this.comic, this.selectedFiles, this.updateUploadProgress)
+        this.isSubmitting = false
         this.responseMessage = 'Success updating ' + this.comic.name
         this.responseMessageType = 'success'
         this.selectedFiles = []
         document.getElementById('newPageFiles').value = ''
         this.$emit('refresh-comic-list')
       }
-      else {
-        this.responseMessage = 'Error updating: ' + response.message
+      catch (err) {
+        this.isSubmitting = false
+        this.responseMessage = err.response?.data || 'Unknown server error'
         this.responseMessageType = 'error'
+        return
       }
 		},
 		
