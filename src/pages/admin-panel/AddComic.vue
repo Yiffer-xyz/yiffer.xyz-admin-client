@@ -472,7 +472,11 @@ export default {
     },
 
     readyForUpload () {
-      return this.detailsFilledIn && this.selectedFiles.length>0 && !this.errorMessageThumbnail
+      return this.detailsFilledIn 
+        && this.selectedFiles.length>0
+        && !this.errorMessageThumbnail
+        && this.croppedThumbnail?.file
+        && this.isThumbnailConfirmed
     }
 	},
 
