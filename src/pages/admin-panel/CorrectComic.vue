@@ -23,12 +23,18 @@
       </div>
 
       <span v-if="comic && !isSubmitting" class="margin-top-8" style="width: 100%;">
-				<button @click="toggleRename(true)"
-                v-if="!renameActive"
-                class="y-button y-button-neutral marginAuto mb-16 fitContent">
-          Rename comic
-        </button>
+        <div class="horizontalFlex mb-16">
+          <button @click="toggleRename(true)"
+                  v-if="!renameActive"
+                  class="y-button y-button-neutral mr-16">
+            Rename comic
+          </button>
 
+          <LoadingButton class="y-button y-button-neutral"
+                         @click="autoResizecomic()"
+                         :isLoading="isResizing"
+                         text="Auto-resize comic"/>
+        </div>
 				<span v-if="renameActive" class="horizontalFlex margin-bottom-16" style="align-items: center;">
           <div class="verticalFlex">
             <p style="text-align: left;">New name</p>
@@ -149,13 +155,15 @@ import Loading from '@/components/LoadingIndicator.vue'
 
 import comicApi from '@/api/comicApi'
 import ResponseMessage from '@/components/ResponseMessage.vue'
+import LoadingButton from '@/components/LoadingButton.vue'
 
 export default {
 	name: 'correctComic',
   
   components: {
     ResponseMessage, Loading,
-    RightArrow, CrossIcon, RefreshIcon
+    RightArrow, CrossIcon, RefreshIcon,
+    LoadingButton
 	},
   
   props: {
@@ -182,6 +190,8 @@ export default {
       isSubmitting: false,
       responseMessage: '',
       responseMessageType: 'info',
+
+      isResizing: false,
     }
   },
 
@@ -215,6 +225,21 @@ export default {
 				this.responseMessageType = 'error'
       }
 		},
+
+    async autoResizecomic () {
+      this.isResizing = true
+      let result = await comicApi.autoResizeComic(this.comic.id)
+      this.isResizing = false
+
+      if (result.error) {
+        this.responseMessage = result.error
+        this.responseMessageType = 'error'
+      }
+      else {
+        this.responseMessage = `Success resizing ${this.comic.name}`
+        this.responseMessageType = 'success'
+      }
+    },
 		
 		toggleRename (isActive) {
 			this.renameActive = isActive

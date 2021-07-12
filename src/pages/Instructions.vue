@@ -48,7 +48,7 @@
         When uploading a comic the same principles apply, try to keep the pages the same size. If you find all the pages in a regular quality and only a few in a higher one, please just use the regular quality ones, as long as they're not unreasonably small.
         <br>
         <br>
-        The main reason to maintain page size consistency is the reader's comfort - if the sizes vary, reading becomes tedious, especially on mobile devices. Pages with a height greater than 1800 px will be scaled down to 1800 px automatically. The exception to this rule is if the height/width ratio is above 1.75 - to avoid making extra-tall/thin pages unreadable (pages like in <a href="https://yiffer.xyz/Pet%20Treats%20Neo" class="underline-link" target="_blank">Pet Treats Neo by Tokifuji<RightArrow/></a>).
+        The main reason to maintain page size consistency is the reader's comfort - if the sizes vary, reading becomes tedious, especially on mobile devices. Pages with a height greater than 2200 px will be scaled down to 2200 px automatically. The exception to this rule is if the height/width ratio is above 1.75 - to avoid making extra-tall/thin pages unreadable (pages like in <a href="https://yiffer.xyz/Pet%20Treats%20Neo" class="underline-link" target="_blank">Pet Treats Neo by Tokifuji<RightArrow/></a>).
         <br>
         <br>
         All this said, be critical when fetching pages from anywhere that isn't the artist themselves. Especially sites like e-hentai, myreadingmanga, luscious, etc. These sites tend to have pages in a <i>lower</i> resolution than what can be found on the artist's pages, so <i>please</i> check their FA, or e621, etc, when fetching from these sources. Quality is one of the most important aspects of Yiffer.xyz!

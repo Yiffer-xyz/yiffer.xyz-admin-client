@@ -212,6 +212,16 @@ export default {
     return
   },
 
+  async autoResizeComic (comicId) {
+    try {
+      await axios.post(`${baseUrl}/comics/${comicId}/auto-resize`)
+      return true
+    }
+    catch (err) {
+      return {error: err?.response?.data || 'Unknown error resizing comic'}
+    }
+  },
+
   async deleteComicPage (comicName, comicId, pageNumber) { //todo MOVE OUT OF HERE, TO MISC
     let response = await axios.post(baseUrl + '/deletecomicpage',
       {comicName: comicName, comicId: comicId, pageNumber: pageNumber})
