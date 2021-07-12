@@ -236,7 +236,7 @@ export default {
         this.responseMessageType = 'error'
       }
       else {
-        this.responseMessage = `Success resizing ${this.comic.name}`
+        this.responseMessage = `Success resizing ${this.comic.name}. Scaled down ${result.numberOfResizedPages}/${result.totalNumberOfPages} pages.`
         this.responseMessageType = 'success'
       }
     },

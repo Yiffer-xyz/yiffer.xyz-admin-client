@@ -214,8 +214,8 @@ export default {
 
   async autoResizeComic (comicId) {
     try {
-      await axios.post(`${baseUrl}/comics/${comicId}/auto-resize`)
-      return true
+      let response = await axios.post(`${baseUrl}/comics/${comicId}/auto-resize`)
+      return response.data
     }
     catch (err) {
       return {error: err?.response?.data || 'Unknown error resizing comic'}
