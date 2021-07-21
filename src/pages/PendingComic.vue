@@ -5,36 +5,65 @@
       <LoadingButton v-if="$store.getters.userData.userType === 'admin' && publishResponseMessageType !== 'success'"
                      :isLoading="isPublishingComic"
                      class="y-button button-with-icon marginAuto mt-32"
-                     :isDisabled="!canPublish"
+                     :isDisabled="!canPublish || isMarkingComicError"
                      @click="processComic"
                      iconType="check"
                      color="primary"
                      :text="`Approve & publish comic${hasChangedData ? ' (unsaved changes)' : ''}`"/>
 
-      <p v-if="comic.errorText" class="mt-32">
+      <p v-if="comic.errorText" class="mt-16">
         Error: {{comic.errorText}}
       </p>
 
       <LoadingButton v-if="$store.getters.userData.userType === 'admin' && comic.errorText"
-                     :isLoading="isMarkingComicError"
-                     class="y-button y-button-neutral marginAuto mt-16"
-                     @click="markComicError(null)"
-                     color="neutral"
-                     text="Remove error status"/>
+                     :isLoading="isSubmittingComicError"
+                     class="y-button marginAuto mt-8"
+                     @click="submitComicError()"
+                     text="Remove error"/>
 
-      <LoadingButton v-if="$store.getters.userData.userType === 'admin' && !comic.errorText"
-                     :isLoading="isMarkingComicError"
-                     class="y-button y-button-neutral marginAuto mt-16"
-                     @click="markComicError('Thumbnail')"
-                     color="neutral"
-                     text="Mark as needing thumbnail fix"/>
+      <button v-if="$store.getters.userData.userType === 'admin' && !comic.errorText && !isMarkingComicError"
+              class="y-button y-button-neutral marginAuto mt-16"
+              @click="initializeErrorMarking()">
+        Mark as needing fix
+      </button>
 
-      <LoadingButton v-if="$store.getters.userData.userType === 'admin' && !comic.errorText"
-                     :isLoading="isMarkingComicError"
-                     class="y-button y-button-neutral marginAuto mt-16"
-                     @click="markComicError('Varying page res.')"
-                     color="neutral"
-                     text="Page resolution too varying"/>
+      <div v-if="isMarkingComicError" class="mt-16 verticalFlex alignItemsStart marginAuto fitContent">
+        <p class="bold">
+          Set comic error
+        </p>
+
+        <TextInput :value="comicErrorText"
+                   @change="newText => comicErrorText = newText"
+                   textAlign="left"
+                   style="width: 16rem;"
+                   title="Error text"/>
+
+        <div class="horizontalFlex mt-16">
+          <button class="y-button y-button-neutral mr-8"
+                  v-for="errorTxt in errorTexts"
+                  :key="errorTxt.short"
+                  @click="comicErrorText = errorTxt.long">
+            {{errorTxt.short}}
+          </button>
+        </div>
+
+
+        <div class="horizontalFlex mt-16" style="align-self: flex-end">
+          <button class="y-button y-button-neutral button-with-icon mr-8"
+                  @click="isMarkingComicError = false">
+            <CrossIcon title=""/>
+            Cancel
+          </button>
+
+          <LoadingButton :isLoading="isSubmittingComicError"
+                         @click="submitComicError()"
+                         color="primary"
+                         iconType="check"
+                         :isDisabled="!comicErrorText"
+                         text="Set error"/>
+        </div>
+      </div>
+
 
       <ResponseMessage :message="publishResponseMessage"
                        :messageType="publishResponseMessageType"
@@ -348,6 +377,7 @@
 <script>
 import UpArrow from 'vue-material-design-icons/ArrowUp.vue'
 import CheckIcon from 'vue-material-design-icons/Check.vue'
+import CrossIcon from 'vue-material-design-icons/Close.vue'
 import ImageCropper from '@/components/ImageCropper.vue'
 import ResponseMessage from '@/components/ResponseMessage.vue'
 import Loading from '@/components/LoadingIndicator.vue'
@@ -367,8 +397,7 @@ export default {
   name: 'pendingComic',
 
   components: {
-    UpArrow,
-    CheckIcon,
+    UpArrow, CrossIcon, CheckIcon,
     ResponseMessage,
     Loading,
     Select,
@@ -408,7 +437,9 @@ export default {
       isPageThumbnailReadyForCrop: false,
       resizerKey: Math.random().toString(),
 
+      isSubmittingComicError: false,
       isMarkingComicError: false,
+      comicErrorText: '',
 
       keywordResponseMessage: '',
       keywordResponseMessageType: 'success',
@@ -438,6 +469,7 @@ export default {
       categoryOptions,
       tagOptions,
       stateOptions,
+      errorTexts,
     }
   },
 
@@ -694,18 +726,25 @@ export default {
       }
     },
 
-    async markComicError (errorType) {
+    initializeErrorMarking () {
+      this.comicErrorText = ''
       this.isMarkingComicError = true
+    },
 
-      if (!errorType) {
+    async submitComicError () {
+      this.isSubmittingComicError = true
+
+      if (!this.comicErrorText) {
         await comicApi.setPendingComicNeedingFix(this.initialComic.id, null)
         this.comic.errorText = null
       }
       else {
-        await comicApi.setPendingComicNeedingFix(this.initialComic.id, errorType)
-        this.comic.errorText = errorType
+        await comicApi.setPendingComicNeedingFix(this.initialComic.id, this.comicErrorText)
+        this.comic.errorText = this.comicErrorText
       }
 
+      this.isSubmittingComicError = false
+      this.comicErrorText = ''
       this.isMarkingComicError = false
       this.reloadComic()
     },
@@ -839,6 +878,11 @@ const stateOptions = [
   {text: 'WIP', value: 'wip'},
   {text: 'Finished', value: 'finished'},
   {text: 'Cancelled', value: 'cancelled'},
+]
+
+const errorTexts = [
+  {short: 'Thumb', long: 'Thumbnail'},
+  {short: 'Res.', long: 'Varying page res.'},
 ]
 </script>
 
