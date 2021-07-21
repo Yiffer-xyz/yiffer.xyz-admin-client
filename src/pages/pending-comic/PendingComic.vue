@@ -126,70 +126,12 @@
         </div>
       </span>
 
-      <ResponseMessage :message="keywordResponseMessage"
-                       :messageType="keywordResponseMessageType"
-                       @closeMessage="() => keywordResponseMessage = ''"
-                       outsideStyle="margin-top: 2rem;" />
+      <Keywords :comic="comic"
+                :isLoadingComic="isLoadingComic"
+                @reloadComic="reloadComic()"/>
 
-      <div class="mt-32 width100">
-        <h2 class="mt-32">Tags</h2>
-
-        <div class="tagsContainer">
-          <div class="verticalFlex alignItemsStart">
-            <p class="admin-mini-header">
-              Existing tags
-            </p>
-
-            <p v-if="comic && comic.keywords.length === 0">
-              No tags yet
-            </p>
-
-            <p v-for="keyword in comic.keywords"
-                @click="addOrRemoveKeywordToDeleteList(keyword)" 
-                :key="keyword.id" class="selected-add-keyword" 
-                :class="{'keyword-to-be-deleted': keywordsToDelete.findIndex(kw=>kw.id===keyword.id)>=0}">
-              {{keyword.name}}
-            </p>
-
-            <LoadingButton text="Remove tags"
-                           iconType="check"
-                           :style="{visibility: keywordsToDelete.length > 0 ? 'visible' : 'hidden'}"
-                           :isLoading="isSubmittingRemoveKw"
-                           color="error"
-                           class="mt-8"
-                           @click="confirmRemoveKeywords()"/>
-          </div>
-
-          <div class="verticalFlex fitContent alignItemsStart">
-            <p class="admin-mini-header newTagsHeader">
-              New tags
-            </p>
-
-            <Select :options="keywordOptions"
-                    isSearchable
-                    :resetValue="kwSelectResetValue"
-                    searchPlaceholder="Search for tags"
-                    @change="newVal => addSelectedKeyword(newVal)"
-                    class="mb-16"
-                    style="margin-top: -1rem;"/>
-
-            <p v-for="keyword in selectedKeywords" 
-              @click="removeKeywordFromSelection(keyword)" 
-              :key="keyword.id" class="selected-add-keyword">
-              {{keyword.name}}
-            </p>
-
-            <LoadingButton text="Add tags"
-                            v-if="selectedKeywords.length > 0"
-                            iconType="check"
-                            :isLoading="isSubmittingAddKw"
-                            class="mt-8"
-                            @click="confirmAddKeywords()"/>
-          </div>
-        </div>
-      </div>
-
-      <EditInfo :initialComic="comic" @reloadComic="reloadComic()"/>
+      <EditInfo :initialComic="comic"
+                @reloadComic="reloadComic()"/>
 
       <h2 class="mt-48 mb-8">
         Comic pages
@@ -261,7 +203,7 @@
       </div>
 
       <div style="display: flex; flex-direction: column; align-items: center;">
-        <img
+        <img  
           v-for="pageNumber in comic.numberOfPages" 
           :src="`${config.comicsBaseUrl}/${$route.params.comicName}/${formattedPageNumber(pageNumber)}.jpg?${randomQueryString}`"
           :key="pageNumber"
@@ -288,37 +230,32 @@ import CrossIcon from 'vue-material-design-icons/Close.vue'
 import ImageCropper from '@/components/ImageCropper.vue'
 import ResponseMessage from '@/components/ResponseMessage.vue'
 import Loading from '@/components/LoadingIndicator.vue'
-import Select from '@/components/Select.vue'
 import LoadingButton from '@/components/LoadingButton.vue'
 import TextInput from '@/components/TextInput.vue'
 
 import comicApi from '@/api/comicApi'
-import keywordApi from '@/api/keywordApi'
-import { mapGetters } from 'vuex'
 import config from '@/config.json'
-import EditInfo from './EditInfo.vue'
+import EditInfo from './PKInfo.vue'
+import Keywords from './PKKeywords.vue'
 
 export default {
   name: 'pendingComic',
 
   components: {
-    UpArrow, CrossIcon, CheckIcon, EditInfo,
+    UpArrow, CrossIcon, CheckIcon,
+    EditInfo, Keywords,
     ResponseMessage,
     Loading,
-    Select,
     TextInput,
     ImageCropper,
     LoadingButton,
   },
 
-  data: function () {
+  data () {
     return {
       config,
+      isLoadingComic: false,
       comic: undefined,
-      keywordsNotInComic: [],
-      selectedKeyword: undefined,
-      selectedKeywords: [],
-      keywordsToDelete: [],
       thumbnailFile: undefined,
 
       isAppendingPages: false,
@@ -345,16 +282,10 @@ export default {
       isMarkingComicError: false,
       comicErrorText: '',
 
-      keywordResponseMessage: '',
-      keywordResponseMessageType: 'success',
-      isSubmittingAddKw: false,
-      isSubmittingRemoveKw: false,
-
       isSubmittingPages: false,
       pagesResponseMessage: '',
       pagesResponseMessageType: 'error',
 
-      kwSelectResetValue: null,
       randomQueryString: Math.random().toString(),
 
       isPublishingComic: false,
@@ -366,22 +297,8 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'allKeywords',
-      'alphabeticKeywordList',
-    ]),
-
     isAppendingOrReplacingPages () {
       return this.isReplacingPages || this.isAppendingPages
-    },
-
-    keywordOptions () {
-      let existingKwIds = this.comic.keywords.map(kw => kw.id)
-      let selectedKwIds = this.selectedKeywords.map(kw => kw.id)
-
-      return this.alphabeticKeywordList
-        .filter(kw => !existingKwIds.includes(kw.id) && !selectedKwIds.includes(kw.id))
-        .map(kw => ({text: kw.name, value: kw}))
     },
 
     filesAreInput () {
@@ -401,10 +318,6 @@ export default {
 
   async mounted () {
     this.reloadComic()
-
-    if (!this.allKeywords.fetched && !this.allKeywords.fetching) {
-      this.$store.dispatch('fetchKeywordList')
-    }
   },
 
   methods: {
@@ -465,60 +378,6 @@ export default {
       else {
         this.thumbnailResponseMessage = 'Error adding thumbnail: ' + response.message
         this.thumbnailResponseMessageType = 'error'
-      }
-    },
-
-    addSelectedKeyword (keyword) {
-      if (!this.selectedKeywords.find(kw => kw.id === keyword.id)) {
-        this.selectedKeywords.push(keyword)
-      }
-      this.kwSelectResetValue = Math.random().toString()
-    },
-
-    removeKeywordFromSelection (keyword) {
-      this.selectedKeywords.splice(this.selectedKeywords.findIndex(kw => kw.id===keyword.id), 1)
-    },
-
-    async addOrRemoveKeywordToDeleteList (keyword) {
-      if (!this.keywordsToDelete.find(kw => kw.id===keyword.id)) {
-        this.keywordsToDelete.push(keyword)
-      }
-      else {
-        this.keywordsToDelete.splice(this.keywordsToDelete.findIndex(kw => kw.id===keyword.id), 1)
-      }
-    },
-    
-    async confirmAddKeywords () {
-      this.isSubmittingAddKw = true
-      let response = await keywordApi.addKeywordsToPendingComic(this.comic, this.selectedKeywords)
-      this.isSubmittingAddKw = false
-
-      if ('error' in response) {
-        this.keywordResponseMessage = 'Error adding tags: ' + response.error
-        this.keywordResponseMessageType = 'error'
-      }
-      else {
-        this.keywordResponseMessage = 'Successfully added tags!'
-        this.keywordResponseMessageType = 'success'
-        this.selectedKeywords = []
-        this.reloadComic()
-      }
-    },
-
-    async confirmRemoveKeywords () {
-      this.isSubmittingRemoveKw = true
-      let response = await keywordApi.removeKeywordsFromPendingComic(this.comic, this.keywordsToDelete)
-      this.isSubmittingRemoveKw = false
-
-      if ('error' in response) {
-        this.keywordResponseMessage = 'Error removing tags: ' + response.error
-        this.keywordResponseMessageType = 'error'
-      }
-      else {
-        this.keywordResponseMessage = 'Successfully removed tags!'
-        this.keywordResponseMessageType = 'success'
-        this.keywordsToDelete = []
-        this.reloadComic()
       }
     },
 
@@ -611,15 +470,11 @@ export default {
     },
 
     async reloadComic () {
+      this.isLoadingComic = true
       let response = await comicApi.getPendingComic(this.$route.params.comicName)
+      this.isLoadingComic = false
       if (response.success) {
         this.comic = response.result
-
-        this.selectedArtist = {name: response.result.artistName, id: response.result.artistId}
-
-        this.keywordsNotInComic = this.allKeywords.payload
-          .filter(kw => !this.comic.keywords.find(comicKw => comicKw.id === kw.id))
-          .sort((kw1, kw2) => kw1.name > kw2.name ? 1 : -1)
       }
       else {
         this.comicLoadErrorMessage = response.message
@@ -656,26 +511,6 @@ const errorTexts = [
 </script>
 
 <style lang="scss" scoped>
-.tagsContainer {
-  display: grid;
-  grid-template-columns: auto auto;
-  width: fit-content;
-  margin: auto;
-  &>div:first-child {
-    @media (min-width: 501px) {
-      margin-right: 2.5rem;
-    }
-    @media (max-width: 500px) {
-      margin-bottom: 1rem;
-    }
-  }
-
-  @media (max-width: 500px) {
-    min-width: 0;
-    grid-template-columns: auto;
-    justify-content: center;
-  }
-}
 .image-fit-full {
   max-width: 100vw;
   max-height: 100vh;
