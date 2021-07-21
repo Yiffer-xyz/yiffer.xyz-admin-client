@@ -3,7 +3,7 @@ import store from '@/store.js'
 import Router from 'vue-router'
 import Login from '@/pages/Login.vue'
 import AdminMain from '@/pages/AdminMain.vue'
-import PendingComic from '@/pages/PendingComic.vue'
+import PendingComic from '@/pages/pending-comic/PendingComic.vue'
 import NoAccess from '@/pages/NoAccess.vue'
 import Instructions from '@/pages/Instructions.vue'
 
