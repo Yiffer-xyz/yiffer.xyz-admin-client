@@ -25,7 +25,7 @@
           </div>
         </div>
 
-        <div class="scrolling-table-container" style="margin: 8px auto 0 auto">
+        <div class="scrolling-table-container scrolling-table-container-vertical" style="max-height: 70vh; margin: 8px auto 0 auto">
           <table class="yTable">
             <thead>
               <tr>

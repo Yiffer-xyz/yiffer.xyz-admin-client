@@ -10,7 +10,7 @@
                             disableElevation
                             class="mb-16"/>
 
-      <span v-if="keywordSuggestionList.length > 0">
+      <div v-if="keywordSuggestionList.length > 0" class="scrolling-table-container">
         <table class="yTable">
           <thead>
             <tr>
@@ -26,11 +26,12 @@
               <td>{{getKeywordSuggestionText(suggestion)}}</td>
               <td style="word-break: break-all;">{{suggestion.user}}</td>
               <td>
-								<div class="horizontal-wrapper-4">
+								<div class="horizontalFlex">
 									<LoadingButton :isLoading="keywordSuggestionSubmit.fetching 
                                     && isActionApprove 
                                     && keywordIdBeingProcessed === suggestion.id"
                                  text="Approve"
+                                 class="mr-4"
 										             @click="processKeyword(suggestion, true)">
 										Approve
 									</LoadingButton>
@@ -47,7 +48,7 @@
             </tr>
           </tbody>
         </table>
-      </span>
+      </div>
 
       <span v-else>
         <p>There are currently no new suggestions.</p>

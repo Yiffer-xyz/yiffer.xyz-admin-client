@@ -18,9 +18,11 @@
 			</p>
 
       <ResponseMessage :message="responseMessage" :messageType="responseMessageType" @closeMessage="closeResponseMessage"
-                       class="margin-bottom-10"/>
+                       class="mb-10"/>
 
-      <div v-if="unprocessedSuggestions.length > 0" class="scrolling-table-container">
+      <div v-if="unprocessedSuggestions.length > 0"
+           class="scrolling-table-container scrolling-table-container-vertical"
+           style="max-height: 70vh;">
         <table class="yTable">
           <thead>
             <tr>
