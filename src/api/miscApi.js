@@ -109,4 +109,68 @@ export default {
       return { success: false }
     }
   },
+
+  async getComicProblems () {
+    let response = await axios.get(`${baseUrl}/comic-problems`)
+    return response.data
+  },
+  
+  async assignComicProblem (problemId) {
+    try {
+      await axios.patch(`${baseUrl}/comic-problems/${problemId}/assign`)
+      return { success: true }
+    }
+    catch (err) {
+      return { success: false, error: err.response.data }
+    }
+  },
+
+  async removeComicProblem (problemId) {
+    try {
+      await axios.delete(`${baseUrl}/comic-problems/${problemId}`)
+      return { success: true }
+    }
+    catch (err) {
+      return { success: false, error: err.response.data }
+    }
+  },
+
+  async getProblemCategories () {
+    let response = await axios.get(`${baseUrl}/comic-problem-categories`)
+    return response.data
+  },
+
+  async addProblemCategory (name, helperText) {
+    try {
+      await axios.post(`${baseUrl}/comic-problem-categories`, {
+        name, helperText,
+      })
+      return { success: true }
+    }
+    catch (err) {
+      return { success: false, error: err.response.data }
+    }
+  },
+
+  async deleteProblemCategory (categoryId) {
+    try {
+      await axios.delete(`${baseUrl}/comic-problem-categories/${categoryId}`)
+      return { success: true }
+    }
+    catch (err) {
+      return { success: false, error: err.response.data }
+    }
+  },
+
+  async editProblemCategory (categoryId, name, helperText) {
+    try {
+      await axios.put(`${baseUrl}/comic-problem-categories/${categoryId}`, {
+        name, helperText
+      })
+      return { success: true }
+    }
+    catch (err) {
+      return { success: false, error: err.response.data }
+    }
+  },
 }

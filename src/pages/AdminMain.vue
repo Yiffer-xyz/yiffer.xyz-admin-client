@@ -20,6 +20,8 @@
     <div class="admin-content-container" v-if="userData">
       <keyword-suggestions />
 
+      <ComicProblems/>
+
       <comic-suggestions />
 
       <add-page :comicList="allComics.payload"
@@ -70,6 +72,7 @@
 import AddPage from '@/pages/admin-panel/AddPage.vue'
 import KeywordManager from '@/pages/admin-panel/KeywordManager.vue'
 import CorrectComic from '@/pages/admin-panel/CorrectComic.vue'
+import ComicProblems from '@/pages/admin-panel/ComicProblems.vue'
 import AddComic from '@/pages/admin-panel/AddComic.vue'
 import ArtistManager from '@/pages/admin-panel/ArtistManager.vue'
 import PendingComics from '@/pages/admin-panel/PendingComics.vue'
@@ -113,6 +116,7 @@ export default {
     AddBlog,
     ModApplications,
     Feedback,
+    ComicProblems,
     RightArrow,
   },
 

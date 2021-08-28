@@ -44,6 +44,13 @@ export async function doFetch (commit, actionName, fetchPromise, transformFunc) 
   }
 }
 
+export async function refreshItem (commit, actionName, listOfItems, findByKeyName, newItem) {
+  let relevantKey = newItem[findByKeyName]
+  let indexOfItem = listOfItems.findIndex(item => item[findByKeyName] === relevantKey)
+  listOfItems[indexOfItem] = newItem
+  commit(`set_${actionName}_fetched`, listOfItems)
+}
+
 export async function doFetchSilent (commit, actionName, fetchPromise, transformFunc) {
   try {
     let result = await fetchPromise

@@ -84,12 +84,18 @@ select {
 .alignSelfCenter {
   align-self: center;
 }
+.alignSelfStart {
+  align-self: flex-start;
+}
 
 .alignItemsStart {
   align-items: flex-start;
 }
 .justifyContentStart {
   justify-content: flex-start;
+}
+.justifyContentEnd {
+  justify-content: flex-end;
 }
 .alignItemsCenter {
   align-items: center;
@@ -111,6 +117,9 @@ select {
 .width100 {
   width: 100%;
 }
+.maxWidth100 {
+  max-width: 100%;
+}
 
 .cursorPointer {
   &:hover {
@@ -131,6 +140,13 @@ select {
   }
   table {
     white-space: nowrap;
+  }
+}
+
+.scrolling-table-container-vertical {
+  th {
+    position: sticky;
+    top: 0;
   }
 }
 
@@ -361,12 +377,16 @@ select {
     font-family: 'Mulish', sans-serif;
     font-weight: 600;
     background-color: #f5f5f5;
+    z-index: 2;
   }
-  tr {
+  tr:not(th) {
     &:hover {
       background: #aeecff33;
     }
     border: 1px solid #aaaaaa44;
+    &:first-child {
+      border-top: none;
+    }
     border-left: none;
     border-right: none;
   }
