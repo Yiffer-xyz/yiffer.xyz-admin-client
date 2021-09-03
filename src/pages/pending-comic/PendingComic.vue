@@ -507,6 +507,7 @@ export default {
 const errorTexts = [
   {short: 'Thumb', long: 'Thumbnail'},
   {short: 'Res.', long: 'Varying page res.'},
+  {short: 'Links', long: 'Artist missing links'},
 ]
 </script>
 

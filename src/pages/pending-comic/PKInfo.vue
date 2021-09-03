@@ -27,10 +27,55 @@
             :resetValue="artistResetValue"
             @searchSelectedClicked="selectedArtist = null"
             @change="onArtistSelect"
-            class="mb-24"
             style="width: 100%;"/>
 
-    <div class="horizontalFlex width100 justifyStart">
+    <div v-if="selectedArtist"
+         class="horizontalFlex width100 mt-8"
+         style="justify-content: space-between;">
+      <p class="underline-link link-color"
+         @click="() => isShowingArtistLinks = !isShowingArtistLinks">
+        {{isShowingArtistLinks ? 'Hide' : 'Show'}} links
+      </p>
+
+      <a :href="`https://yiffer.xyz/artist/${selectedArtist.name}`"
+         target="_blank"
+         class="underline-link">
+        Go to artist <RightArrow/>
+      </a>
+    </div>
+    <div v-if="isShowingArtistLinks" class="verticalFlex alignItemsStart">
+      <p v-if="comic.artistPatreonName">
+        <a :href="`https://patreon.com/${comic.artistPatreonName}`"
+           class="underline-link textAlignLeft fitContent"
+           target="_blank">
+          Patreon: {{comic.artistPatreonName}}
+        </a>
+      </p>
+      <p v-else>
+        Patreon: -
+      </p>
+      
+      <p v-if="comic.artistE621Name">
+        <a :href="`https://e621.net/post/index/1/${comic.artistE621Name}`"
+           class="underline-link textAlignLeft fitContent"
+           target="_blank">
+          E621: {{comic.artistE621Name}}
+        </a>
+      </p>
+      <p v-else>
+        E621: -
+      </p>
+
+      <p v-for="link in comic.artistLinks" :key="link.linkUrl">
+        <a :href="link.linkUrl"
+           class="underline-link textAlignLeft fitContent"
+           target="_blank">
+          {{link.linkUrl}}
+        </a>
+      </p>
+    </div>
+
+    <div class="horizontalFlex width100 justifyStart mt-24">
       <Select :options="categoryOptions"
               title="Category"
               :defaultValue="{text: comic.cat, value: comic.cat}"
@@ -108,6 +153,7 @@ import ResponseMessage from '@/components/ResponseMessage.vue'
 import TextInput from '@/components/TextInput.vue'
 import Select from '@/components/Select.vue'
 import LoadingButton from '@/components/LoadingButton.vue'
+import RightArrow from 'vue-material-design-icons/ArrowRight.vue'
 
 export default {
   name: 'pendingComicInfo',
@@ -118,6 +164,7 @@ export default {
 
   components: {
     ResponseMessage, TextInput, Select, LoadingButton,
+    RightArrow,
   },
 
   data () {
@@ -135,6 +182,8 @@ export default {
       allSelectResetValue: null,
       prevComicResetValue: null,
       nextComicResetValue: null,
+
+      isShowingArtistLinks: false,
 
       categoryOptions,
       tagOptions,
