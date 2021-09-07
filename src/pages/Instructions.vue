@@ -13,6 +13,7 @@
       <ul>
         <li>Add new comics</li>
         <li>Update comics</li>
+        <li>Process reported comic problems</li>
         <li>Process tags suggestions</li>
         <li>Tag comics that have few tags in the pending comics list</li>
         <li>Fix other issues in the pending comics list</li>
