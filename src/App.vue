@@ -74,6 +74,9 @@ import TwitterIcon from 'vue-material-design-icons/Twitter.vue'
 import DarkIcon from 'vue-material-design-icons/LightbulbOutline.vue'
 import LightIcon from 'vue-material-design-icons/Lightbulb.vue'
 
+import config from '@/config.json'
+let cookieConfig = config.cookieConfig
+
 import { mapGetters } from 'vuex'
 
 export default {
@@ -145,7 +148,8 @@ export default {
   },
 
   created: function () {
-    this.$cookies.config('60d')
+    this.$cookies.config('60d', ...cookieConfig)
+
     this.$store.dispatch('getAndSetLoginStatus')
     if (this.$cookies.get('theme') && this.$cookies.get('theme')==='dark') {
       this.setTheme('dark')
