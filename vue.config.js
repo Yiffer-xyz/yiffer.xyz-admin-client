@@ -1,5 +1,4 @@
 module.exports = {
-  publicPath: './',
   devServer: {
     proxy: 'http://localhost:8012',
     https: false,
