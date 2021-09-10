@@ -140,7 +140,7 @@ export default {
   computed: {
     ...mapGetters(['isDarkTheme']),
   },
-
+ 
   data: function () {
     return {
       darkTheme: false,
