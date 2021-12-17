@@ -45,6 +45,8 @@
       <artist-manager :artistList="artistList.payload"
                       @refresh-artist-list="refreshArtistList" />
 
+      <PatreonAdmin/>
+
       <pending-comics :pendingComics="pendingComics"
                       @refresh-pending-comics="refreshPendingComics"
                       @refresh-comic-list="refreshComicList" />
@@ -83,6 +85,7 @@ import UserManager from '@/pages/admin-panel/UserManager.vue'
 import ModScoreboard from '@/pages/admin-panel/ModScoreboard.vue'
 import ModLog from '@/pages/admin-panel/ModLog.vue'
 import AdAdmin from '@/pages/admin-panel/AdAdmin.vue'
+import PatreonAdmin from '@/pages/admin-panel/PatreonAdmin.vue'
 import VisitorStats from '@/pages/admin-panel/VisitorStats.vue'
 import AddBlog from '@/pages/admin-panel/AddBlog.vue'
 import ModApplications from '@/pages/admin-panel/ModApplications.vue'
@@ -112,6 +115,7 @@ export default {
     'mod-scoreboard': ModScoreboard,
     ModLog,
     AdAdmin,
+    PatreonAdmin,
     VisitorStats,
     AddBlog,
     ModApplications,
