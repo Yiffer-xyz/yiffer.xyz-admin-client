@@ -82,6 +82,8 @@ registerFetchNames(store,
   {name: 'createArtist', defaultValue: null},
   {name: 'artistList', defaultValue: []},
   {name: 'pendingComics', defaultValue: []},
+  {name: 'processLink', defaultValue: null},
+  {name: 'clearPatronFieldReq', defaultValue: null},
 )
 
 export default new Vuex.Store(store)

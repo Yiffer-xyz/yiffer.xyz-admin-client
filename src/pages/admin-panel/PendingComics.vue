@@ -16,12 +16,16 @@
             You can add keywords, a thumbnail, or more pages by <u>clicking the comic title</u>. <br/>
           </p>
           <p class="mt-8">
-            Comics are published by admins.
+            Comics are published or scheduled by admins.
           </p>
+
+          <button class="y-button y-button-neutral button-with-icon mt-12 mb-4" @click="() => refreshComics()">
+            <RefreshIcon/> Refresh data
+          </button>
 
           <div class="mt-8">
             <input type="checkbox" id="showAllDataCheckbox" v-model="showAllData" style="margin: 0 0.5rem 0 0">
-            <label for="showAllDataCheckbox">Show all data</label>
+            <label for="showAllDataCheckbox">Show all columns</label>
           </div>
         </div>
 
@@ -153,6 +157,7 @@ import RightArrow from 'vue-material-design-icons/ArrowRight.vue'
 import CancelIcon from 'vue-material-design-icons/Close.vue'
 import SaveIcon from 'vue-material-design-icons/ContentSave.vue'
 import DeleteIcon from 'vue-material-design-icons/TrashCanOutline.vue'
+import RefreshIcon from 'vue-material-design-icons/Refresh.vue'
 
 import comicApi from '@/api/comicApi'
 import ResponseMessage from '@/components/ResponseMessage.vue'
@@ -163,7 +168,7 @@ export default {
 
 	components: {
     ResponseMessage,
-		CheckboxIcon, RightArrow, CancelIcon, SaveIcon, DeleteIcon,
+		CheckboxIcon, RightArrow, CancelIcon, SaveIcon, DeleteIcon, RefreshIcon,
   },
   
   props: {
@@ -232,6 +237,10 @@ export default {
         this.$emit('refresh-pending-comics')
         this.comicIdBeingScheduled = null
 			}
+    },
+
+    refreshComics () {
+      this.$emit('refresh-pending-comics')
     },
 
     isOtherComicBeingScheduled (comicId) {
