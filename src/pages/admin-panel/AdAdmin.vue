@@ -21,7 +21,7 @@
                        @on-change="onAdSelectionChange"
                        class="mb-16"/>
 
-      <div class="scrolling-table-container" v-show="displayedAds.length>0">
+      <div class="scrolling-table-container" v-show="displayedAds.length>0" style="max-height: 70vh;">
         <table v-if="displayedAds" class="yTable yTableLeft">
           <thead>
             <tr>
@@ -31,6 +31,7 @@
               <th>User</th>
               <th>Expires</th>
               <th>Type</th>
+              <th>Media</th>
               <th>Status</th>
               <th>$</th>
               <th>Link</th>
@@ -108,6 +109,18 @@
 
               <td>
                 {{ad.adType}}
+              </td>
+
+              <td>
+                <div v-if="!isThisAdBeingEdited(ad.id)">
+                  {{ad.filetype}}
+                </div>
+                <TextInput v-else
+                           :value="editedAd.filetype"
+                           @change="newVal => editedAd.filetype = newVal"
+                           type="text"
+                           title="Filetype"
+                           textAlign="left"/>
               </td>
 
               <td>
@@ -278,6 +291,7 @@ export default {
         extendMonths: 0,
         expiryDateChoice: ad.expiryDate ? 'manual' : 'null',
         payment: null,
+        filetype: ad.filetype,
       }
     },
 
@@ -307,6 +321,7 @@ export default {
         extendMonths,
         customExpiryDate,
         this.editedAd.payment,
+        this.editedAd.filetype,
       ))
       let adIndex = this.displayedAds.findIndex(ad => ad.id === this.editedAd.id)
 
