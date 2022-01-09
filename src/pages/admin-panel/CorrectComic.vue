@@ -1,29 +1,40 @@
 <template>
   <div class="admin-content-box" @click="openComponent" :class="{'admin-content-box-open': isOpen}">
-    <h2 @click="closeComponent" class="cursorPointer adminHeader">Correct comic data</h2>
-    <span class="admin-content-box-inner" v-if="isOpen">
+    <h2 @click="closeComponent" class="cursorPointer adminHeader">
+      Correct comic data
+    </h2>
+    <span class="admin-content-box-inner" v-if="isOpen" ref="innerAdminBox">
 
       <ResponseMessage :message="responseMessage" :messageType="responseMessageType" @closeMessage="closeResponseMessage"
                        outsideStyle="margin: 0.5rem auto;"/>
 
       <Loading v-if="comicList.length === 0" text="Fetching comics" style="margin-top: 1rem;" />
 
-      <div v-else class="horizontalFlex flex-wrap" style="margin-top: 8px; align-items: center;">
-        <p class="admin-mini-header margin-bottom-4 margin-right-8">Comic:</p>
-        <select v-model="comic" class="margin-bottom-4">
-          <option v-for="comic in comicList" :key="comic.id" :value="comic">
-            {{comic.name}}
-          </option>
-        </select>
-        <a :href="`https://yiffer.xyz/${comic.name}`"
-           v-if="comic"
-           style="margin-left: 8px;" target="_blank" class="underline-link margin-bottom-4">
+      <div class="centerLeftAlignedContainer marginAuto" v-else>
+
+      <div class="verticalFlex flexWrap" style="align-items: flex-end; margin: 0 auto">
+        <Select :options="comicOptions"
+                title="Comic"
+                isSearchable
+                searchKeepSelected
+                searchPlaceholder="Search for comic"
+                initialWidth="16rem"
+                :maxWidth="maxContentWidth"
+                :searchSelected="comic ? comic.text : null"
+                :resetValue="comicResetValue"
+                @searchSelectedClicked="comic = null"
+                @change="onComicSelect"/>
+
+        <a :href="`https://yiffer.xyz/${comic.value.name}`"
+            v-if="comic" 
+            target="_blank"
+            class="underline-link mt-8">
           Go to comic <RightArrow/>
         </a>
       </div>
 
       <span v-if="comic && !isSubmitting" class="margin-top-8" style="width: 100%;">
-        <div class="horizontalFlex mb-16">
+        <div class="horizontalFlex mb-16 justifyContentStart">
           <button @click="toggleRename(true)"
                   v-if="!renameActive"
                   class="y-button y-button-neutral mr-16">
@@ -35,10 +46,12 @@
                          :isLoading="isResizing"
                          text="Auto-resize comic"/>
         </div>
-				<span v-if="renameActive" class="horizontalFlex margin-bottom-16" style="align-items: center;">
+				<span v-if="renameActive" class="horizontalFlex margin-bottom-16 alignItemsCenter justifyContentStart">
           <div class="verticalFlex">
-            <p style="text-align: left;">New name</p>
-            <input type="text" v-model="newComicName" style="width: 200px; height: 18px;"/>
+            <TextInput :value="newComicName"
+                       @change="newVal => newComicName = newVal"
+                       title="New name"
+                       textAlign="left"/>
           </div>
 					<button @click="toggleRename(false)" class="y-button y-button-neutral no-margin-bot margin-left-8" style="align-self: flex-end;">
             <CrossIcon/> Cancel rename
@@ -46,84 +59,65 @@
 				</span>
 				
 
-        <div id="fourSelectsContainer" class="verticalFlex">
-          <div class="verticalFlex">
-            <p style="text-align: left;">Artist</p>
-            <select v-model="artist">
-              <option v-for="artist in artistList" :key="artist.name" :value="artist.name">
-                {{artist.name}}
-              </option>
-            </select>
-          </div>
+        <div id="fourSelectsContainer" class="verticalFlex alignItemsStart">
+          <Select :options="artistOptions"
+                  title="Artist"
+                  isSearchable
+                  searchKeepSelected
+                  searchPlaceholder="Search for artist"
+                  initialWidth="10rem"
+                  :defaultValue="artist"
+                  :searchSelected="artist ? artist.text : null"
+                  :resetValue="artistResetValue"
+                  @searchSelectedClicked="artist = null"
+                  @change="onArtistSelect"/>
 
-          <div class="verticalFlex">
-            <p style="text-align: left;">Category</p>
-            <select v-model="cat">
-              <option value="Furry">Furry</option>
-              <option value="MLP">MLP</option>
-              <option value="Pokemon">Pokemon</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
+          <Select :options="categoryOptions"
+                  title="Category"
+                  @change="onCatSelected"
+                  :resetValue="selectResetValue"
+                  :defaultValue="cat"/>
 
-          <div class="verticalFlex">
-            <p style="text-align: left;">Classification</p>
-            <select v-model="tag">
-              <option value="M">M</option>
-              <option value="F">F</option>
-              <option value="MF">MF</option>
-              <option value="MM">MM</option>
-              <option value="FF">FF</option>
-              <option value="MF+">MF+</option>
-              <option value="I">I</option>
-            </select>
-          </div>
-          
-          <div class="verticalFlex">
-            <p style="text-align: left;">State</p>
-            <select v-model="state">
-              <option value="wip">WIP</option>
-              <option value="finished">Finished</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-          </div>
+          <Select :options="tagOptions"
+                  title="Classification"
+                  @change="onTagSelected"
+                  :resetValue="selectResetValue"
+                  :defaultValue="tag"/>
+
+          <Select :options="stateOptions"
+                  title="State"
+                  @change="onStateSelected"
+                  :resetValue="selectResetValue"
+                  :defaultValue="state"/>
         </div>
 
         <!-- PREVIOUS COMIC -->
-        <div class="prev-next-comic-container margin-top-16">
-          <div class="horizontalFlex horiz-space-items-8px" style="align-items: center; flex-wrap: wrap;">
-            <div>
-              <p style="text-align: left;">Previous comic</p>
-              <select v-model="previousComic">
-                <option v-for="comic in comicList" :key="comic.id" :value="comic">
-                  {{comic.name}}
-                </option>
-              </select>
-            </div>
-            <button v-if="previousComic" class="y-button y-button-neutral button-with-icon" 
-                    style="margin-left: 4px; margin-top: 2px; align-self: flex-end;" @click="removePreviousLink()">
-              <CrossIcon/> Remove link
-            </button>
-          </div>
-        </div>
+        <Select :options="comicOptions"
+                title="Previous comic"
+                isSearchable
+                searchKeepSelected
+                searchPlaceholder="Search for comic"
+                initialWidth="16rem"
+                classes="mt-16"
+                :maxWidth="maxContentWidth"
+                :searchSelected="previousComic ? previousComic.text : null"
+                :resetValue="prevComicResetValue"
+                @searchSelectedClicked="previousComic = null"
+                @change="onPrevComicSelect"/>
 
         <!-- NEXT COMIC -->
-        <div class="prev-next-comic-container margin-top-8">
-          <div class="horizontalFlex horiz-space-items-8px" style="align-items: center; flex-wrap: wrap;">
-            <div>
-              <p style="text-align: left;">Next comic</p>
-              <select v-model="nextComic">
-                <option v-for="comic in comicList" :key="comic.id" :value="comic">
-                  {{comic.name}}
-                </option>
-              </select>
-            </div>
-            <button v-if="nextComic" class="y-button y-button-neutral button-with-icon"
-                    style="margin-left: 4px; margin-top: 2px; align-self: flex-end;" @click="removeNextLink()">
-              <CrossIcon/> Remove link
-            </button>
-          </div>
-        </div>
+        <Select :options="comicOptions"
+                title="Next comic"
+                isSearchable
+                searchKeepSelected
+                searchPlaceholder="Search for comic"
+                initialWidth="16rem"
+                classes="mt-16"
+                :maxWidth="maxContentWidth"
+                :searchSelected="nextComic ? nextComic.text : null"
+                :resetValue="nextComicResetValue"
+                @searchSelectedClicked="nextComic = null"
+                @change="onNextComicSelect"/>
 
 				<span class="horizontalFlex no-margin-bot" style="margin-top: 16px;">
         	<button @click="resetFields()"
@@ -135,6 +129,8 @@
           </button>
 				</span>
       </span>
+
+      </div>
 
       <Loading v-if="isSubmitting" text="Updating..." style="margin-top: 1rem;" />
 
@@ -152,6 +148,8 @@ import CrossIcon from 'vue-material-design-icons/Close.vue'
 import RefreshIcon from 'vue-material-design-icons/Refresh.vue'
 import RightArrow from 'vue-material-design-icons/ArrowRight.vue'
 import Loading from '@/components/LoadingIndicator.vue'
+import Select from '@/components/Select.vue'
+import TextInput from '@/components/TextInput.vue'
 
 import comicApi from '@/api/comicApi'
 import ResponseMessage from '@/components/ResponseMessage.vue'
@@ -161,9 +159,8 @@ export default {
 	name: 'correctComic',
   
   components: {
-    ResponseMessage, Loading,
+    ResponseMessage, Loading, Select, LoadingButton, TextInput,
     RightArrow, CrossIcon, RefreshIcon,
-    LoadingButton
 	},
   
   props: {
@@ -171,7 +168,17 @@ export default {
     artistList: Array,
   },
 
-  data: function () {
+  computed: {
+    comicOptions () {
+      return this.comicList.map(c => ({text: c.name, value: c}))
+    },
+    
+    artistOptions () {
+      return this.artistList.map(a => ({text: a.name, value: a.name}))
+    },
+  },
+
+  data () {
     return {
 			renameActive: false,
 			newComicName: '',
@@ -187,37 +194,75 @@ export default {
       previousComic: undefined,
       nextComic: undefined,
 
+      comicResetValue: null,
+      artistResetValue: null,
+      selectResetValue: null,
+      prevComicResetValue: null,
+      nextComicResetValue: null,
+
       isSubmitting: false,
       responseMessage: '',
       responseMessageType: 'info',
 
       isResizing: false,
+      maxContentWidth: 9999,
+      categoryOptions,
+      tagOptions,
+      stateOptions,
     }
   },
 
   methods: {
+    onComicSelect (comic) {
+      this.comic = this.comicOptions.find(c => c.value.id === comic.id)
+      this.comicResetValue = Math.random().toString()
+      this.artist = this.artistOptions.find(a => a.value === this.comic.value.artist)
+      this.cat = this.categoryOptions.find(c => c.value === this.comic.value.cat)
+      this.tag = this.tagOptions.find(c => c.value === this.comic.value.tag)
+      this.state = this.stateOptions.find(c => c.value === this.comic.value.state)
+    },
+
+    onArtistSelect (artistName) {
+      this.artist = this.artistOptions.find(a => a.value === artistName)
+    },
+    onCatSelected (catName) {
+      this.cat = this.categoryOptions.find(opt => opt.value === catName)
+    },
+    onTagSelected (tagName) {
+      this.tag = this.tagOptions.find(opt => opt.value === tagName)
+    },
+    onStateSelected (stateName) {
+      this.state = this.stateOptions.find(opt => opt.value === stateName)
+    },
+    onPrevComicSelect (comic) {
+      this.previousComic = this.comicOptions.find(opt => opt.value.id === comic.id)
+    },
+    onNextComicSelect (comic) {
+      this.nextComic = this.comicOptions.find(opt => opt.value.id === comic.id)
+    },
+
     async submitChanges () {
       this.isSubmitting = true
 
       let response = await comicApi.updateComic({
-				id: this.comic.id,
-				name: (this.renameActive && this.newComicName.length>0) ? this.newComicName : this.comic.name,
-				oldName: this.comic.name,
-				cat: this.cat,
-				tag: this.tag,
-				state: this.state,
-        artist: this.artist,
-        previousComic: this.previousComic ? this.previousComic.id : null,
-        nextComic: this.nextComic ? this.nextComic.id : null
+				id: this.comic.value.id,
+				name: (this.renameActive && this.newComicName.length>0) ? this.newComicName : this.comic.value.name,
+				oldName: this.comic.value.name,
+				cat: this.cat?.value,
+				tag: this.tag?.value,
+				state: this.state?.value,
+        artist: this.artist?.value,
+        previousComic: this.previousComic ? this.previousComic.value.id : null,
+        nextComic: this.nextComic ? this.nextComic.value.id : null
       })
       
       this.isSubmitting = false
 
       if (response.success) {
-        this.responseMessage = 'Successfully updated info of ' + this.comic.name
+        this.responseMessage = 'Successfully updated info of ' + this.comic.value.name
 				this.responseMessageType = 'success'
 				this.toggleRename(false)
-				this.lastComicId = this.comic.id
+				this.lastComicId = this.comic.value.id
 				this.$emit('refresh-comic-list')
       }
       else {
@@ -228,7 +273,7 @@ export default {
 
     async autoResizecomic () {
       this.isResizing = true
-      let result = await comicApi.autoResizeComic(this.comic.id)
+      let result = await comicApi.autoResizeComic(this.comic.value.id)
       this.isResizing = false
 
       if (result.error) {
@@ -236,14 +281,14 @@ export default {
         this.responseMessageType = 'error'
       }
       else {
-        this.responseMessage = `Success resizing ${this.comic.name}. Scaled down ${result.numberOfResizedPages}/${result.totalNumberOfPages} pages.`
+        this.responseMessage = `Success resizing ${this.comic.value.name}. Scaled down ${result.numberOfResizedPages}/${result.totalNumberOfPages} pages.`
         this.responseMessageType = 'success'
       }
     },
 		
 		toggleRename (isActive) {
 			this.renameActive = isActive
-			if (!isActive) { this.newComicName = this.comic.name }
+			if (!isActive) { this.newComicName = this.comic.value.name }
     },
     
     removePreviousLink () {
@@ -255,10 +300,10 @@ export default {
     },
 
 		resetFields () {
-			this.tag = this.comic.tag + ''
-			this.cat = this.comic.cat + ''
-			this.state = this.comic.state
-      this.artist = this.comic.artist + ''
+			this.tag = this.tagOptions.find(opt => opt.value === this.comic.value.tag)
+			this.cat = this.categoryOptions.find(opt => opt.value === this.comic.value.cat)
+			this.state = this.stateOptions.find(opt => opt.value === this.comic.value.state)
+      this.artist = this.artistOptions.find(a => a.value === this.comic.value.artist)
       this.nextComic = this.originalNextComic + ''
       this.previousComic = this.originalPreviousComic + ''
       this.toggleRename(false)
@@ -266,15 +311,20 @@ export default {
     },
     
     async findComicLinks () {
-      let comicData = await comicApi.getComic(this.comic.name)
+      let comicData = await comicApi.getComic(this.comic.value.name)
+
       this.previousComic = comicData.previousComic ? 
-        this.comicList.find(c => c.name === comicData.previousComic)
+        this.comicOptions.find(c => c.value.name === comicData.previousComic)
         : undefined
       this.nextComic = comicData.nextComic ? 
-        this.comicList.find(c => c.name === comicData.nextComic)
+        this.comicOptions.find(c => c.value.name === comicData.nextComic)
         : undefined
-      this.originalPreviousComic = this.previousComic + ''
-      this.originalNextComic = this.nextComic + ''
+
+      this.originalPreviousComic = this.comicOptions.find(c => c.value.name === comicData.previousComic)
+      this.originalNextComic = this.comicOptions.find(c => c.value.name === comicData.nextComic)
+
+      this.prevComicResetValue = Math.random().toString()
+      this.nextComicResetValue = Math.random().toString()
     },
 
     closeResponseMessage () { this.responseMessage = '' },
@@ -289,34 +339,58 @@ export default {
       if (this.comic) { this.resetFields() }
 		},
 
-		comicList () {
-			this.comic = this.comicList.find(c => c.id===this.lastComicId)
-		} 
+		comicOptions () {
+			this.comic = this.comicOptions.find(c => c.value.id === this.lastComicId)
+		},
+
+    isOpen () {
+      setTimeout(() => {
+        if (this.$refs.innerAdminBox && document.body.clientWidth < 400) {
+          this.maxContentWidth = this.$refs.innerAdminBox.clientWidth - 32
+        }
+      }, 25)
+    }
+
   },
 }
+
+const categoryOptions = [
+  {text: 'Furry', value: 'Furry'},
+  {text: 'MLP', value: 'MLP'},
+  {text: 'Pokemon', value: 'Pokemon'},
+  {text: 'Other', value: 'Other'},
+]
+
+const tagOptions = [
+  {text: 'M', value: 'M'},
+  {text: 'F', value: 'F'},
+  {text: 'MF', value: 'MF'},
+  {text: 'MM', value: 'MM'},
+  {text: 'FF', value: 'FF'},
+  {text: 'MF+', value: 'MF+'},
+  {text: 'I', value: 'I'},
+]
+
+const stateOptions = [
+  {text: 'WIP', value: 'wip'},
+  {text: 'Finished', value: 'finished'},
+  {text: 'Cancelled', value: 'cancelled'},
+]
 </script>
 
 <style lang="scss">
 #fourSelectsContainer {
   flex-wrap: wrap;
   justify-content: center;
-  margin: auto;
   width: fit-content;
-
-  div {
-    margin: 4px;
-  }
+  gap: 0.5rem;
 
 	@media (min-width: 900px) {
     flex-direction: row;
-    div {
-      margin: 8px;
-    }
 	}
 }
 
 .prev-next-comic-container {
-  margin-left: auto; margin-right: auto;
   display: flex;
   flex-direction: column;
   width: fit-content;

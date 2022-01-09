@@ -192,6 +192,11 @@ export default {
       }
     },
 
+    defaultValue () {
+      this.selected = this.defaultValue
+      this.searchText = ''
+    },
+
     searchText (newText) {
       this.highlightedIndex = null
 

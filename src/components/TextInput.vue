@@ -37,7 +37,7 @@
         {{helperText}}
       </label>
 
-      <textarea v-else-if="type === 'textarea'" rows=4
+      <textarea v-else-if="type === 'textarea'" :rows="textAreaRows"
                 v-model="localValue"
                 @input="changeEvent => $emit('change', changeEvent.target.value)"
                 class="paddedInput"
@@ -79,6 +79,11 @@ export default {
       type: String,
       required: false,
       default: 'text'
+    },
+    textAreaRows: {
+      type: Number,
+      required: false,
+      default: 4,
     },
     textAlign: {
       type: String,
