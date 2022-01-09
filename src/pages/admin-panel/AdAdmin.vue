@@ -33,6 +33,7 @@
               <th>Type</th>
               <th>Media</th>
               <th>Status</th>
+              <th>Name</th>
               <th>$</th>
               <th>Link</th>
               <th>Media</th>
@@ -133,20 +134,24 @@
                   </p>
                 </div>
                 <div v-else class="verticalFlex">
-                  <select v-model="editedAd.status" style="width: 10rem;">
-                    <option v-for="adStatus in Object.values(adStatuses)"
-                            :key="adStatus"
-                            :value="adStatus">
-                      {{adStatus}}
-                    </option>
-                  </select>
-                  <textarea v-if="editedAd.status === adStatuses.needsCorrection || editedAd.status === adStatuses.activeNeedsCorrection"
-                            v-model="editedAd.correctionNote"
-                            rows="3"
-                            class="mt-4"
-                            placeholder="Correction note"
-                            type="text"/>
+                  <Select :options="adStatusOptions"
+                          title="Status"
+                          :defaultValue="adStatusOptions.find(opt => opt.value === editedAd.status)"
+                          @change="newVal => editedAd.status = newVal"/>   
+
+                  <TextInput v-if="editedAd.status === adStatuses.needsCorrection || editedAd.status === adStatuses.activeNeedsCorrection"
+                             :value="editedAd.correctionNote"
+                             @change="newVal => editedAd.correctionNote = newVal"
+                             type="textarea"
+                             :textAreaRows="2"
+                             title="Correction note"
+                             classes="mt-16"
+                             textAlign="left"/>
                 </div>
+              </td>
+
+              <td>
+                {{ad.adName}}
               </td>
 
               <td>
@@ -175,27 +180,20 @@
 
               <td style="white-space: pre-wrap;">
                 <a :href="ad.link" v-if="!isThisAdBeingEdited(ad.id)" target="_blank" style="min-width: 6rem; word-break: normal;" class="underline-link">{{ad.link}}</a>
-                <input type="text" v-else v-model="editedAd.link"/>
+                <TextInput v-else
+                           :value="editedAd.link"
+                           @change="newVal => editedAd.link = newVal"
+                           type="text"
+                           title="Link"
+                           wrapperStyle="max-width: 16rem;"
+                           textAlign="left"/>
               </td>
 
               <td>
-                <a v-if="ad.adType === 'banner'"
-                   :href="`${config.paidImagesBaseUrl}/${ad.id}.${ad.filetype}`"
+                <a :href="`${config.paidImagesBaseUrl}/${ad.id}.${ad.filetype}`"
                    class="underline-link"
                    target="_blank">
                   View
-                </a>
-                <a v-if="ad.adType === 'card'"
-                   :href="`${config.paidImagesBaseUrl}/${ad.id}-big.${ad.filetype}`"
-                   class="underline-link mr-8"
-                   target="_blank">
-                  Big
-                </a>
-                <a v-if="ad.adType === 'card'"
-                   :href="`${config.paidImagesBaseUrl}/${ad.id}-small.${ad.filetype}`"
-                   class="underline-link"
-                   target="_blank">
-                  Small
                 </a>
               </td>
 
@@ -217,7 +215,13 @@
 
               <td style="white-space: pre-wrap;">
                 <p v-if="!isThisAdBeingEdited(ad.id) && ad.adminNotes" style="min-width: 8rem;">{{ad.adminNotes}}</p>
-                <input type="text" v-if="isThisAdBeingEdited(ad.id)" v-model="editedAd.adminNotes"/>
+                <TextInput v-if="isThisAdBeingEdited(ad.id)"
+                           :value="editedAd.adminNotes"
+                           @change="newVal => editedAd.adminNotes = newVal"
+                           type="text"
+                           title="Admin notes"
+                           wrapperStyle="width: 12rem;"
+                           textAlign="left"/>
               </td>
             </tr>
           </tbody>
@@ -246,6 +250,7 @@ import MultiToggleButton from '@/components/MultiToggleButton'
 import FetchResponseMessage from '@/components/FetchResponseMessage.vue'
 import Loading from '@/components/LoadingIndicator.vue'
 import TextInput from '@/components/TextInput.vue'
+import Select from '@/components/Select.vue'
 
 import CancelIcon from 'vue-material-design-icons/Close.vue'
 import EditIcon from 'vue-material-design-icons/Pencil.vue'
@@ -258,14 +263,14 @@ export default {
 
   components: {
     MultiToggleButton, FetchResponseMessage, Loading,
-    EditIcon, CancelIcon, SaveIcon, TextInput,
+    EditIcon, CancelIcon, SaveIcon, TextInput, Select,
   },
 
   computed: {
     ...mapGetters(['updateAd']),
   },
 
-  data: function () {
+  data () {
     return {
       displayedAds: [],
       editedAd: null,
@@ -273,7 +278,8 @@ export default {
       numberOfPendingAds: 0,
       isOpen: false,
       config,
-      adStatuses: adStatuses,
+      adStatuses,
+      adStatusOptions,
       paymentAdId: null,
       addPaymentAmount: 0,
     }
@@ -413,6 +419,11 @@ const adStatuses = {
   ended: 'ENDED',
   deleted: 'DELETED',
 }
+
+const adStatusOptions = Object.values(adStatuses).map(status => ({
+  text: status.substr(0,1) + status.substr(1).toLowerCase(),
+  value: status
+}))
 </script>
 
 <style lang="scss">
