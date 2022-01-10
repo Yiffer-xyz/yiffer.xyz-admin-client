@@ -98,13 +98,14 @@
                          v-model="editedAd.expiryDate"
                          class="mt-8"/>
 
-                  <div v-else-if="editedAd.expiryDateChoice === 'extend'"
-                       class="horizontalFlex justifyContentStart mt-8">
-                    <label for="customExtend" class="mr-4">
-                      +Months{{(!editedAd.expiryDate || editedAd.expiryDate.includes('1970')) ? ' (from now)' : ''}}:
-                    </label>
-                    <input type="number" v-model="editedAd.extendMonths" id="customExtend" style="width: 2.5rem;"/>
-                  </div>
+
+                  <TextInput v-else-if="editedAd.expiryDateChoice === 'extend'"
+                             @change="newVal => editedAd.extendMonths = newVal"
+                             type="number"
+                             :title="`+ months${(!editedAd.expiryDate || editedAd.expiryDate.includes('1970')) ? ' (from now)' : ''}`"
+                             textAlign="left"
+                             classes="mt-8"/>
+
                 </div>
               </td>
 

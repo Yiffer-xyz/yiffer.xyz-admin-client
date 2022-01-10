@@ -339,7 +339,7 @@ export default {
 
       if (!this.isSearchable) {
         if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === ' ') {
-          if (this.$refs.outerContainer.isSameNode(document.activeElement)) {
+          if (this.$refs.outerContainer && this.$refs.outerContainer.isSameNode(document.activeElement)) {
             e.preventDefault()
             this.isOpen = true
           }
