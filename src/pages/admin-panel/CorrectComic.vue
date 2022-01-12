@@ -34,7 +34,7 @@
       </div>
 
       <span v-if="comic && !isSubmitting" class="margin-top-8" style="width: 100%;">
-        <div class="horizontalFlex mb-16 justifyContentStart">
+        <div class="horizontalFlex mb-16 mt-8">
           <button @click="toggleRename(true)"
                   v-if="!renameActive"
                   class="y-button y-button-neutral mr-16">
@@ -59,7 +59,7 @@
 				</span>
 				
 
-        <div id="fourSelectsContainer" class="verticalFlex alignItemsStart">
+        <div id="fourSelectsContainer" class="verticalFlex alignItemsCenter">
           <Select :options="artistOptions"
                   title="Artist"
                   isSearchable
@@ -98,7 +98,7 @@
                 searchKeepSelected
                 searchPlaceholder="Search for comic"
                 initialWidth="16rem"
-                classes="mt-16"
+                classes="prevNextComic"
                 :maxWidth="maxContentWidth"
                 :searchSelected="previousComic ? previousComic.text : null"
                 :resetValue="prevComicResetValue"
@@ -112,14 +112,14 @@
                 searchKeepSelected
                 searchPlaceholder="Search for comic"
                 initialWidth="16rem"
-                classes="mt-16"
+                classes="prevNextComic"
                 :maxWidth="maxContentWidth"
                 :searchSelected="nextComic ? nextComic.text : null"
                 :resetValue="nextComicResetValue"
                 @searchSelectedClicked="nextComic = null"
                 @change="onNextComicSelect"/>
 
-				<span class="horizontalFlex no-margin-bot" style="margin-top: 16px;">
+				<span class="horizontalFlex mt-32">
         	<button @click="resetFields()"
                   class="y-button y-button-neutral button-with-icon" style="margin-right: 4px;">
             <RefreshIcon/> Reset
@@ -382,17 +382,14 @@ const stateOptions = [
 #fourSelectsContainer {
   flex-wrap: wrap;
   justify-content: center;
-  width: fit-content;
-  gap: 0.5rem;
+  gap: 0.75rem;
 
 	@media (min-width: 900px) {
     flex-direction: row;
 	}
 }
 
-.prev-next-comic-container {
-  display: flex;
-  flex-direction: column;
-  width: fit-content;
+.prevNextComic {
+  margin: 1.5rem auto 0 auto;
 }
 </style>

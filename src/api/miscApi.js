@@ -1,10 +1,17 @@
 import axios from 'axios'
 import config from '@/config.json'
+import { format } from 'date-fns'
 let baseUrl = config.apiBaseUrl
 
 export default {
-  async getModScores () {
-    let response = await axios.get(baseUrl + '/modscores')
+  async getModScores (startDate, endDate) {
+    let url = `${baseUrl}/modscores`
+
+    if (startDate && endDate) {
+      url += `?startDate=${format(startDate, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`
+    }
+
+    let response = await axios.get(url)
     if (!response.data.error) { return response.data }
     else { return [] }
   },
