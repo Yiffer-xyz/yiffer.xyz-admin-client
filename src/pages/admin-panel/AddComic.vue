@@ -389,6 +389,7 @@ export default {
       this.thumbnailFile = undefined
       this.nextComic = undefined
       this.previousComic = undefined
+      this.resetResizer()
       document.getElementById('newPageFilesAddComic').value = ''
       this.$emit('refresh-pending-comics')
 		},
