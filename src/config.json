@@ -1,7 +1,7 @@
 {
   "apiBaseUrl": "/api",
-  "maxUploadSizeMB": 20,
-  "comicsBaseUrl": "https://static.yiffer.xyz/comics-beta",
-  "paidImagesBaseUrl": "https://static.yiffer.xyz/pi-beta",
-  "cookieConfig": ["60d", "", ".testyiffer.xyz", false]
+  "maxUploadSizeMB": 150,
+  "comicsBaseUrl": "https://static.yiffer.xyz/comics",
+  "paidImagesBaseUrl": "https://static.yiffer.xyz/pi",
+  "cookieConfig": ["60d", "", ".yiffer.xyz", false]
 }

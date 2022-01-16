@@ -129,8 +129,8 @@ export default {
       }
     },
 
-    logout () {
-      this.$store.dispatch('logout')
+    async logout () {
+      await this.$store.dispatch('logout')
       if (this.$route.meta.redirectOnLogout) {
         this.$router.replace('/login')
       }

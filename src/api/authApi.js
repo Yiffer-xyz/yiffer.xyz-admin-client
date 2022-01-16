@@ -17,7 +17,7 @@ export default {
     return response.data
   },
   
-  logout () {
-    axios.get(baseUrl + '/logout')
+  async logout () {
+    await axios.get(baseUrl + '/logout')
   },
 }

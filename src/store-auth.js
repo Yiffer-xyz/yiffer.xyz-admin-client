@@ -10,7 +10,7 @@ export default {
   actions: {
     async logout ({dispatch}) {
       dispatch('destroyUserData')
-      authApi.logout()
+      await authApi.logout()
     },
 
     async getAndSetLoginStatus ({commit, dispatch}) {
