@@ -10,12 +10,12 @@ export default {
   actions: {
     async logout ({dispatch}) {
       dispatch('destroyUserData')
-      authApi.logout()
+      await authApi.logout()
     },
 
     async getAndSetLoginStatus ({commit, dispatch}) {
-      if ($cookies.isKey('user-data')) {
-        let userData = $cookies.get('user-data')
+      if ($cookies.isKey('yiffer_userdata')) {
+        let userData = $cookies.get('yiffer_userdata')
         commit('setUserData', userData)
         commit('setIsAuthenticated', true)
         dispatch('refreshUserData')
@@ -41,13 +41,11 @@ export default {
     setUserData (context, userData) {
       context.commit('setUserData', userData)
       context.commit('setIsAuthenticated', true)
-      $cookies.set('user-data', userData)
     },
 
     destroyUserData (context) {
       context.commit('setUserData', undefined)
       context.commit('setIsAuthenticated', false)
-      $cookies.remove('user-data')
     },
   },
 
