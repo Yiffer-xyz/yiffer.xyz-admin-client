@@ -17,7 +17,8 @@
         <li>Process tags suggestions</li>
         <li>Tag comics that have few tags in the pending comics list</li>
         <li>Fix other issues in the pending comics list</li>
-        <li>Make sure artist links are up to date whenever you upload/update a comic by them!</li>
+        <li>
+          <u> Make sure artist links are up to date whenever you upload/update a comic by them</u>. If the artist is missing an e621-link, for example, <u>add it</u> (assuming the artist exists on e621 - almost all of them do).</li>
         <li>Add tags when you see a comic with insufficient ones</li>
       </ul>
 
@@ -41,6 +42,49 @@
         We comply if an artist requests that we take down their content - so far, only Jay Naylor and vore artist Voregence has requested this.
       </p>
 
+      <h3>Uploading comics</h3>
+      <ul>
+        <li>
+          Wait for a comic to have at least 4 pages before uploading it.
+        </li>
+        <li>
+          If you aren't going to do a proper job tagging the comic, leave it without tags, rather than putting 1-2 tags on it. This will make it easier for people who do tag comics to see that your comic is missing them.
+        </li>
+        <li>
+          If there is a cover page that isn't really "part of the comic", you should still add it as page 1. An example: <a href="https://yiffer.xyz/A%20Darker%20Shade%20of%20Life%20-%20Ch.%201" target="_blank" class="underline-link">A Darker Shade of Life</a>.
+        </li>
+      </ul>
+
+      <h3>Tagging</h3>
+      <p>
+        Because I've seen varying quality in the tags, here are some suggestions.
+      </p>
+      <br>
+      <p>
+        Most comics should be tagged either anthro or feral.
+      </p>
+      <br>
+      <p>
+        Tag species to the best of your ability - eg. dog, cat, panda. Also tag the species family or group. Below are some of the more common ones. We don't need e621-level of specificity though. We're not tagging to be technically correct, we're just tagging to help users find what they want. Explanation: any comic with a dog, wolf or fox should be tagged as canine in addition to the species themselves.
+      </p>
+      <ul>
+        <li>
+          Canine: dogs, wolves, foxes, hyenas ++
+        </li>
+        <li>
+          Feline: cats, tigers, lions, cheetahs, anything cat-like
+        </li>
+        <li>
+          Equine: horses, ponies, donkies, zebras, ++
+        </li>
+        <li>
+          Scalie: dragons, dinosaurs, snakes, reptiles, anything with scales
+        </li>
+        <li>
+          Avian: birds, gryphons, anything bird-like
+        </li>
+      </ul>
+
       <h3>Keep page sizes equal &amp; don't use resized pages</h3>
       <p>
         In general, try to keep the size of a comic's pages similar. If, for instance, a comic that's already been uploaded has all of its pages in a "regular" size (say, 1400px tall) but you find a new one in a huge size (for example 3000px tall), please look for another version - typically found on the artist's FA or twitter. It might feel "wrong" to "downgrade" a comic's pages from being 2600x3200 px to, say, 1300x1600 px - but trust me, most readers prefer this, as the latter is still more than big enough to be readable, and will load much quicker.
@@ -49,10 +93,10 @@
         When uploading a comic the same principles apply, try to keep the pages the same size. If you find all the pages in a regular quality and only a few in a higher one, please just use the regular quality ones, as long as they're not unreasonably small.
         <br>
         <br>
-        The main reason to maintain page size consistency is the reader's comfort - if the sizes vary, reading becomes tedious, especially on mobile devices. Pages with a height greater than 2200 px will be scaled down to 2200 px automatically. The exception to this rule is if the height/width ratio is above 1.75 - to avoid making extra-tall/thin pages unreadable (pages like in <a href="https://yiffer.xyz/Pet%20Treats%20Neo" class="underline-link" target="_blank">Pet Treats Neo by Tokifuji<RightArrow/></a>).
+        The main reason to maintain page size consistency is the reader's comfort - if the sizes vary, reading becomes tedious, especially on mobile devices. Pages with a height greater than 2000 px will be scaled down to 2000 px automatically. The exception to this rule is if the height/width ratio is above 1.75 - to avoid making extra-tall/thin pages unreadable (pages like in <a href="https://yiffer.xyz/Pet%20Treats%20Neo" class="underline-link" target="_blank">Pet Treats Neo by Tokifuji</a>).
         <br>
         <br>
-        All this said, be critical when fetching pages from anywhere that isn't the artist themselves. Especially sites like e-hentai, myreadingmanga, luscious, etc. These sites tend to have pages in a <i>lower</i> resolution than what can be found on the artist's pages, so <i>please</i> check their FA, or e621, etc, when fetching from these sources. Quality is one of the most important aspects of Yiffer.xyz!
+        All this said, <u>be critical when fetching pages from anywhere that isn't the artist themselves</u>. Especially sites like e-hentai, myreadingmanga, luscious, etc. These sites tend to have pages in a <i>lower</i> resolution than what can be found on the artist's pages, so <u><i>please</i> check their FA, or e621, etc, when fetching from these sources</u>. Quality is one of the most important aspects of Yiffer.xyz!
       </p>
 
       <h3>Thumbnails</h3>
@@ -94,7 +138,7 @@
             <img src="assets/thumb-ex-3.jpg">
           </picture>
           <label>
-            COULD BE BETTER: A better page choice, but so many panels that the content is way too small. Also, sort of spoiler-y (bottom panel)
+            COULD BE BETTER: A better page choice, but so many panels that the content is too small. Also, sort of spoiler-y (bottom panel)
           </label>
         </div>
         <div class="pic-with-desc">
@@ -104,7 +148,7 @@
             <img src="assets/thumb-ex-4.jpg">
           </picture>
           <label>
-            GOOD: Not spoiling the surprises, most main characters clearly visible
+            GOOD: Not spoiling the surprises, most main characters clearly visible. A single panel is <u>not</u> always preferable, though.
           </label>
         </div>
       </div>
@@ -114,13 +158,13 @@
       </h3>
       <ul>
         <li>
+          You can add/remove tags directly from a comic on the regular site, via the "Add tag"/"Remove tag" buttons. You'll skip the suggestion step as long as you're logged in as a mod.
+        </li>
+        <li>
           We don't host cub comics.
         </li>
         <li>
           When there are many, pending comics are published a handful at a time instead of all at once, intentionally.
-        </li>
-        <li>
-          VERY occasionally there is a glitch when appending pages, causing the pages to simply.. not be appended, despite the success message. This is a google cloud storage oddity that I'm still investigating. Please tell me if it happens to you!
         </li>
         <li>
           When adding a comic from the "Comic Suggestions", please press "Adding the comic" before you start, so we don't end up with two people gathering the same comic's pages at the same time.
@@ -141,12 +185,10 @@
 
 <script>
 import LeftArrow from 'vue-material-design-icons/ArrowLeft.vue'
-import RightArrow from 'vue-material-design-icons/ArrowRight.vue'
 
 export default {
-  name: 'instructions',
   components: {
-    LeftArrow, RightArrow,
+    LeftArrow,
   },
 }
 </script>
