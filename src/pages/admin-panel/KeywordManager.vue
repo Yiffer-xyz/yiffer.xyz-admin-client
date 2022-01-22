@@ -59,7 +59,7 @@
                 New tags
               </p>
 
-              <Select :options="keywordOptions"
+              <Select :options="selectedComicKeywordOptions"
                       isSearchable
                       :resetValue="selectResetValue"
                       searchPlaceholder="Search for tags"
@@ -91,12 +91,18 @@
           <Loading text="Loading tags"/>
         </div>
 
-        <button v-if="!isCreatingNewTag"
-                class="y-button button-with-icon"
-                style="margin-top: 40px;"
-                @click="isCreatingNewTag = true">
-          <PlusIcon/> Create new tag
-        </button>
+        <div style="margin-top: 40px; gap: 1rem;" class="horizontalFlex flexWrap">
+          <button v-if="!isCreatingNewTag && !isEditingOrDeletingTag"
+                  class="y-button button-with-icon"
+                  @click="isCreatingNewTag = true">
+            <PlusIcon/> Create new tag
+          </button>
+          <button v-if="!isCreatingNewTag && !isEditingOrDeletingTag"
+                  class="y-button button-with-icon"
+                  @click="isEditingOrDeletingTag = true">
+            <PlusIcon/> Change/delete a tag
+          </button>
+        </div>
 
         <span v-if="isCreatingNewTag">
           <h2 class="textLeft width100" style="margin-top: 40px;">
@@ -120,6 +126,47 @@
           </div>
         </span>
 
+
+        <span v-if="isEditingOrDeletingTag">
+          <h2 class="textLeft width100" style="margin-top: 40px;">
+            Change/delete tag
+          </h2>
+
+          <Select :options="allKeywordOptions"
+                  title="Tag"
+                  isSearchable
+                  searchKeepSelected
+                  searchPlaceholder="Search for tags"
+                  :searchSelected="editOrDeleteTag ? editOrDeleteTag.name : null"
+                  :resetValue="editOrDeleteTagResetValue"
+                  @searchSelectedClicked="() => onEditOrDelTagSelect('')"
+                  @change="onEditOrDelTagSelect"
+                  class="mb-16"/>
+
+          <div class="horizontalFlex justifyContentStart" style="gap: 1rem;" v-if="!isDeletingTag">
+            <button @click="() => cancelEditOrDelete" class="y-button y-button-neutral">
+              Cancel
+            </button>
+            <button @click="() => isDeletingTag = true" class="y-button y-button-red">
+              Delete tag
+            </button>
+            <button @click="() => saveTagChange"
+                    class="y-button"
+                    :class="{'y-button-disabled': isEditKwChanged}"
+                    :disabled="isEditKwChanged">
+              Save
+            </button>
+          </div>
+
+          <div v-if="isDeletingTag" class="horizontalFlex justifyContentStart" style="gap: 1rem;" >
+            <button @click="() => deleteTag" class="y-button y-button-red">
+              Confirm delete
+            </button>
+            <button @click="() => isDeletingTag = false" class="y-button y-button-neutral">
+              Cancel
+            </button>
+          </div>
+        </span>
       </div>
 
       <menu-up-icon @click="closeComponent" class="mdi-arrow close-component-arrow"/>
@@ -160,7 +207,7 @@ export default {
     comicList: Array,
 	},
 
-  data: function () {
+  data () {
     return {
       isOpen: false,
       comic: undefined,
@@ -175,6 +222,11 @@ export default {
       selectResetValue: null,
       comicResetValue: null,
       isCreatingNewTag: false,
+      isEditingOrDeletingTag: false,
+      editOrDeleteTag: '',
+      isDeletingTag: false,
+      originalEditOrDeleteTag: '',
+      editOrDeleteTagResetValue: null,
       isSubmittingAddKw: false,
       isSubmittingRemoveKw: false,
       isMounted: false,
@@ -193,13 +245,25 @@ export default {
       return this.comicList.map(c => ({text: c.name, value: c.name}))
     },
 
-    keywordOptions () {
+    isEditKwChanged () {
+      return true // TODO:
+    },
+
+    selectedComicKeywordOptions () {
+      if (!this.comicKeywords || !this.selectedKeywords) {
+        return []
+      }
+
       let existingKwIds = this.comicKeywords.map(kw => kw.id)
       let selectedKwIds = this.selectedKeywords.map(kw => kw.id)
 
       return this.alphabeticKeywordList
         .filter(kw => !existingKwIds.includes(kw.id) && !selectedKwIds.includes(kw.id))
         .map(kw => ({text: kw.name, value: kw}))
+    },
+
+    allKeywordOptions () {
+      return this.alphabeticKeywordList.map(kw => ({text: kw.name, value: kw}))
     },
 
     comicInputWidth () {
@@ -244,6 +308,25 @@ export default {
         this.keywordsToDelete.splice(this.keywordsToDelete.findIndex(kw => kw.id===keyword.id), 1)
       }
     },
+
+    cancelEditOrDelete () {
+      this.editOrDeleteTag = null
+      this.isEditingOrDeletingTag = false
+    },
+
+    onEditOrDelTagSelect (newTag) {
+      console.log(newTag)
+      this.editOrDeleteTag = newTag
+      this.editOrDeleteTagResetValue = Math.random().toString()
+    },
+
+    deleteTag () {
+
+    },
+
+    saveTagChange () {
+
+    },  
     
     async confirmAddKeywords () {
       this.responseMessage = ''
