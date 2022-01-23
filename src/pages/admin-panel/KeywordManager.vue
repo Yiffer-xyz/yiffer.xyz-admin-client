@@ -111,10 +111,10 @@
 
           <p>If a tag is not in the list above, create it here. Double check first though, please.</p>
           <TextInput :value="newKeyword"
-                      @change="newKw => newKeyword = newKw"
-                      title="New tag name"
-                      textAlign="left"
-                      class="mt-24 mb-24"/>
+                     @change="newKw => newKeyword = newKw"
+                     title="New tag name"
+                     textAlign="left"
+                     class="mt-24 mb-24"/>
 
           <div class="horizontalFlex justifyContentStart">
             <button @click="isCreatingNewTag = false" class="y-button y-button-neutral mr-8">
@@ -132,6 +132,9 @@
             Change/delete tag
           </h2>
 
+          <FetchResponseMessage :fetchStates="[deleteKeywordState, updateKeywordState]"
+                                classes="mb-16" style="width: 100%;" disableElevation/>
+
           <Select :options="allKeywordOptions"
                   title="Tag"
                   isSearchable
@@ -143,25 +146,48 @@
                   @change="onEditOrDelTagSelect"
                   class="mb-16"/>
 
-          <div class="horizontalFlex justifyContentStart" style="gap: 1rem;" v-if="!isDeletingTag">
-            <button @click="() => cancelEditOrDelete" class="y-button y-button-neutral">
+          <div class="horizontalFlex justifyContentStart" style="gap: 1rem;" v-if="!isDeletingTag && !isRenamingTag">
+            <button @click="cancelEditOrDelete" class="y-button y-button-neutral">
               Cancel
             </button>
-            <button @click="() => isDeletingTag = true" class="y-button y-button-red">
+            <button @click="initiateRenamingTag"
+                    v-if="editOrDeleteTag"
+                    class="y-button">
+              Rename tag
+            </button>
+            <button @click="() => isDeletingTag = true"
+                    v-if="editOrDeleteTag"
+                    class="y-button y-button-red">
               Delete tag
             </button>
-            <button @click="() => saveTagChange"
-                    class="y-button"
-                    :class="{'y-button-disabled': isEditKwChanged}"
-                    :disabled="isEditKwChanged">
-              Save
+          </div>
+
+          <div v-if="isRenamingTag">
+            <TextInput :value="newTagName"
+                       @change="newKw => newTagName = newKw"
+                       title="New name"
+                       textAlign="left"
+                       class="mt-24"/>
+          </div>
+
+          <div v-if="isRenamingTag" class="horizontalFlex justifyContentStart mt-16" style="gap: 1rem;" >
+            <LoadingButton :isLoading="updateKeywordState.fetching"
+                           :isDisabled="!isEditKwChanged"
+                           @click="saveTagChange"
+                           text="Save"
+                           iconType="save"/>
+
+            <button @click="() => isRenamingTag = false" class="y-button y-button-neutral">
+              Cancel
             </button>
           </div>
 
           <div v-if="isDeletingTag" class="horizontalFlex justifyContentStart" style="gap: 1rem;" >
-            <button @click="() => deleteTag" class="y-button y-button-red">
-              Confirm delete
-            </button>
+            <LoadingButton :isLoading="deleteKeywordState.fetching"
+                           @click="deleteTag"
+                           color="error"
+                           text="Confirm delete"/>
+
             <button @click="() => isDeletingTag = false" class="y-button y-button-neutral">
               Cancel
             </button>
@@ -185,9 +211,11 @@ import Select from '@/components/Select.vue'
 import PlusIcon from 'vue-material-design-icons/Plus.vue'
 import TextInput from '../../components/TextInput.vue'
 import LoadingButton from '@/components/LoadingButton.vue'
+import { doFetch } from '@/utils/statefulFetch'
 
 import keywordApi from '@/api/keywordApi'
 import ResponseMessage from '@/components/ResponseMessage.vue'
+import FetchResponseMessage from '@/components/FetchResponseMessage.vue'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -195,6 +223,7 @@ export default {
   
 	components: {
     ResponseMessage,
+    FetchResponseMessage,
     RightArrow,
     Loading,
     Select,
@@ -225,7 +254,8 @@ export default {
       isEditingOrDeletingTag: false,
       editOrDeleteTag: '',
       isDeletingTag: false,
-      originalEditOrDeleteTag: '',
+      isRenamingTag: false,
+      newTagName: '',
       editOrDeleteTagResetValue: null,
       isSubmittingAddKw: false,
       isSubmittingRemoveKw: false,
@@ -239,14 +269,14 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['alphabeticKeywordList']),
+    ...mapGetters(['alphabeticKeywordList', 'deleteKeywordState', 'updateKeywordState']),
 
     comicOptions () {
       return this.comicList.map(c => ({text: c.name, value: c.name}))
     },
 
     isEditKwChanged () {
-      return true // TODO:
+      return this.editOrDeleteTag.name !== this.newTagName
     },
 
     selectedComicKeywordOptions () {
@@ -309,23 +339,36 @@ export default {
       }
     },
 
-    cancelEditOrDelete () {
-      this.editOrDeleteTag = null
-      this.isEditingOrDeletingTag = false
+    initiateRenamingTag () {
+      this.isRenamingTag = true
+      this.newTagName = this.editOrDeleteTag.name
     },
 
-    onEditOrDelTagSelect (newTag) {
-      console.log(newTag)
-      this.editOrDeleteTag = newTag
+    cancelEditOrDelete () {
+      this.editOrDeleteTag = ''
+      this.isEditingOrDeletingTag = false
       this.editOrDeleteTagResetValue = Math.random().toString()
     },
 
-    deleteTag () {
-
+    onEditOrDelTagSelect (newTag) {
+      this.editOrDeleteTag = newTag
+      this.editOrDeleteTagResetValue = Math.random().toString()
+      this.isRenamingTag = false
+      this.isDeletingTag = false
     },
 
-    saveTagChange () {
+    async deleteTag () {
+      let result = await doFetch(this.$store.commit, 'deleteKeywordState', keywordApi.deleteKeyword(this.editOrDeleteTag.id))
+      if (result.success) {
+				this.$store.dispatch('fetchKeywordList')
+      }   
+    },
 
+    async saveTagChange () {
+      let result = await doFetch(this.$store.commit, 'updateKeywordState', keywordApi.updateKeywordName(this.editOrDeleteTag.id, this.newTagName))
+      if (result.success) {
+				this.$store.dispatch('fetchKeywordList')
+      }      
     },  
     
     async confirmAddKeywords () {
@@ -392,6 +435,14 @@ export default {
 		comicList () {
 			this.comic = this.comicList.find(c => c.id===this.lastComicId)
 		},
+
+    alphabeticKeywordList () {
+      this.editOrDeleteTag = ''
+      this.newTagName = ''
+      this.isRenamingTag = false
+      this.isDeletingTag = false
+      this.editOrDeleteTagResetValue = Math.random().toString()
+    },
 
     isOpen () {
       setTimeout(() => {

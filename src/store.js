@@ -84,6 +84,8 @@ registerFetchNames(store,
   {name: 'pendingComics', defaultValue: []},
   {name: 'processLink', defaultValue: null},
   {name: 'clearPatronFieldReq', defaultValue: null},
+  {name: 'deleteKeywordState', defaultValue: null},
+  {name: 'updateKeywordState', defaultValue: null},
 )
 
 export default new Vuex.Store(store)

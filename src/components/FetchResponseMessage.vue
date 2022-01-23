@@ -50,7 +50,7 @@ export default {
   watch: {
     fetchStates (newFetchState) {
       for (let fetchState of newFetchState) {
-        if (fetchState.fetched) {
+        if (fetchState.fetched && this.successMessage) {
           this.currentMessage = this.successMessage
           this.currentMessageType = 'success'
           this.currentFetchStateName = fetchState.name

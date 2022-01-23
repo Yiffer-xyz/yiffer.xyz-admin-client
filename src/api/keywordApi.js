@@ -8,6 +8,16 @@ export default {
     return response.data
   },
 
+  async deleteKeyword (keywordId) {
+    await axios.delete(`${baseUrl}/keywords/${keywordId}`)
+    return { success: true }
+  },
+
+  async updateKeywordName (keywordId, newName) {
+    await axios.put(`${baseUrl}/keywords/${keywordId}`, { newName })
+    return { success: true }
+  },
+
   async getComicKeywords (comicId) {
     let response = await axios.get(`${baseUrl}/comic-keywords/${comicId}`)
     if (!response.data.error) { return response.data }
