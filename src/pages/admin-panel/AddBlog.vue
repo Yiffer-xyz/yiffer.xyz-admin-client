@@ -6,45 +6,33 @@
       <ResponseMessage :message="responseMessage" :messageType="responseMessageType" @closeMessage="closeResponseMessage"
                         class="m-8"/>
 
-      <table id="newBlogTable">
-        <tr>
-          <td>
-            <p>Title</p>
-          </td>
-          <td>
-            <input type="text" v-model="title" />
-          </td>
-        </tr>
-          
-        <tr>
-          <td>
-            <p>Is important?</p>
-          </td>
-          <td>
-            <input type="radio" v-model="isImportant" :value="true" id="importantTrue">
-            <label for="importantTrue">Yes</label>
-            
-            <input type="radio" v-model="isImportant" :value="false" id="importantFalse" style="margin-left: 1rem;">
-            <label for="importantFalse">No</label>
-            <!-- <input type="number" v-model="isImportant" /> -->
-          </td>
-        </tr>
+      <div class="verticalFlex alignItemsStart" style="width: 16rem;">
+        <TextInput :value="title"
+                  @change="v => title = v"
+                  textAlign="left"
+                  title="Title"
+                  style="width: 100%;"
+                  class="mb-24"/>
 
-        <tr>
-          <td>
-            <p>Display days</p>
-          </td>
-          <td>
-            <input type="number" v-model="displayDays" />
-          </td>
-        </tr>
-      </table>
+        <TextInput :value="displayDays"
+                  @change="v => displayDays = v"
+                  textAlign="left"
+                  title="Display days"
+                  class="mb-24"
+                  style="width: 6rem;"
+                  type="number"/>
+      </div>
 
-      <p class="mt-16">Blog content:</p>
-      <textarea v-model="content" rows="6" style="width: 80%;"/>
+      <TextInput :value="content"
+                @change="v => content = v"
+                textAlign="left"
+                title="Content"
+                class="mb-24"
+                style="width: 40rem; max-width: 90%;"
+                type="textarea"
+                :textAreaRows="2"/>
 
-      <div v-show="content" class="mt-16">
-        <p>Preview:</p>
+      <div v-show="content" style="width: 40rem; max-width: 90%;">
         <p style="text-align: left;" v-html="content"/>
 
         <button @click="submitNewBlog" class="y-button mt-16">
@@ -65,17 +53,19 @@
 import blogApi from '@/api/blogApi'
 
 import ResponseMessage from '@/components/ResponseMessage.vue'
+import TextInput from '@/components/TextInput.vue'
 
 export default {
   name: 'addBlog',
 
-  components: { ResponseMessage },
+  components: {
+    ResponseMessage, TextInput,
+  },
   
   data: function () {
     return {
       isOpen: false,
       title: '',
-      isImportant: false,
       displayDays: 0,
       content: '',
       responseMessage: '',
@@ -85,7 +75,7 @@ export default {
 
   methods: {
     async submitNewBlog () {
-      let response = await blogApi.addBlog(this.title, this.isImportant, this.content, this.displayDays)
+      let response = await blogApi.addBlog(this.title, true, this.content, this.displayDays)
 
       if (response.success) {
         this.responseMessage = 'Successfully added blog!'
@@ -100,7 +90,6 @@ export default {
 
     clearContent () {
       this.title = ''
-      this.isImportant = false
       this.displayDays = 0
       this.content = ''
     },
