@@ -222,6 +222,16 @@ export default {
     }
   },
 
+  async deleteComic (comicId) {
+    try {
+      let response = await axios.delete(`${baseUrl}/comics/${comicId}`)
+      return response.data
+    }
+    catch (err) {
+      return { error: err?.response?.data }
+    }
+  },
+
   async deleteComicPage (comicName, comicId, pageNumber) { //todo MOVE OUT OF HERE, TO MISC
     let response = await axios.post(baseUrl + '/deletecomicpage',
       {comicName: comicName, comicId: comicId, pageNumber: pageNumber})

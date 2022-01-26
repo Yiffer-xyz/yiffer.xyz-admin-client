@@ -34,18 +34,37 @@
       </div>
 
       <span v-if="comic && !isSubmitting" class="margin-top-8" style="width: 100%;">
-        <div class="horizontalFlex mb-16 mt-8">
+        <div class="horizontalFlex mb-16 mt-8" v-if="!isDeletingInitiated" style="gap: 1rem;">
           <button @click="toggleRename(true)"
                   v-if="!renameActive"
-                  class="y-button y-button-neutral mr-16">
+                  class="y-button y-button-neutral">
             Rename comic
           </button>
 
           <LoadingButton class="y-button y-button-neutral"
-                         @click="autoResizecomic()"
+                         @click="() => autoResizecomic()"
                          :isLoading="isResizing"
                          text="Auto-resize comic"/>
+
+          <LoadingButton class="y-button y-button-neutral y-button-red"
+                         @click="() => isDeletingInitiated = true"
+                         :isLoading="isDeleting"
+                         text="Delete comic"/>
         </div>
+
+        <div v-else class="horizontalFlex mb-16 mt-8" style="gap: 1rem;">
+          <LoadingButton class="y-button-red"
+                         @click="() => deleteComic()"
+                         color="error"
+                         :isLoading="isDeleting"
+                         text="Confirm delete"/>
+
+          <button @click="() => isDeletingInitiated = false"
+                  class="y-button y-button-neutral">
+            Cancel
+          </button>
+        </div>
+
 				<span v-if="renameActive" class="horizontalFlex margin-bottom-16 alignItemsCenter justifyContentStart">
           <div class="verticalFlex">
             <TextInput :value="newComicName"
@@ -125,7 +144,7 @@
             <RefreshIcon/> Reset
           </button>
         	<button @click="submitChanges()" class="y-button" style="margin-left: 4px;">
-            Submit changes
+            Save changes
           </button>
 				</span>
       </span>
@@ -205,6 +224,9 @@ export default {
       responseMessageType: 'info',
 
       isResizing: false,
+      isDeletingInitiated: false,
+      isDeleting: false,
+
       maxContentWidth: 9999,
       categoryOptions,
       tagOptions,
@@ -283,6 +305,23 @@ export default {
       else {
         this.responseMessage = `Success resizing ${this.comic.value.name}. Scaled down ${result.numberOfResizedPages}/${result.totalNumberOfPages} pages.`
         this.responseMessageType = 'success'
+      }
+    },
+
+    async deleteComic () {
+      this.isDeleting = true
+      let result = await comicApi.deleteComic(this.comic.value.id)
+      this.isDeleting = false
+
+      if (result.error) {
+        this.responseMessage = result.error
+        this.responseMessageType = 'error'
+      }
+      else {
+        this.responseMessage = `Success deleting ${this.comic.value.name}`
+        this.responseMessageType = 'success'
+				this.$emit('refresh-comic-list')
+        this.isDeletingInitiated = false
       }
     },
 		
