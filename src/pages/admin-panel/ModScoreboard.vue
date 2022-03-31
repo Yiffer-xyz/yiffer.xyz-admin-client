@@ -4,7 +4,7 @@
     <span class="admin-content-box-inner" v-if="isOpen">
 
       <MultiToggleButton :items="['Monthly', 'All time']"
-                         :initialValue="'Monthly'"
+                         :initialValue="mode"
                          :allowMultiple="false"
                          :allowNone="false"
                          @on-change="onModeChange"
