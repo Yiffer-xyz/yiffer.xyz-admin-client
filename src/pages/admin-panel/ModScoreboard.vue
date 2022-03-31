@@ -4,7 +4,7 @@
     <span class="admin-content-box-inner" v-if="isOpen">
 
       <MultiToggleButton :items="['Monthly', 'All time']"
-                         :initialValue="'Monthly'"
+                         :initialValue="mode"
                          :allowMultiple="false"
                          :allowNone="false"
                          @on-change="onModeChange"
@@ -52,7 +52,7 @@
 <script>
 import miscApi from '@/api/miscApi'
 import MultiToggleButton from '@/components/MultiToggleButton.vue'
-import { format, add, endOfMonth } from 'date-fns'
+import { format, add } from 'date-fns'
 import startOfMonth from 'date-fns/startOfMonth/index'
 import Loading from '@/components/LoadingIndicator.vue'
 import LeftArrow from 'vue-material-design-icons/ArrowLeft.vue'
