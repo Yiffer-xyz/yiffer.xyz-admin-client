@@ -24,8 +24,20 @@ export default {
   },
 
   async getAllComics () {
-    let response = await axios.get(`${baseUrl}/all-comics`)
-    return response.data
+    let pageSize = 800
+    let allResponseData = []
+    let hasNextPage = true
+    let page = 1
+
+    while (hasNextPage) {
+      let offset = (page - 1) * pageSize
+      let response = await axios.get(`${baseUrl}/all-comics`, { params: { offset, limit: pageSize } })
+      allResponseData = allResponseData.concat(response.data.comics)
+      hasNextPage = response.data.length === pageSize
+      page++
+    }
+
+    return allResponseData
   },
 
   async getComic (comicName) {
