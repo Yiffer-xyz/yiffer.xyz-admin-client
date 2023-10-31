@@ -32,7 +32,7 @@ export default {
     while (hasNextPage) {
       let offset = (page - 1) * pageSize
       let response = await axios.get(`${baseUrl}/all-comics`, { params: { offset, limit: pageSize } })
-      allResponseData = allResponseData.concat(response.data.comics)
+      allResponseData = allResponseData.concat(response.data)
       hasNextPage = response.data.length === pageSize
       page++
     }
