@@ -1,4 +1,5 @@
-FROM node:lts-alpine as build
+FROM node:14.17.3-alpine as build
+RUN apk add --no-cache python3 py3-pip make g++
 WORKDIR /app
 COPY package.json /app/package.json
 RUN npm install
