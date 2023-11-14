@@ -19,7 +19,7 @@
       <div class="horizontalFlex margin-top-8 flex-wrap">
         <p class="admin-mini-header" style="margin-right: 8px">Comic:</p>
         <select v-model="comic" @change="comicChanged">
-          <option v-for="comic in comicList" :key="comic.id" :value="comic">
+          <option v-for="comic in comicOptions" :key="comic.id" :value="comic">
             {{ comic.name }}
           </option>
         </select>
@@ -255,6 +255,7 @@ export default {
 
   props: {
     comicList: Array,
+    pendingComics: Array,
   },
 
   data: function () {
@@ -470,6 +471,19 @@ export default {
             this.startPageViewing + 2,
           ].slice(0, this.comic.numberOfPages - this.startPageViewing + 1)
         : [];
+    },
+
+    comicOptions() {
+      let comicsMapped = this.comicList.map((c) => ({
+        text: c.name,
+        value: c,
+      }));
+      let pendingComicsMapped = this.pendingComics.map((c) => ({
+        text: `${c.name} (PENDING)`,
+        value: c,
+      }));
+
+      return comicsMapped.concat(pendingComicsMapped).sort((c) => c.text);
     },
   },
 };
