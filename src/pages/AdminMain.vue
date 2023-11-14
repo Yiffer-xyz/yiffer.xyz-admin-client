@@ -46,6 +46,7 @@
 
       <page-manager
         :comicList="allComics.payload"
+        :pendingComics="pendingComics"
         @refresh-comic-list="refreshComicList"
       />
 
