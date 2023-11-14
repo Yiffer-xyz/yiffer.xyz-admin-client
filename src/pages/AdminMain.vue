@@ -1,118 +1,136 @@
 <template>
   <div style="width: 100%">
-    <span :class="{'coloredYifferTitle': isDarkTheme, 'yifferTitle': !isDarkTheme}">
+    <span
+      :class="{ coloredYifferTitle: isDarkTheme, yifferTitle: !isDarkTheme }"
+    >
       Admin - Yiffer.xyz
     </span>
 
-    <router-link to='/instructions' class="underline-link">
-      Read the instructions <RightArrow/>
+    <router-link to="/instructions" class="underline-link">
+      Read the instructions <RightArrow />
     </router-link>
 
     <div v-if="isSomeError" class="adminErrorBox">
       <p v-if="allComics.failed">
-        Fetching the list of comics failed. If the problem persists, please message an administrator.
+        Fetching the list of comics failed. If the problem persists, please
+        message an administrator.
       </p>
       <p v-if="allKeywords.failed">
-        Fetching the list of tags failed. If the problem persists, please message an administrator.
+        Fetching the list of tags failed. If the problem persists, please
+        message an administrator.
       </p>
     </div>
 
     <div class="admin-content-container" v-if="userData">
       <keyword-suggestions />
 
-      <ComicProblems/>
+      <ComicProblems />
 
       <comic-suggestions />
 
-      <add-page :comicList="allComics.payload"
-                @refresh-comic-list="refreshComicList" />
+      <add-page
+        :comicList="allComics.payload"
+        @refresh-comic-list="refreshComicList"
+      />
 
-      <KeywordManager :comicList="allComics.payload"
-                      @refresh-comic-list="refreshComicList" />
+      <KeywordManager
+        :comicList="allComics.payload"
+        @refresh-comic-list="refreshComicList"
+      />
 
-      <correct-comic :comicList="allComics.payload" 
-                     :artistList="artistList.payload"
-                     @refresh-comic-list="refreshComicList" />
+      <correct-comic
+        :comicList="allComics.payload"
+        :artistList="artistList.payload"
+        @refresh-comic-list="refreshComicList"
+      />
 
-      <page-manager :comicList="allComics.payload"
-                    @refresh-comic-list="refreshComicList" />
+      <page-manager
+        :comicList="allComics.payload"
+        @refresh-comic-list="refreshComicList"
+      />
 
-      <add-comic :artistList="artistList.payload" 
-                 :comicList="allComics.payload"
-                 :pendingComics="pendingComics"
-                 @refresh-pending-comics="refreshPendingComics" />
+      <add-comic
+        :artistList="artistList.payload"
+        :comicList="allComics.payload"
+        :pendingComics="pendingComics"
+        @refresh-pending-comics="refreshPendingComics"
+      />
 
-      <artist-manager :artistList="artistList.payload"
-                      @refresh-artist-list="refreshArtistList" />
+      <artist-manager
+        :artistList="artistList.payload"
+        @refresh-artist-list="refreshArtistList"
+      />
 
-      <PatreonAdmin/>
+      <PatreonAdmin />
 
-      <pending-comics :pendingComics="pendingComics"
-                      @refresh-pending-comics="refreshPendingComics"
-                      @refresh-comic-list="refreshComicList" />
+      <pending-comics
+        :pendingComics="pendingComics"
+        @refresh-pending-comics="refreshPendingComics"
+        @refresh-comic-list="refreshComicList"
+      />
 
-      <mod-scoreboard/>
+      <mod-scoreboard />
 
-      <UserManager v-if="userData.userType==='admin'"/>
+      <UserManager v-if="userData.userType === 'admin'" />
 
-      <AdAdmin v-if="userData.userType==='admin'"/>
+      <AdAdmin v-if="userData.userType === 'admin'" />
 
-      <VisitorStats/>
+      <VisitorStats />
 
-      <AddBlog v-if="userData.userType==='admin'"/>
+      <AddBlog v-if="userData.userType === 'admin'" />
 
-      <ModLog v-if="userData.userType==='admin'"/>
+      <ModLog v-if="userData.userType === 'admin'" />
 
-      <ModApplications v-if="userData.userType==='admin'"/>
+      <ModApplications v-if="userData.userType === 'admin'" />
 
-      <Feedback v-if="userData.userType==='admin'"/>
+      <Feedback v-if="userData.userType === 'admin'" />
     </div>
   </div>
 </template>
 
 <script>
-import AddPage from '@/pages/admin-panel/AddPage.vue'
-import KeywordManager from '@/pages/admin-panel/KeywordManager.vue'
-import CorrectComic from '@/pages/admin-panel/CorrectComic.vue'
-import ComicProblems from '@/pages/admin-panel/ComicProblems.vue'
-import AddComic from '@/pages/admin-panel/AddComic.vue'
-import ArtistManager from '@/pages/admin-panel/ArtistManager.vue'
-import PendingComics from '@/pages/admin-panel/PendingComics.vue'
-import KeywordSuggestions from '@/pages/admin-panel/KeywordSuggestions.vue'
-import ComicSuggestions from '@/pages/admin-panel/ComicSuggestions.vue'
-import PageManager from '@/pages/admin-panel/PageManager.vue'
-import UserManager from '@/pages/admin-panel/UserManager.vue'
-import ModScoreboard from '@/pages/admin-panel/ModScoreboard.vue'
-import ModLog from '@/pages/admin-panel/ModLog.vue'
-import AdAdmin from '@/pages/admin-panel/AdAdmin.vue'
-import PatreonAdmin from '@/pages/admin-panel/PatreonAdmin.vue'
-import VisitorStats from '@/pages/admin-panel/VisitorStats.vue'
-import AddBlog from '@/pages/admin-panel/AddBlog.vue'
-import ModApplications from '@/pages/admin-panel/ModApplications.vue'
-import Feedback from '@/pages/admin-panel/Feedback.vue'
+import AddPage from "@/pages/admin-panel/AddPage.vue";
+import KeywordManager from "@/pages/admin-panel/KeywordManager.vue";
+import CorrectComic from "@/pages/admin-panel/CorrectComic.vue";
+import ComicProblems from "@/pages/admin-panel/ComicProblems.vue";
+import AddComic from "@/pages/admin-panel/AddComic.vue";
+import ArtistManager from "@/pages/admin-panel/ArtistManager.vue";
+import PendingComics from "@/pages/admin-panel/PendingComics.vue";
+import KeywordSuggestions from "@/pages/admin-panel/KeywordSuggestions.vue";
+import ComicSuggestions from "@/pages/admin-panel/ComicSuggestions.vue";
+import PageManager from "@/pages/admin-panel/PageManager.vue";
+import UserManager from "@/pages/admin-panel/UserManager.vue";
+import ModScoreboard from "@/pages/admin-panel/ModScoreboard.vue";
+import ModLog from "@/pages/admin-panel/ModLog.vue";
+import AdAdmin from "@/pages/admin-panel/AdAdmin.vue";
+import PatreonAdmin from "@/pages/admin-panel/PatreonAdmin.vue";
+import VisitorStats from "@/pages/admin-panel/VisitorStats.vue";
+import AddBlog from "@/pages/admin-panel/AddBlog.vue";
+import ModApplications from "@/pages/admin-panel/ModApplications.vue";
+import Feedback from "@/pages/admin-panel/Feedback.vue";
 
-import RightArrow from 'vue-material-design-icons/ArrowRight.vue'
+import RightArrow from "vue-material-design-icons/ArrowRight.vue";
 
-import ArtistApi from '@/api/artistApi'
-import comicApi from '@/api/comicApi'
-import { mapGetters } from 'vuex'
-import { doFetch } from '../utils/statefulFetch'
+import ArtistApi from "@/api/artistApi";
+import comicApi from "@/api/comicApi";
+import { mapGetters } from "vuex";
+import { doFetch } from "../utils/statefulFetch";
 
 export default {
-  name: 'admin',
+  name: "admin",
 
   components: {
-    'add-page': AddPage,
+    "add-page": AddPage,
     KeywordManager,
-    'correct-comic': CorrectComic,
-    'add-comic': AddComic,
-    'artist-manager': ArtistManager,
-    'pending-comics': PendingComics,
-    'keyword-suggestions': KeywordSuggestions,
-    'comic-suggestions': ComicSuggestions,
-    'page-manager': PageManager,
+    "correct-comic": CorrectComic,
+    "add-comic": AddComic,
+    "artist-manager": ArtistManager,
+    "pending-comics": PendingComics,
+    "keyword-suggestions": KeywordSuggestions,
+    "comic-suggestions": ComicSuggestions,
+    "page-manager": PageManager,
     UserManager,
-    'mod-scoreboard': ModScoreboard,
+    "mod-scoreboard": ModScoreboard,
     ModLog,
     AdAdmin,
     PatreonAdmin,
@@ -129,63 +147,75 @@ export default {
       alphabeticComicList: [],
       keywordSuggestionList: [],
       pendingComics: [],
-    }
+    };
   },
 
   computed: {
     ...mapGetters([
-      'allComics',
-      'userData',
-      'allKeywords',
-      'isDarkTheme',
-      'artistList',
+      "allComics",
+      "userData",
+      "allKeywords",
+      "isDarkTheme",
+      "artistList",
     ]),
 
-    isSomeError () {
-      return this.allComics.failed || this.allKeywords.failed
-    }
+    isSomeError() {
+      return this.allComics.failed || this.allKeywords.failed;
+    },
   },
 
-  async mounted () {
+  async mounted() {
     if (!this.allComics.fetched && !this.allComics.fetching) {
-      doFetch(this.$store.commit, 'allComics', comicApi.getAllComics())
+      doFetch(this.$store.commit, "allComics", comicApi.getAllComics());
     }
     if (!this.allKeywords.fetched && !this.allKeywords.fetching) {
-      this.$store.dispatch('fetchKeywordList')
+      this.$store.dispatch("fetchKeywordList");
     }
     if (!this.artistList.fetched && !this.artistList.fetching) {
-      doFetch(this.$store.commit, 'artistList', ArtistApi.getArtistList())
+      doFetch(this.$store.commit, "artistList", ArtistApi.getArtistList());
     }
-    this.refreshPendingComics()
+    this.refreshPendingComics();
   },
 
   methods: {
-    async refreshComicList () {
-      doFetch(this.$store.commit, 'allComics', comicApi.getAllComics())
+    async refreshComicList() {
+      doFetch(this.$store.commit, "allComics", comicApi.getAllComics());
     },
-    async refreshArtistList () {
-      doFetch(this.$store.commit, 'artistList', ArtistApi.getArtistList())
+    async refreshArtistList() {
+      doFetch(this.$store.commit, "artistList", ArtistApi.getArtistList());
     },
-    async refreshPendingComics () {
-      let pendingComics = await comicApi.getPendingComics()
-      this.pendingComics = pendingComics.map(c => ({...c, isPending: true}))
+    async refreshPendingComics() {
+      let pendingComics = await comicApi.getPendingComics();
+      this.pendingComics = pendingComics.map((c) => ({
+        ...c,
+        isPending: true,
+      }));
     },
   },
 
-  metaInfo () {
-    let title = `Admin - Yiffer.xyz`
+  metaInfo() {
+    let title = `Admin - Yiffer.xyz`;
     return {
       title: title,
       meta: [
-        {vmid: 'twitterTitle', name: 'twitter:title', content: title},
-        {vmid: 'ogTitle', property: 'og:title', content: title},
-        {vmid: 'twitterDesc', name: 'twitter:description', content: "The internet's best collection of high quality furry porn comics, easily readable and free!"},
-        {vmid: 'ogDesc', property: 'og:description', content: "The internet's best collection of high quality furry porn comics, easily readable and free!"}
-      ]
-    }
+        { vmid: "twitterTitle", name: "twitter:title", content: title },
+        { vmid: "ogTitle", property: "og:title", content: title },
+        {
+          vmid: "twitterDesc",
+          name: "twitter:description",
+          content:
+            "The internet's best collection of high quality furry porn comics, easily readable and free!",
+        },
+        {
+          vmid: "ogDesc",
+          property: "og:description",
+          content:
+            "The internet's best collection of high quality furry porn comics, easily readable and free!",
+        },
+      ],
+    };
   },
-}
-
+};
 </script>
 
 <style lang="scss">
@@ -214,7 +244,7 @@ export default {
   justify-content: center;
 
   @media (max-width: 900px) {
-    max-width: 100%;    
+    max-width: 100%;
   }
 }
 
@@ -273,7 +303,7 @@ export default {
   border-style: hidden;
   border-top-width: 10px;
   border-top-style: solid;
-  border-image: linear-gradient(to right, $themeGreen1, $themeGreen2) 1; 
+  border-image: linear-gradient(to right, $themeGreen1, $themeGreen2) 1;
 
   width: 95%;
   height: auto;
@@ -315,4 +345,3 @@ export default {
   }
 }
 </style>
-
