@@ -318,12 +318,14 @@ export default {
     comicId,
     imageFile,
     insertAfterPageNumber,
-    progressFunction
+    progressFunction,
+    isPendingComic
   ) {
     let formData = new FormData();
     formData.append("comicName", comicName);
     formData.append("comicId", comicId);
     formData.append("insertAfterPageNumber", insertAfterPageNumber);
+    formData.append("isPendingComic", isPendingComic);
     formData.append("newPageFile", imageFile);
 
     await axios.post(baseUrl + "/insertcomicpage", formData, {
@@ -354,12 +356,18 @@ export default {
     }
   },
 
-  async deleteComicPage(comicName, comicId, pageNumber) {
+  async deleteComicPage(
+    comicName,
+    comicId,
+    pageNumber,
+    isPendingComic = false
+  ) {
     //todo MOVE OUT OF HERE, TO MISC
     let response = await axios.post(baseUrl + "/deletecomicpage", {
       comicName: comicName,
       comicId: comicId,
       pageNumber: pageNumber,
+      isPendingComic: isPendingComic,
     });
     if (response.data.error) {
       return { success: false, message: response.data.error };
